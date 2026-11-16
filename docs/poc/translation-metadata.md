@@ -1,19 +1,13 @@
-# Translation metadata proposal
+# Translation metadata evaluation
 
-Status: proposed, not implemented. Decision authority: human project owner.
-Next action: validate during the localization milestone; migrate accepted contracts to durable
-architecture documentation when implemented, and retire this draft after recording the outcome.
+Status: implemented for the localization PoC. Decision authority: human project owner.
+Next action: review stable snapshot policy during the combined-edition increment. Retain this note
+until that policy is decided, then archive or retire it.
 
-Future translation records should contain `sourcePath`, `sourceSha256`, `locale`, `edition`, and
-`translationPath`. Compare with the selected canonical file, not a repository-wide commit:
+The implemented contract is maintained in [architecture](../design/architecture.md#translation-boundary).
+Tests cover unchanged files despite unrelated repository changes, changed files, review by updating
+the recorded hash, missing records, invalid declarations, symlinks, and edition isolation.
 
-| Condition                                       | State                          |
-| ----------------------------------------------- | ------------------------------ |
-| No translation record/file                      | Missing                        |
-| Translation exists and source file hash matches | Checked against current source |
-| Translation exists and source file hash differs | Source changed; review needed  |
-
-Source changed does not prove a semantic translation defect. A maintainer can confirm that no
-translation edit is needed and update the recorded hash. Stable snapshot policy is still open;
-do not silently substitute next translations. Metadata logic and Japanese examples are not yet
-implemented. The current per-file manifest hashes supply the future comparison input.
+A declared missing file fails instead of silently falling back. `current` means source identity
+matches; it is not a translation quality or approval status. The Japanese example explicitly states
+that human language review is pending. Stable snapshot policy remains open.

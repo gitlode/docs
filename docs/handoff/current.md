@@ -26,8 +26,8 @@ closes both servers in `finally`. Follow the [process lifecycle procedure](../co
 for all verification processes. A previous shell/tool exit left a Node child holding both fixed
 preview ports; do not treat wrapper completion as evidence of child termination.
 
-Next action: add a minimal owned Japanese translation and compare missing-page behavior, followed
-by combined stable/next artifact assembly. Keep both candidates and the existing human decision gate.
+Localization is implemented: see [evidence](../poc/localization.md).
+Next action: combined stable/next artifact assembly and version navigation. Keep both candidates and the existing human decision gate.
 The SSG recommendation is not yet ready. Search remains disabled for this increment.
 
 ## Pending review

@@ -141,6 +141,7 @@ export function validateOutput(
   siteRoot: string,
   base: string,
   expectedRoutes: string[],
+  requireRoot = true,
 ): OutputStatistics {
   if (!/^\/(?:[A-Za-z0-9_-]+\/)*$/.test(base)) throw new Error(`Invalid site base: ${base}`);
   const root = resolve(siteRoot);
@@ -170,7 +171,7 @@ export function validateOutput(
   }
   scan(root);
 
-  const routes = new Set(["", ...expectedRoutes]);
+  const routes = new Set([...(requireRoot ? [""] : []), ...expectedRoutes]);
   for (const route of routes) {
     if (route !== "" && !/^(?:[A-Za-z0-9_-]+\/)+$/.test(route))
       throw new Error(`Invalid expected route: ${route}`);

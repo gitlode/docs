@@ -1,6 +1,6 @@
 # Implementation plan
 
-Status: English comparison preview increment implemented; comparative PoC remains in progress.
+Status: Localization increment implemented; comparative PoC remains in progress.
 Owner: human project owner. Implementation: Codex working in `gitlode/docs` on `work/initial-poc`.
 The kickoff increment was committed as `0ef1673`. Commit subsequent work at practical increments;
 the owner plans to squash merge into `main`. No push or merge has been performed by this session.
@@ -24,7 +24,7 @@ PoC using documented local choices without waiting for commonization approval. S
 | 1. Inspect and bootstrap | Verify repository and real source tree; runtime, lockfile, project docs, validation CI                                | Implemented locally; hosted CI not run    |
 | 2. Acquire and stage     | Pin both refs; select six real documents; preserve bytes and provenance; reject unsafe paths/symlinks                 | Implemented and locally tested            |
 | 3. Comparable previews   | Add VitePress and Starlight under `candidates/`; same staged input; titles, README routing, sidebar, TOC, code fences | Implemented; see English preview evidence |
-| 4. Localization          | Owned Japanese example, explicit missing page, native/custom fallback comparison, file-level freshness metadata tests | Pending                                   |
+| 4. Localization          | Owned Japanese example, missing-page behavior, native/custom fallback comparison, file-level freshness tests          | Implemented; see localization evidence    |
 | 5. Pages simulation      | Both editions/locales under nested `/docs/` paths; complete artifact; links/assets validation; PR build               | Pending                                   |
 | 6. Evidence and proposal | Timings, sizes, warnings, screenshots/manual review, reproducible comparison, proposed recommendation                 | Pending                                   |
 | 7. Human selection gate  | Owner reviews both previews and approves an SSG; only then remove a candidate                                         | Human decision pending                    |
@@ -35,8 +35,8 @@ Do not create empty candidate directories or claim previews before the rendering
 ## Next implementation tasks
 
 1. Review the [English previews and limitations](english-previews.md) before extending the corpus.
-2. Add an owned Japanese translation and compare missing-page behavior using both candidates.
-3. Test file-level translation metadata and keep stable/next translation ownership explicit.
+2. Review [localization evidence](localization.md) and the owned Japanese example in both candidates.
+3. Keep stable/next translation ownership explicit; file-level metadata tests now pass.
 4. Exercise both source editions in one complete Pages-style artifact, including version links.
 5. Address remaining dependency findings and add imported asset support only with explicit selection
    and validation. Do not expand publication merely to hide link errors.

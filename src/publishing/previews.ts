@@ -16,6 +16,8 @@ import type { SourceTree } from "./markdown.ts";
 import { git, safeDirectory, stage } from "./pipeline.ts";
 import type { Sources, Publication } from "./pipeline.ts";
 import { startPreview, withPreviews } from "./preview-server.ts";
+import { loadTranslation } from "./translations.ts";
+import { validateLocalization } from "./validate-localization.ts";
 import { validateOutput, validateRendering } from "./validate-output.ts";
 
 const root = resolve(import.meta.dirname, "../..");
@@ -84,34 +86,66 @@ export function preparePreviews(editionName = "next") {
     staging,
     candidates: {} as Record<
       Candidate,
-      { root: string; base: string; pages: { route: string; sourcePath: string; sha256: string }[] }
+      {
+        root: string;
+        base: string;
+        pages: {
+          route: string;
+          sourcePath: string;
+          sha256: string;
+          locale: "en" | "ja";
+          status: "canonical" | "missing" | "current" | "source-changed";
+          snapshot: string;
+        }[];
+      }
     >,
   };
   for (const candidate of ["vitepress", "starlight"] as const) {
     const siteRoot = safeDirectory(output, candidate);
-    const base = `/docs/${candidate}/${editionName}/en/`;
-    const pages = edition.documents.map((doc) => {
+    const base = `/docs/${candidate}/${editionName}/`;
+    const pages = edition.documents.flatMap((doc) => {
       const content = readFileSync(join(staging, doc.stagedPath));
       if (createHash("sha256").update(content).digest("hex") !== doc.sha256)
         throw new Error(`Staged content changed: ${doc.sourcePath}`);
-      return {
-        ...doc,
-        route: routeFor(doc.sourcePath),
-        ...prepareMarkdown(content.toString("utf8"), {
-          sourcePath: doc.sourcePath,
-          commit: edition.resolvedCommit,
-          routes,
-          tree,
-          base: candidate === "vitepress" ? "/" : base,
-        }),
-      };
+      const translation = loadTranslation(root, editionName, doc.sourcePath, doc.sha256);
+      return (["en", "ja"] as const).map((locale) => {
+        const translated = locale === "ja" && translation.status !== "missing";
+        const source = translated ? translation.content : content.toString("utf8");
+        const status = locale === "en" ? ("canonical" as const) : translation.status;
+        const contentLocale = translated ? "ja" : "en";
+        const route = `${locale}/${routeFor(doc.sourcePath)}`;
+        const snapshot = `snapshots/${route}source.md`;
+        write(siteRoot, snapshot, source);
+        return {
+          ...doc,
+          locale,
+          route,
+          status,
+          snapshot,
+          translationPath: translated ? translation.translationPath : undefined,
+          checkedSourceSha256: translated ? translation.sourceSha256 : undefined,
+          contentSha256: createHash("sha256").update(source).digest("hex"),
+          ...prepareMarkdown(source, {
+            sourcePath: doc.sourcePath,
+            commit: edition.resolvedCommit,
+            routes,
+            tree,
+            base: `${candidate === "vitepress" ? "/" : base}${contentLocale}/`,
+          }),
+        };
+      });
     });
     const groups = navigation.groups.map((group) => ({
       label: group.label,
       pages: group.files.map((file) => {
-        const page = pages.find((p) => p.sourcePath === file);
+        const page = pages.find((p) => p.sourcePath === file && p.locale === "en");
         if (!page) throw new Error(`Sidebar contains unpublished page: ${file}`);
-        return { title: page.title, route: page.route };
+        return {
+          title: page.title,
+          jaTitle:
+            pages.find((p) => p.sourcePath === file && p.locale === "ja")?.title ?? page.title,
+          route: routeFor(file),
+        };
       }),
     }));
     write(
@@ -120,35 +154,47 @@ export function preparePreviews(editionName = "next") {
       JSON.stringify({ edition: editionName, base, navigation: groups }, null, 2),
     );
     for (const page of pages) {
+      // Leave absent Japanese entries to Starlight's native fallback.
+      if (candidate === "starlight" && page.status === "missing") continue;
       const attribution = `\n\n---\n\n[Canonical English source](${page.sourceUrl}) · ${editionName} · commit \`${edition.resolvedCommit}\`\n`;
+      const notice =
+        page.status === "source-changed"
+          ? "> 翻訳元の英語が更新されています。この翻訳は確認が必要です。\n\n"
+          : "";
       const content =
         candidate === "vitepress"
-          ? page.markdown
-          : `---\ntitle: ${JSON.stringify(page.title)}\n---\n\n${page.body}`;
+          ? `---\ntranslationFallback: ${page.status === "missing"}\n---\n\n${notice}${page.markdown}`
+          : `---\ntitle: ${JSON.stringify(page.title)}\n---\n\n${notice}${page.body}`;
       write(
         siteRoot,
         `${candidate === "vitepress" ? "content" : "src/content/docs"}/${page.route}index.md`,
         content + attribution,
       );
     }
-    const title = `gitlode ${editionName} documentation`;
-    const landing =
-      `English comparison preview from commit \`${edition.resolvedCommit}\`.\n\n` +
-      pages
-        .map(
-          (p) =>
-            `- [${p.title.replace(/[\\`*{}\[\]()#+.!<>_]/g, "\\$&")}](${candidate === "vitepress" ? "/" : base}${p.route})`,
-        )
-        .join("\n") +
-      "\n";
-    parseSafeMarkdown(landing);
-    write(
-      siteRoot,
-      candidate === "vitepress" ? "content/index.md" : "src/content/docs/index.md",
-      (candidate === "vitepress"
-        ? `# ${title}\n\n`
-        : `---\ntitle: ${JSON.stringify(title)}\n---\n\n`) + landing,
-    );
+    for (const locale of ["en", "ja"] as const) {
+      const title =
+        locale === "en"
+          ? `gitlode ${editionName} documentation`
+          : `gitlode ${editionName} ドキュメント`;
+      const landing =
+        pages
+          .filter((p) => p.locale === locale)
+          .map(
+            (p) =>
+              `- [${p.title.replace(/[\\`*{}\[\]()#+.!<>_]/g, "\\$&")}](${candidate === "vitepress" ? "/" : base}${p.route})`,
+          )
+          .join("\n") + "\n";
+      parseSafeMarkdown(landing);
+      write(
+        siteRoot,
+        `${candidate === "vitepress" ? "content" : "src/content/docs"}/${locale}/index.md`,
+        (candidate === "vitepress"
+          ? `# ${title}\n\n`
+          : `---\ntitle: ${JSON.stringify(title)}\n---\n\n`) + landing,
+      );
+    }
+    if (candidate === "vitepress")
+      write(siteRoot, "content/index.md", "# gitlode\n\n[English](/en/) · [日本語](/ja/)\n");
     if (candidate === "vitepress") {
       safeDirectory(siteRoot, ".vitepress");
       copyFileSync(
@@ -170,7 +216,7 @@ export function preparePreviews(editionName = "next") {
     report.candidates[candidate] = {
       root: siteRoot,
       base,
-      pages: pages.map(({ route, sourcePath, sha256 }) => ({ route, sourcePath, sha256 })),
+      pages: pages.map(({ markdown: _markdown, body: _body, title: _title, ...page }) => page),
     };
   }
   write(output, "inputs.json", JSON.stringify(report, null, 2));
@@ -190,6 +236,7 @@ export function buildPreviews(edition = "next") {
   const { output, report } = preparePreviews(edition);
   const measurements: Record<string, number> = {};
   const validation: Record<string, ReturnType<typeof validateOutput>> = {};
+  const localization: Record<string, ReturnType<typeof validateLocalization>[]> = {};
   const rendering: Record<string, ReturnType<typeof validateRendering>[]> = {};
   for (const candidate of ["vitepress", "starlight"] as const) {
     const started = performance.now();
@@ -203,27 +250,43 @@ export function buildPreviews(edition = "next") {
     validation[candidate] = validateOutput(
       join(siteRoot, "dist"),
       report.candidates[candidate].base,
-      report.candidates[candidate].pages.map((p) => p.route),
+      ["en/", "ja/", ...report.candidates[candidate].pages.map((p) => p.route)],
+      candidate === "vitepress",
     );
     const site = json<{ navigation: { pages: { route: string }[] }[] }>(
       join(siteRoot, "site.json"),
     );
-    const sidebarLinks = site.navigation.flatMap((group) =>
-      group.pages.map((page) => report.candidates[candidate].base + page.route),
+    const sidebarLinks = (locale: string) =>
+      site.navigation.flatMap((group) =>
+        group.pages.map((page) => report.candidates[candidate].base + locale + "/" + page.route),
+      );
+    localization[candidate] = report.candidates[candidate].pages.map((page) =>
+      validateLocalization(
+        readFileSync(join(siteRoot, "dist", page.route, "index.html"), "utf8"),
+        candidate,
+        page.locale,
+        page.route.slice(3),
+        report.candidates[candidate].base,
+        page.status,
+      ),
     );
     rendering[candidate] = report.candidates[candidate].pages.map((page) =>
       validateRendering(
         readFileSync(join(siteRoot, "dist", page.route, "index.html"), "utf8"),
         candidate,
-        readFileSync(join(report.staging, edition, "en", page.sourcePath), "utf8"),
-        sidebarLinks,
+        readFileSync(join(siteRoot, page.snapshot), "utf8"),
+        sidebarLinks(page.locale),
       ),
     );
   }
   write(
     output,
     "build.json",
-    JSON.stringify({ ...report, milliseconds: measurements, validation, rendering }, null, 2),
+    JSON.stringify(
+      { ...report, milliseconds: measurements, validation, rendering, localization },
+      null,
+      2,
+    ),
   );
   const latest = join(root, ".generated/preview.json");
   if (existsSync(latest) && lstatSync(latest).isSymbolicLink())
@@ -248,7 +311,7 @@ function previewConfiguration(candidate: string, port?: number) {
 export async function preview(candidate: string) {
   const config = previewConfiguration(candidate);
   const server = await startPreview(config.directory, config.base, config.port);
-  console.log("Preview: " + server.url);
+  console.log("Preview: " + server.url + "en/");
   return server;
 }
 
@@ -259,9 +322,11 @@ export async function verifyPreviews() {
     async (previews) => {
       for (const preview of previews) {
         for (const [path, expected] of [
-          ["", 200],
-          ["usage/", 200],
-          ["design/plugins/", 200],
+          ["en/", 200],
+          ["ja/", 200],
+          ["ja/profiling/", 200],
+          ["ja/usage/", 200],
+          ["en/design/plugins/", 200],
           ["not-found/", 404],
         ] as const) {
           const response = await fetch(preview.url + path, { signal: AbortSignal.timeout(5000) });

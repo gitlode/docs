@@ -3,12 +3,12 @@
 ## Ownership and flow
 
 `gitlode/gitlode` owns canonical English documents. This repository owns selection, acquisition,
-staging, candidate adapters, future Japanese translation sources, validation, and publishing.
+staging, candidate adapters, Japanese translation sources, validation, and publishing.
 Its own `docs/` directory is never automatically published as product documentation.
 
 Current flow: `config/sources.json` -> Git object acquisition -> explicit allowlist -> byte-preserving
-staging/provenance -> shared Markdown preparation -> candidate adapters -> two English static builds
-and output validation. Localization, complete stable/next artifact assembly, and the human SSG
+staging/provenance -> shared Markdown preparation -> candidate adapters -> English/Japanese static builds
+and output validation. Complete stable/next artifact assembly and the human SSG
 decision remain subsequent milestones.
 
 ## Acquisition and pins
@@ -66,7 +66,7 @@ Starlight receives paths including its base. External HTTP(S) links are not fetc
 
 `previews.ts` owns candidate staging and build orchestration. Each run copies trusted configurations
 from `candidates/` into unique generated roots and emits matching source hashes in `inputs.json`.
-The two next-English sites use `/docs/<candidate>/next/en/`; this is a nested-path simulation, not
+The next sites use `/docs/<candidate>/next/{en,ja}/`; this is a nested-path simulation, not
 a combined Pages deployment. `build.json` records validation and timings. Only successful runs
 update the local preview pointer. The loopback preview server exposes static output, without SSG
 development middleware. See the [development workflow](../contributing/development.md).
@@ -80,12 +80,27 @@ site-owned asset. Known dependency findings are tracked in [PoC evidence](../poc
 
 Japanese translation sources belong to this repository. Missing translations and source changes
 are distinct conditions; freshness must use file-level identity rather than a repository-wide commit.
-Stable content must not silently use next translations. The unimplemented metadata design is tracked
-in the [PoC proposal](../poc/translation-metadata.md).
+`translations/manifest.json` records edition, locale, canonical source path, checked source SHA-256,
+and repository-owned translation path. A matching file hash means `current`, not human approval;
+a changed hash means `source-changed` and renders a review warning while retaining the translation.
+No record means `missing`; a declared but absent file is an error. Invalid paths, duplicate records,
+and symlink/junction paths fail closed. Stable never silently uses next translations.
+
+Translations use the same restricted Markdown preparation as English, with relative links resolved
+against the canonical source path. Each generated candidate stores render-input snapshots and hashes,
+translation paths, and checked source hashes in its inputs report. Do not automatically update the
+checked hash when upstream changes; review the actual file difference first.
+
+Starlight generates missing Japanese routes, notice, and English content-language markup natively.
+VitePress receives generated English fallback pages and a small trusted renderer wrapper for the
+Japanese notice and `lang="en"` body. Imported HTML remains disabled. Both use native same-page
+language controls. Fallback body links retain the English locale; Japanese sidebar links remain
+Japanese. Translated heading IDs may differ: language switching does not map section fragments.
+See [localization evidence](../poc/localization.md) for current limitations.
 
 ## CI and future publishing
 
 PR CI has only `contents: read`, installs locked dependencies, checks types/tests, acquires public
-source, stages both editions, then builds and validates both next-English candidates. It does not
+source, stages both editions, then builds and validates both next candidates in English and Japanese. It does not
 deploy. Production must assemble one complete artifact (never append a version
 to an existing Pages deployment), then deploy through a trusted job with scoped Pages/OIDC rights.

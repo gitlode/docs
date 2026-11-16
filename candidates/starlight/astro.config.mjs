@@ -14,7 +14,9 @@ export default defineConfig({
   integrations: [
     starlight({
       title: "gitlode",
-      description: `English documentation — ${site.edition} comparison preview`,
+      defaultLocale: "en",
+      locales: { en: { label: "English", lang: "en" }, ja: { label: "日本語", lang: "ja" } },
+      description: `Documentation — ${site.edition} comparison preview`,
       sidebar: site.navigation.map((group) => ({
         label: group.label,
         items: group.pages.map((page) => ({ slug: page.route.replace(/\/$/, "") })),

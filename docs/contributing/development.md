@@ -21,7 +21,7 @@ npm run previews:build
 Each successful stage prints a new directory with a manifest and 12 raw Markdown files (six per
 edition). Inspect that manifest to identify exact inputs. Do not mistake staged Markdown for a built site.
 
-## English comparison previews
+## Comparison previews
 
 `npm run previews:prepare` creates trusted candidate inputs from a single staging run. The default
 edition is `next`. `npm run previews:build` prepares, builds, and validates both candidates, then
@@ -39,6 +39,8 @@ npm run preview:starlight
 Open `http://127.0.0.1:4173/docs/vitepress/next/en/` and
 `http://127.0.0.1:4174/docs/starlight/next/en/`. Stop with Ctrl+C. The shared preview server serves
 only built static files on loopback; it does not run either SSG's development server or watch files.
+Use the language selector to switch the current page. Japanese `profiling/` is translated;
+`usage/` and the other four documents intentionally demonstrate English fallback.
 Rebuild after changes. Ports are fixed; stop an existing preview before starting another on that port.
 `npm run previews:build -- stable` selects stable explicitly, but historical-source defects may
 fail validation. It does not assemble a combined deployment or supply version switching.
@@ -136,7 +138,7 @@ symlink blobs, output path containment, Markdown safety, route/link rewriting, a
 validation failures. Generated test fixtures remain ignored for diagnosis.
 
 `.github/workflows/docs.yml` performs these checks plus real upstream acquisition/staging on PRs,
-main pushes, and manual runs, followed by both next-English builds and output validation. Hosted
+main pushes, and manual runs, followed by both next English/Japanese builds and output validation. Hosted
 execution has not yet been observed. See [preview evidence](../poc/english-previews.md) for local
 checks and the remaining browser, localization, and deployment acceptance work.
 
@@ -154,3 +156,12 @@ checks and the remaining browser, localization, and deployment acceptance work.
   before deleting it. Do not delete upstream or user-authored translation files.
 
 No environment secrets, deployment keys, or privileged GitHub credentials are needed locally.
+
+## Translation maintenance
+
+Add owned plain Markdown under `translations/ja/<edition>/` and a record in
+`translations/manifest.json`. Record the canonical file SHA-256 from staging, not the repository
+commit. Relative links use the canonical document directory. Review translation and source changes
+before updating that hash. A matching hash does not certify translation quality. The current
+Profiling Guide is a PoC example awaiting human language review. Stable translation snapshot policy
+remains open; no next-to-stable substitution occurs.
