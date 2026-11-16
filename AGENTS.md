@@ -12,4 +12,8 @@ The owner's kickoff contract is preserved in [docs/kickoff.md](docs/kickoff.md).
 - Retain both SSG candidates through human review. SSG selection, production launch, and changes
   to ownership or hosting require the human owner; ordinary implementation does not.
 - Keep evaluation claims tied to tests or observations. A successful staging run is not a site build.
-- Run `npm run check` after implementation changes and document meaningful limitations.
+- Use `work/initial-poc` for the initial PoC and commit at working increments. The owner plans
+  to squash merge into `main`; individual commits need not represent release-ready states.
+- Consult gitlode's development settings when evolving tooling; record relevant adaptations in
+  `docs/development.md` rather than copying product-only infrastructure wholesale.
+- Run `npm run format:write`, then `npm run check` after implementation changes and document limitations.

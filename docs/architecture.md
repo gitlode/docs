@@ -59,11 +59,11 @@ not yet copied; asset validation and link rewriting are pending and must precede
 Future translation records should contain `sourcePath`, `sourceSha256`, `locale`, `edition`, and
 `translationPath`. Compare with the selected canonical file, not a repository-wide commit:
 
-| Condition | State |
-| --- | --- |
-| No translation record/file | Missing |
+| Condition                                       | State                          |
+| ----------------------------------------------- | ------------------------------ |
+| No translation record/file                      | Missing                        |
 | Translation exists and source file hash matches | Checked against current source |
-| Translation exists and source file hash differs | Source changed; review needed |
+| Translation exists and source file hash differs | Source changed; review needed  |
 
 Source changed does not prove a semantic translation defect. A maintainer can confirm that no
 translation edit is needed and update the recorded hash. Stable snapshot policy is still open;

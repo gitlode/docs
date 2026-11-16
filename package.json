@@ -2,14 +2,33 @@
   "name": "@gitlode/docs",
   "version": "0.0.0",
   "private": true,
+  "description": "Selective, versioned documentation publishing for gitlode",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gitlode/docs.git"
+  },
   "type": "module",
-  "engines": { "node": ">=22.23.1 <23", "npm": ">=11 <12" },
   "scripts": {
     "typecheck": "tsc --noEmit",
     "test": "node --experimental-strip-types --test test/publishing.test.ts",
-    "check": "npm run typecheck && npm test",
+    "format": "node -e \"console.error('Error: Please run format:check or format:write instead.'); process.exit(1)\"",
+    "format:check": "oxfmt --check .",
+    "format:write": "oxfmt .",
+    "lint": "oxlint src test",
+    "lint:fix": "oxlint --fix src test",
+    "lockfile:sync": "npm install --package-lock-only --ignore-scripts",
+    "check": "npm run format:check && npm run lint && npm run typecheck && npm test",
     "source:acquire": "node --experimental-strip-types src/publishing/cli.ts acquire",
     "content:stage": "node --experimental-strip-types src/publishing/cli.ts stage"
   },
-  "devDependencies": { "@types/node": "22.20.5", "typescript": "5.9.3" }
+  "devDependencies": {
+    "@types/node": "22.20.5",
+    "oxfmt": "0.78.0",
+    "oxlint": "1.77.0",
+    "typescript": "5.9.3"
+  },
+  "engines": {
+    "node": ">=22.23.1 <23",
+    "npm": ">=11 <12"
+  }
 }
