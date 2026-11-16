@@ -1,0 +1,15 @@
+{
+  "name": "@gitlode/docs",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "engines": { "node": ">=22.23.1 <23", "npm": ">=11 <12" },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "node --experimental-strip-types --test test/publishing.test.ts",
+    "check": "npm run typecheck && npm test",
+    "source:acquire": "node --experimental-strip-types src/publishing/cli.ts acquire",
+    "content:stage": "node --experimental-strip-types src/publishing/cli.ts stage"
+  },
+  "devDependencies": { "@types/node": "22.20.5", "typescript": "5.9.3" }
+}
