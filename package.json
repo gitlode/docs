@@ -22,6 +22,7 @@
     "content:stage": "node --experimental-strip-types src/publishing/cli.ts stage",
     "previews:prepare": "node --experimental-strip-types src/publishing/preview-cli.ts prepare",
     "previews:build": "node --experimental-strip-types src/publishing/preview-cli.ts build",
+    "previews:verify": "node --experimental-strip-types src/publishing/preview-cli.ts verify",
     "preview:vitepress": "node --experimental-strip-types src/publishing/preview-cli.ts preview vitepress",
     "preview:starlight": "node --experimental-strip-types src/publishing/preview-cli.ts preview starlight"
   },

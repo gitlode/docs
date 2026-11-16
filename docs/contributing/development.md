@@ -47,6 +47,38 @@ The Starlight adapter uses Astro's unified processor explicitly. Imported files 
 Starlight's transitive MDX dependency does not grant permission to import `.mdx`. SSG configuration
 is maintained under `candidates/` and copied into each disposable build root.
 
+## Verification process lifecycle
+
+For automated HTTP checks, use `npm run previews:verify` after building. It starts both static
+servers inside one Node process on OS-assigned ports, checks representative responses with
+five-second request timeouts, and closes all owned listeners and connections in `finally`.
+It also cleans up the first server if the second fails to start. It does not compete for the
+developer's fixed 4173/4174 ports. Regression tests confirm ports can be rebound after successful
+checks, failed checks, and partial startup failures; unrelated listeners are left alone.
+
+Manual `preview:*` commands keep serving until interrupted. Their CLI handles SIGINT/SIGTERM and
+waits for server closure. A forced termination or a terminated shell wrapper is not proof that its
+children stopped; signal behavior varies across operating systems and launch tools.
+
+For every agent-owned long-running verification process, including browsers and other future PoC
+tools, follow this procedure:
+
+1. Prefer a finite command with timeouts and `try/finally` cleanup. For custom checks, use
+   `withPreviews` from `src/publishing/preview-server.ts` and await all work inside its callback.
+2. If a separate process is necessary, record its PID, executable/command line, start time, tool
+   session, and owned ports. Use an isolated browser profile and wait for browser exit too.
+3. On success, failure, interruption, or handoff, close/stop the owned processes and await exit.
+   A tool session reporting completion is not sufficient, especially with npm/Volta/shell wrappers.
+4. Verify the actual child PID is gone and owned listener ports are free. On Windows, use
+   `Get-NetTCPConnection` and `Get-CimInstance Win32_Process` from the host context when the sandbox
+   cannot see host processes. Recheck identity before stopping a leftover process; never kill by
+   port number alone, and never stop an unrelated developer process.
+5. Report any cleanup failure explicitly. Leave a server running only when the user has requested
+   it, with its URL and stop instructions. Otherwise complete cleanup before the final response.
+
+This procedure applies beyond preview servers. Do not rely solely on signal handlers: they cannot
+run after an uncatchable process kill. Bounded checks minimize the chance of orphaned processes.
+
 ## Development tooling conventions
 
 Tooling alignment is bidirectional: both projects can benefit from each other's choices. Record

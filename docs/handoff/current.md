@@ -21,6 +21,10 @@ fragments, sidebar/TOC presence, code-block, and table checks. See
 [English preview evidence](../poc/english-previews.md) for reproduction, measurements, and screenshots.
 Node 22.23.4 is now required by the current Astro dependency line; npm 11 remains the baseline.
 Run `npm run previews:build`, then the two `preview:*` commands in separate terminals.
+For agent-owned HTTP checks, prefer bounded `npm run previews:verify`: it uses ephemeral ports and
+closes both servers in `finally`. Follow the [process lifecycle procedure](../contributing/development.md#verification-process-lifecycle)
+for all verification processes. A previous shell/tool exit left a Node child holding both fixed
+preview ports; do not treat wrapper completion as evidence of child termination.
 
 Next action: add a minimal owned Japanese translation and compare missing-page behavior, followed
 by combined stable/next artifact assembly. Keep both candidates and the existing human decision gate.

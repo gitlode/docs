@@ -19,3 +19,7 @@ The owner's kickoff contract is preserved in [docs/poc/kickoff.md](docs/poc/kick
 - Follow the documentation lifecycle in `docs/README.md`. Record cross-project feedback under
   `docs/proposals/` and continue authorized PoC work without waiting for its adoption.
 - Run `npm run format:write`, then `npm run check` after implementation changes and document limitations.
+- Own the full lifecycle of verification processes. Follow the process cleanup procedure in
+  `docs/contributing/development.md`; prefer bounded `npm run previews:verify` for HTTP checks.
+  Never infer child-process termination from a tool/session exit. Confirm owned PIDs have exited
+  and listeners are released before handoff, unless the user explicitly requested a running preview.

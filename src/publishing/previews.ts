@@ -8,16 +8,14 @@ import {
   readFileSync,
   writeFileSync,
 } from "node:fs";
-import { createServer } from "node:http";
 import { dirname, join, resolve } from "node:path";
 import { performance } from "node:perf_hooks";
-
-import sirv from "sirv";
 
 import { parseSafeMarkdown, prepareMarkdown, routeFor } from "./markdown.ts";
 import type { SourceTree } from "./markdown.ts";
 import { git, safeDirectory, stage } from "./pipeline.ts";
 import type { Sources, Publication } from "./pipeline.ts";
+import { startPreview, withPreviews } from "./preview-server.ts";
 import { validateOutput, validateRendering } from "./validate-output.ts";
 
 const root = resolve(import.meta.dirname, "../..");
@@ -235,36 +233,47 @@ export function buildPreviews(edition = "next") {
   return output;
 }
 
-export function preview(candidate: string) {
+function previewConfiguration(candidate: string, port?: number) {
   if (candidate !== "vitepress" && candidate !== "starlight")
     throw new Error("Unknown preview candidate.");
   const { output } = json<{ output: string }>(join(root, ".generated/preview.json"));
   const report = json<ReturnType<typeof preparePreviews>["report"]>(join(output, "build.json"));
-  const siteRoot = report.candidates[candidate].root;
-  const port = candidate === "vitepress" ? 4173 : 4174;
-  const base = report.candidates[candidate].base;
-  const serve = sirv(join(siteRoot, "dist"), { dev: true, single: false });
-  const server = createServer((request, response) => {
-    if (
-      request.headers.host !== `127.0.0.1:${port}` &&
-      request.headers.host !== `localhost:${port}`
-    ) {
-      response.writeHead(403).end();
-      return;
-    }
-    if (!request.url?.startsWith(base)) {
-      response.writeHead(404).end();
-      return;
-    }
-    request.url = "/" + request.url.slice(base.length);
-    serve(request, response, () => {
-      response.writeHead(404).end();
-    });
-  });
-  server.on("error", (error) => {
-    console.error(error.message);
-    process.exitCode = 1;
-  });
-  server.listen(port, "127.0.0.1", () => console.log(`Preview: http://127.0.0.1:${port}${base}`));
+  return {
+    directory: join(report.candidates[candidate].root, "dist"),
+    base: report.candidates[candidate].base,
+    port: port ?? (candidate === "vitepress" ? 4173 : 4174),
+  };
+}
+
+export async function preview(candidate: string) {
+  const config = previewConfiguration(candidate);
+  const server = await startPreview(config.directory, config.base, config.port);
+  console.log("Preview: " + server.url);
   return server;
+}
+
+export async function verifyPreviews() {
+  // Ephemeral ports avoid interfering with a developer's interactive previews.
+  await withPreviews(
+    [previewConfiguration("vitepress", 0), previewConfiguration("starlight", 0)],
+    async (previews) => {
+      for (const preview of previews) {
+        for (const [path, expected] of [
+          ["", 200],
+          ["usage/", 200],
+          ["design/plugins/", 200],
+          ["not-found/", 404],
+        ] as const) {
+          const response = await fetch(preview.url + path, { signal: AbortSignal.timeout(5000) });
+          await response.arrayBuffer();
+          if (response.status !== expected)
+            throw new Error(
+              "Unexpected HTTP status: " + response.status + " for " + preview.url + path,
+            );
+        }
+        console.log("Verified: " + preview.url);
+      }
+    },
+  );
+  console.log("Verification complete; all owned preview listeners and connections closed.");
 }

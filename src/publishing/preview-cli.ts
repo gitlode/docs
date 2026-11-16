@@ -1,4 +1,5 @@
-import { buildPreviews, preparePreviews, preview } from "./previews.ts";
+import { handlePreviewSignals } from "./preview-server.ts";
+import { buildPreviews, preparePreviews, preview, verifyPreviews } from "./previews.ts";
 
 try {
   switch (process.argv[2]) {
@@ -9,10 +10,13 @@ try {
       buildPreviews(process.argv[3]);
       break;
     case "preview":
-      preview(process.argv[3]);
+      handlePreviewSignals(await preview(process.argv[3]));
+      break;
+    case "verify":
+      await verifyPreviews();
       break;
     default:
-      throw new Error("Expected prepare, build, or preview command.");
+      throw new Error("Expected prepare, build, preview, or verify command.");
   }
 } catch (error) {
   console.error(error instanceof Error ? error.message : error);

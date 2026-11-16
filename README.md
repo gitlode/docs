@@ -19,6 +19,7 @@ npm run check
 npm run source:acquire
 npm run content:stage
 npm run previews:build
+npm run previews:verify
 ```
 
 Run `npm run preview:vitepress` and `npm run preview:starlight` in separate terminals, then open:
