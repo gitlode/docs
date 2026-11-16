@@ -16,9 +16,15 @@ npm run content:stage
 `source:acquire` needs outbound HTTPS to GitHub; `content:stage` is offline after acquisition.
 Each successful stage prints a new directory with a manifest and 12 raw Markdown files (six per
 edition). Inspect that manifest to identify exact inputs. No preview commands exist yet; see
-[the next milestone](plan.md). Do not mistake staged Markdown for a built site.
+[the next milestone](../temporary/poc/plan.md). Do not mistake staged Markdown for a built site.
 
 ## Development tooling conventions
+
+Tooling alignment is bidirectional: both projects can benefit from each other's choices. Record
+cross-project suggestions in `../temporary/proposals/` and continue authorized PoC work using the
+current local configuration. See the [documentation lifecycle](../README.md) and the open
+[environment feedback](../temporary/proposals/development-environment.md). Pending upstream
+adoption is not a prerequisite for local development.
 
 The reference is gitlode's development configuration at
 [`90512564`](https://github.com/gitlode/gitlode/tree/90512564d76490088ecc99da7596128df1c45a2c):
@@ -47,8 +53,8 @@ and the contributor lint policy. Use it as a baseline when evolving this project
 - Dependencies remain exact-pinned with a committed lockfile. `npm run lockfile:sync` follows
   the upstream lockfile-refresh convention. CI runs the same `npm run check` used locally.
 
-Work on `work/initial-poc` and commit at practical work increments. The owner intends a squash
-merge into `main`; intermediate commits need not be release-ready. Do not merge automatically.
+Follow the [current handoff](../temporary/handoff/current.md) for the working branch and
+integration instructions. Commit at practical work increments; do not merge automatically.
 
 ## Updating inputs
 

@@ -44,6 +44,6 @@ before rendering ([official guide](https://vitepress.dev/guide/using-vue)). Its 
 also support file inclusion ([official guide](https://vitepress.dev/guide/markdown)). These are
 implementation constraints, not observed defects in the gitlode corpus.
 
-No evidence currently supports choosing either SSG. Keep the [decision proposal](decisions/0001-ssg-proposal.md)
+No evidence currently supports choosing either SSG. Keep the [decision proposal](ssg-proposal.md)
 open until both previews and their validation results exist. All PoC exit criteria involving rendered
 sites, localization, Pages simulation, and a recommendation remain incomplete.

@@ -6,7 +6,7 @@ Status: **Proposed evaluation; selection pending human approval.**
 
 Canonical English Markdown remains upstream. The documentation repository must support selective
 publication, navigation/TOC, English/Japanese, stable/next, and GitHub Pages. The same repository
-must survive the comparative PoC. [The evaluation](../evaluation.md) currently contains acquisition
+must survive the comparative PoC. [The evaluation](evaluation.md) currently contains acquisition
 evidence only; it does not establish rendering fidelity or relative maintenance cost.
 
 ## Proposal

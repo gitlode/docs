@@ -54,21 +54,12 @@ navigation. Shared preprocessing owns selection and link/asset inventory. Intern
 remain inside the Pages base; unselected targets may link to their fixed upstream SHA. Assets are
 not yet copied; asset validation and link rewriting are pending and must precede site acceptance.
 
-## Translation metadata proposal
+## Translation boundary
 
-Future translation records should contain `sourcePath`, `sourceSha256`, `locale`, `edition`, and
-`translationPath`. Compare with the selected canonical file, not a repository-wide commit:
-
-| Condition                                       | State                          |
-| ----------------------------------------------- | ------------------------------ |
-| No translation record/file                      | Missing                        |
-| Translation exists and source file hash matches | Checked against current source |
-| Translation exists and source file hash differs | Source changed; review needed  |
-
-Source changed does not prove a semantic translation defect. A maintainer can confirm that no
-translation edit is needed and update the recorded hash. Stable snapshot policy is still open;
-do not silently substitute next translations. Metadata logic and Japanese examples are not yet
-implemented. The current per-file manifest hashes supply the future comparison input.
+Japanese translation sources belong to this repository. Missing translations and source changes
+are distinct conditions; freshness must use file-level identity rather than a repository-wide commit.
+Stable content must not silently use next translations. The unimplemented metadata design is tracked
+in the [PoC proposal](../temporary/poc/translation-metadata.md).
 
 ## CI and future publishing
 

@@ -1,8 +1,8 @@
 # Agent instructions
 
-Read [the project plan](docs/plan.md), [architecture](docs/architecture.md), and
-[development workflow](docs/development.md) before changing implementation.
-The owner's kickoff contract is preserved in [docs/kickoff.md](docs/kickoff.md).
+Read [the documentation guide](docs/README.md), [the project plan](docs/temporary/poc/plan.md), [architecture](docs/durable/architecture.md), and
+[development workflow](docs/durable/development.md) before changing implementation.
+The owner's kickoff contract is preserved in [docs/temporary/poc/kickoff.md](docs/temporary/poc/kickoff.md).
 
 - Write project documentation and code comments in English.
 - Keep canonical English documentation upstream; transform only generated copies.
@@ -15,5 +15,7 @@ The owner's kickoff contract is preserved in [docs/kickoff.md](docs/kickoff.md).
 - Use `work/initial-poc` for the initial PoC and commit at working increments. The owner plans
   to squash merge into `main`; individual commits need not represent release-ready states.
 - Consult gitlode's development settings when evolving tooling; record relevant adaptations in
-  `docs/development.md` rather than copying product-only infrastructure wholesale.
+  `docs/durable/development.md` rather than copying product-only infrastructure wholesale.
+- Follow the documentation lifecycle in `docs/README.md`. Record cross-project feedback under
+  `docs/temporary/proposals/` and continue authorized PoC work without waiting for its adoption.
 - Run `npm run format:write`, then `npm run check` after implementation changes and document limitations.
