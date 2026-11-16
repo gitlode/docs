@@ -4,20 +4,31 @@ The long-lived documentation publishing repository for [gitlode](https://github.
 Canonical English Markdown remains upstream; this repository owns publication, Japanese translations,
 site implementation, and operations. Project documentation under `docs/` is not product-site content.
 
-**Status:** kickoff increment implemented: pinned acquisition, explicit selection, provenance, tests,
-and validation CI. VitePress and Astro Starlight previews are the next milestone, not yet implemented.
+**Status:** English comparison previews implemented for VitePress and Astro Starlight, using the
+same six real documents from the pinned next revision. Acquisition, Markdown preparation, HTML
+validation, tests, and build CI are included. Japanese and combined stable/next deployment are next.
 No SSG has been selected and no production deployment is enabled.
 
 ## Quick start
 
-Requires Git, Node.js 22.23.1 (see `.node-version`), and npm 11.
+Requires Git, Node.js 22.23.4 (see `.node-version`), and npm 11.
 
 ```sh
 npm ci
 npm run check
 npm run source:acquire
 npm run content:stage
+npm run previews:build
 ```
+
+Run `npm run preview:vitepress` and `npm run preview:starlight` in separate terminals, then open:
+
+- VitePress: <http://127.0.0.1:4173/docs/vitepress/next/en/>
+- Starlight: <http://127.0.0.1:4174/docs/starlight/next/en/>
+
+These commands serve the last successful static build on loopback; rebuild after changing inputs.
+See [English preview evidence and limitations](docs/poc/english-previews.md), including the remaining
+VitePress dependency audit findings. These previews are not a production deployment.
 
 Acquisition needs public GitHub access, without credentials. Staging is offline after acquisition.
 The staging command prints a unique `.generated/staging/run-*/` directory containing both editions

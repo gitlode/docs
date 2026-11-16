@@ -1,6 +1,6 @@
 # Comparative PoC evidence
 
-Status: baseline acquisition evidence only. Rendering comparison is **not yet performed**.
+Status: English comparison previews implemented. Full PoC comparison is still incomplete.
 Observation date: 2026-11-16, Asia/Tokyo.
 
 ## Verified inputs
@@ -18,32 +18,34 @@ exercise links outside the allowlist. Those targets must not be automatically pu
 
 ## Local evidence
 
-- Node 22.23.1 / npm 11.11.0 on Windows.
+- Node 22.23.4 / npm 11.11.0 on Windows for the preview increment.
 - Locked clean installation (`npm ci --ignore-scripts`) succeeded.
-- `npm run check`: type check and eight meaningful automated tests passed.
+- `npm run check`: formatting, lint, type checks, and publishing/Markdown/output fixture tests.
 - `npm run source:acquire`: fetched and verified both approved refs/pins.
 - `npm run content:stage`: staged six byte-preserved documents for each edition and emitted provenance.
 - Only selected Markdown enters staging; agent/handoff files are excluded by validation.
-- Remote CI, clean-clone execution on another machine, and HTML output remain unverified.
+- `npm run previews:build`: both next-English sites and generated output checks pass.
+- [English preview evidence](english-previews.md) records commands, versions, observations, and limitations.
+- Remote CI and clean-clone execution on another machine remain unverified.
 
 ## Comparison to collect
 
-| Criterion               | VitePress       | Astro Starlight | Required evidence                                                  |
-| ----------------------- | --------------- | --------------- | ------------------------------------------------------------------ |
-| Rendering fidelity      | Not tested      | Not tested      | Same manifest; headings, tables, TypeScript fences, angle brackets |
-| Navigation/TOC          | Not tested      | Not tested      | Sidebar subset; per-page headings; README routes                   |
-| Markdown safety         | Not implemented | Not implemented | Active HTML, expressions, includes and MDX fixtures                |
-| Japanese/missing pages  | Not tested      | Not tested      | Owned translated page; missing translation; language navigation    |
-| Stable/next Pages paths | Not tested      | Not tested      | Complete artifact under nested base; link/asset validation         |
-| Local search            | Not tested      | Not tested      | English/Japanese sample queries; index scope                       |
-| Maintenance cost        | Not measured    | Not measured    | Actual transformations and dependencies; warnings/workarounds      |
-| Build performance/size  | Not measured    | Not measured    | Commands, runtime, duration, artifact bytes                        |
+| Criterion               | VitePress                               | Astro Starlight                         | Required evidence                                                    |
+| ----------------------- | --------------------------------------- | --------------------------------------- | -------------------------------------------------------------------- |
+| Rendering fidelity      | Static checks pass                      | Static checks pass                      | Same source hashes; code-block text and table counts checked         |
+| Navigation/TOC          | Static checks pass                      | Static checks pass                      | Sidebar links, TOC presence, single H1, README routes and fragments  |
+| Markdown safety         | Shared validation + disabled extensions | Shared validation + plain Markdown      | Includes, active HTML, interpolation, unsafe URL and image rejection |
+| Japanese/missing pages  | Not tested                              | Not tested                              | Owned translated page; missing translation; language navigation      |
+| Stable/next Pages paths | Next-English nested base passes         | Next-English nested base passes         | Combined artifact and version navigation still pending               |
+| Local search            | Not tested                              | Not tested                              | English/Japanese sample queries; index scope                         |
+| Maintenance cost        | Small config; base-specific URLs        | Small config; frontmatter/H1 adaptation | Long-term assessment pending; dependency findings recorded           |
+| Build performance/size  | Recorded in build.json                  | Recorded in build.json                  | Single-run supporting evidence, not a benchmark                      |
 
 VitePress explicitly compiles Markdown as Vue components, so untrusted source must be constrained
 before rendering ([official guide](https://vitepress.dev/guide/using-vue)). Its Markdown extensions
 also support file inclusion ([official guide](https://vitepress.dev/guide/markdown)). These are
 implementation constraints, not observed defects in the gitlode corpus.
 
-No evidence currently supports choosing either SSG. Keep the [decision proposal](ssg-proposal.md)
-open until both previews and their validation results exist. All PoC exit criteria involving rendered
-sites, localization, Pages simulation, and a recommendation remain incomplete.
+The English increment alone does not support final SSG selection. Keep the [decision proposal](ssg-proposal.md)
+open through localization, multi-version assembly, and human usability review. Those scenarios,
+the recommendation, hosted CI verification, and PoC exit approval remain incomplete.

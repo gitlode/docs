@@ -6,14 +6,14 @@ Status: **Proposed evaluation; selection pending human approval.**
 
 Canonical English Markdown remains upstream. The documentation repository must support selective
 publication, navigation/TOC, English/Japanese, stable/next, and GitHub Pages. The same repository
-must survive the comparative PoC. [The evaluation](evaluation.md) currently contains acquisition
-evidence only; it does not establish rendering fidelity or relative maintenance cost.
+must survive the comparative PoC. [The evaluation](evaluation.md) now includes English static
+preview evidence. Localization, version assembly, and human usability review remain incomplete.
 
 ## Proposal
 
-Implement both VitePress and Astro Starlight adapters against the same immutable staging manifest.
+Retain both VitePress and Astro Starlight adapters against the same immutable staging manifest.
 Keep Docusaurus as reference only. Defer a preferred-SSG recommendation until both candidates have
-been built and compared. The final proposal must name a recommendation, show evidence and trade-offs,
+completed the required comparison scenarios. The final proposal must name a recommendation, show evidence and trade-offs,
 list required custom code, and present known failures before asking the owner to select.
 
 ## Consequences and review gate

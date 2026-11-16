@@ -7,8 +7,9 @@ staging, candidate adapters, future Japanese translation sources, validation, an
 Its own `docs/` directory is never automatically published as product documentation.
 
 Current flow: `config/sources.json` -> Git object acquisition -> explicit allowlist -> byte-preserving
-staging -> provenance manifest. Next: staged copies -> independent candidate adapters -> two static
-previews -> human SSG decision -> complete stable/next Pages artifact.
+staging/provenance -> shared Markdown preparation -> candidate adapters -> two English static builds
+and output validation. Localization, complete stable/next artifact assembly, and the human SSG
+decision remain subsequent milestones.
 
 ## Acquisition and pins
 
@@ -25,8 +26,8 @@ and submodule entries. No individual-file API calls or privileged source credent
 ## Selection and staging contract
 
 `config/publication.json` enumerates six exact Markdown paths, independently of the proposed
-sidebar groups in `config/navigation.json`. The navigation config is validated but is not yet
-consumed by a renderer. Missing selected files are errors. Agent/handoff content, arbitrary roots,
+sidebar groups in `config/navigation.json`. Both renderers consume the validated navigation subset.
+Missing selected files are errors. Agent/handoff content, arbitrary roots,
 MDX, duplicate/case-colliding paths, traversal, backslashes, and Windows reserved names are rejected.
 Broader publication requires explicit configuration and, if outside the durable document policy,
 a justified policy change.
@@ -45,14 +46,35 @@ reproducible. Release artifacts must eventually come from a clean committed docs
 ## Renderer boundary and security
 
 Staging is raw source acquisition, **not sanitization**. It deliberately retains original Markdown.
-Do not execute or serve it yet. The next milestone must constrain active HTML, Vue expressions,
-SSG includes, and other executable extensions before introducing rendering. Markdown code fences
-and plain TypeScript syntax must remain faithful. Do not build a universal Markdown AST framework.
+`markdown.ts` parses staged copies with remark/GFM, rejects raw HTML/components, upstream frontmatter,
+Vue interpolation outside code, SSG directives, code-fence metadata, unsafe URLs, and image syntax
+without an explicit asset policy. Include comments are rejected even inside code because VitePress
+expands them before Markdown parsing. VitePress also disables HTML, attributes, and snippet handling.
+Titles reused in generated navigation are checked and Markdown link labels escaped.
 
-Candidate adapters own frontmatter/H1 handling, README routing, locale configuration, and SSG
-navigation. Shared preprocessing owns selection and link/asset inventory. Internal links must
-remain inside the Pages base; unselected targets may link to their fixed upstream SHA. Assets are
-not yet copied; asset validation and link rewriting are pending and must precede site acceptance.
+The shared preparation step uses the parser's native tree only for narrow validation/link rewriting;
+it does not define a universal adapter AST. Serialization normalizes Markdown formatting in generated
+copies. Fenced code values and Markdown structure are preserved and checked; source bytes remain
+unchanged in staging. Unsupported syntax fails with an actionable error instead of being executed.
+
+Both adapters use directory routes (`usage.md` -> `usage/`, `design/README.md` -> `design/`).
+Starlight receives generated title frontmatter and the body without its original H1; VitePress
+keeps that H1. Git tree entries resolve links before any rewriting. Selected pages become internal
+links; unselected regular files/directories link to their fixed upstream SHA. Missing targets and
+symlinks fail. VitePress receives site-root Markdown paths because it adds the configured base;
+Starlight receives paths including its base. External HTTP(S) links are not fetched.
+
+`previews.ts` owns candidate staging and build orchestration. Each run copies trusted configurations
+from `candidates/` into unique generated roots and emits matching source hashes in `inputs.json`.
+The two next-English sites use `/docs/<candidate>/next/en/`; this is a nested-path simulation, not
+a combined Pages deployment. `build.json` records validation and timings. Only successful runs
+update the local preview pointer. The loopback preview server exposes static output, without SSG
+development middleware. See the [development workflow](../contributing/development.md).
+
+HTML validation checks expected pages, a single H1, local href/src targets, fragment IDs, nested
+base containment, and absence of excluded output. Imported images remain unsupported: selected
+assets, CSS URLs, and srcset validation require a later increment. The small favicon is a trusted
+site-owned asset. Known dependency findings are tracked in [PoC evidence](../poc/english-previews.md).
 
 ## Translation boundary
 
@@ -64,6 +86,6 @@ in the [PoC proposal](../poc/translation-metadata.md).
 ## CI and future publishing
 
 PR CI has only `contents: read`, installs locked dependencies, checks types/tests, acquires public
-source, and stages both editions. It does not deploy. Once adapters exist, add both builds and
-static output validation. Production must assemble one complete artifact (never append a version
+source, stages both editions, then builds and validates both next-English candidates. It does not
+deploy. Production must assemble one complete artifact (never append a version
 to an existing Pages deployment), then deploy through a trusted job with scoped Pages/OIDC rights.

@@ -11,6 +11,7 @@ permissions:
 jobs:
   validate:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
         with:
@@ -24,3 +25,4 @@ jobs:
       - run: npm run check
       - run: npm run source:acquire
       - run: npm run content:stage
+      - run: npm run previews:build

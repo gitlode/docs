@@ -1,6 +1,6 @@
 # Implementation plan
 
-Status: initial kickoff increment completed; comparative PoC remains in progress.
+Status: English comparison preview increment implemented; comparative PoC remains in progress.
 Owner: human project owner. Implementation: Codex working in `gitlode/docs` on `work/initial-poc`.
 The kickoff increment was committed as `0ef1673`. Commit subsequent work at practical increments;
 the owner plans to squash merge into `main`. No push or merge has been performed by this session.
@@ -19,30 +19,27 @@ PoC using documented local choices without waiting for commonization approval. S
 
 ## Sequential milestones
 
-| Milestone                | Deliverable and verification                                                                                          | Status                                 |
-| ------------------------ | --------------------------------------------------------------------------------------------------------------------- | -------------------------------------- |
-| 1. Inspect and bootstrap | Verify repository and real source tree; runtime, lockfile, project docs, validation CI                                | Implemented locally; hosted CI not run |
-| 2. Acquire and stage     | Pin both refs; select six real documents; preserve bytes and provenance; reject unsafe paths/symlinks                 | Implemented and locally tested         |
-| 3. Comparable previews   | Add VitePress and Starlight under `candidates/`; same staged input; titles, README routing, sidebar, TOC, code fences | Next                                   |
-| 4. Localization          | Owned Japanese example, explicit missing page, native/custom fallback comparison, file-level freshness metadata tests | Pending                                |
-| 5. Pages simulation      | Both editions/locales under nested `/docs/` paths; complete artifact; links/assets validation; PR build               | Pending                                |
-| 6. Evidence and proposal | Timings, sizes, warnings, screenshots/manual review, reproducible comparison, proposed recommendation                 | Pending                                |
-| 7. Human selection gate  | Owner reviews both previews and approves an SSG; only then remove a candidate                                         | Human decision pending                 |
+| Milestone                | Deliverable and verification                                                                                          | Status                                    |
+| ------------------------ | --------------------------------------------------------------------------------------------------------------------- | ----------------------------------------- |
+| 1. Inspect and bootstrap | Verify repository and real source tree; runtime, lockfile, project docs, validation CI                                | Implemented locally; hosted CI not run    |
+| 2. Acquire and stage     | Pin both refs; select six real documents; preserve bytes and provenance; reject unsafe paths/symlinks                 | Implemented and locally tested            |
+| 3. Comparable previews   | Add VitePress and Starlight under `candidates/`; same staged input; titles, README routing, sidebar, TOC, code fences | Implemented; see English preview evidence |
+| 4. Localization          | Owned Japanese example, explicit missing page, native/custom fallback comparison, file-level freshness metadata tests | Pending                                   |
+| 5. Pages simulation      | Both editions/locales under nested `/docs/` paths; complete artifact; links/assets validation; PR build               | Pending                                   |
+| 6. Evidence and proposal | Timings, sizes, warnings, screenshots/manual review, reproducible comparison, proposed recommendation                 | Pending                                   |
+| 7. Human selection gate  | Owner reviews both previews and approves an SSG; only then remove a candidate                                         | Human decision pending                    |
 
 Milestones are reviewable working increments, not separate disposable repositories.
 Do not create empty candidate directories or claim previews before the rendering code exists.
 
 ## Next implementation tasks
 
-1. Add the two SSGs with compatible pinned dependencies and a lockfile update.
-2. Implement a small link inventory/normalization step. Selected links become internal routes;
-   links to unselected existing files become SHA-specific upstream links. Missing targets fail.
-   Do not expand the allowlist to hide link errors. Referenced assets require explicit selection.
-3. Derive titles from H1 and map nested README paths; remove duplicate H1 only where required.
-4. Enforce inert Markdown rendering before passing imported text to either SSG: reject/escape
-   executable directives, Vue interpolation, raw active HTML, and local file includes. Add malicious
-   input fixtures. Never pass staged raw Markdown directly into a VitePress build.
-5. Build both candidates from one staging manifest and check published paths, sidebar and TOC.
+1. Review the [English previews and limitations](english-previews.md) before extending the corpus.
+2. Add an owned Japanese translation and compare missing-page behavior using both candidates.
+3. Test file-level translation metadata and keep stable/next translation ownership explicit.
+4. Exercise both source editions in one complete Pages-style artifact, including version links.
+5. Address remaining dependency findings and add imported asset support only with explicit selection
+   and validation. Do not expand publication merely to hide link errors.
 
 ## Owner review points
 

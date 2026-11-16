@@ -22,7 +22,7 @@ The following homes contain tracked working material with a limited purpose:
 
 - `poc/`: [plan](poc/plan.md), [original kickoff](poc/kickoff.md),
   [evaluation evidence](poc/evaluation.md), [SSG proposal](poc/ssg-proposal.md),
-  and [translation metadata draft](poc/translation-metadata.md).
+  [English previews](poc/english-previews.md), and [translation metadata draft](poc/translation-metadata.md).
 - `handoff/`: [current continuation notes](handoff/current.md) for human/LLM and
   session-to-session transfer. Link to canonical docs instead of restating their contracts.
 - `proposals/`: [development environment feedback](proposals/development-environment.md)

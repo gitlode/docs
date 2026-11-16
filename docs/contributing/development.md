@@ -2,21 +2,50 @@
 
 ## Environment and commands
 
-Use Node.js 22.23.1, npm 11 (verified with 11.11.0), and Git on Windows or Linux. Node runs the
-erasable TypeScript scripts directly; TypeScript 5.9.3 checks types separately. There is no runtime
-dependency or upstream package installation. `package-lock.json` is checked in.
+Use Node.js 22.23.4, npm 11 (verified with 11.11.0), and Git on Windows or Linux. Node runs the
+erasable TypeScript scripts directly; TypeScript 5.9.3 checks types separately. Build and preview
+dependencies are local to this repository; no upstream package installation occurs.
+`package-lock.json` is checked in. The Node patch upgrade supports current Astro dependencies.
+With Volta, `volta run --node 22.23.4 npm run check` uses the selected runtime without changing
+the global default; the same prefix works for installation, build, and preview commands.
 
 ```sh
 npm ci --ignore-scripts
 npm run check
 npm run source:acquire
 npm run content:stage
+npm run previews:build
 ```
 
 `source:acquire` needs outbound HTTPS to GitHub; `content:stage` is offline after acquisition.
 Each successful stage prints a new directory with a manifest and 12 raw Markdown files (six per
-edition). Inspect that manifest to identify exact inputs. No preview commands exist yet; see
-[the next milestone](../poc/plan.md). Do not mistake staged Markdown for a built site.
+edition). Inspect that manifest to identify exact inputs. Do not mistake staged Markdown for a built site.
+
+## English comparison previews
+
+`npm run previews:prepare` creates trusted candidate inputs from a single staging run. The default
+edition is `next`. `npm run previews:build` prepares, builds, and validates both candidates, then
+prints a unique `.generated/previews/run-*/` directory. `inputs.json` records identical source
+hashes for both candidates; `build.json` adds output checks and measurements. A failed build does
+not replace the `.generated/preview.json` pointer to the last successful build.
+
+Run in separate terminals:
+
+```sh
+npm run preview:vitepress
+npm run preview:starlight
+```
+
+Open `http://127.0.0.1:4173/docs/vitepress/next/en/` and
+`http://127.0.0.1:4174/docs/starlight/next/en/`. Stop with Ctrl+C. The shared preview server serves
+only built static files on loopback; it does not run either SSG's development server or watch files.
+Rebuild after changes. Ports are fixed; stop an existing preview before starting another on that port.
+`npm run previews:build -- stable` selects stable explicitly, but historical-source defects may
+fail validation. It does not assemble a combined deployment or supply version switching.
+
+The Starlight adapter uses Astro's unified processor explicitly. Imported files remain plain `.md`;
+Starlight's transitive MDX dependency does not grant permission to import `.mdx`. SSG configuration
+is maintained under `candidates/` and copied into each disposable build root.
 
 ## Development tooling conventions
 
@@ -71,11 +100,13 @@ Use exact file paths in `config/publication.json`; adding to the sidebar is a se
 `npm run check` runs formatting validation, linting, type checking, and Node's test runner. Tests create isolated local Git fixtures
 under `.generated/tests/`; they do not use the network. They verify immutable blob reads despite
 dirty worktrees, provenance hashes, repeatability, excluded paths, missing files, invalid refs,
-symlink blobs, and output path containment. Generated test fixtures remain ignored for diagnosis.
+symlink blobs, output path containment, Markdown safety, route/link rewriting, and built HTML
+validation failures. Generated test fixtures remain ignored for diagnosis.
 
 `.github/workflows/docs.yml` performs these checks plus real upstream acquisition/staging on PRs,
-main pushes, and manual runs. Hosted execution has not yet been observed. Rendering, browser QA,
-Pages paths, link/asset checks, Japanese fallback, and build measurements remain future checks.
+main pushes, and manual runs, followed by both next-English builds and output validation. Hosted
+execution has not yet been observed. See [preview evidence](../poc/english-previews.md) for local
+checks and the remaining browser, localization, and deployment acceptance work.
 
 ## Troubleshooting
 
