@@ -28,5 +28,5 @@ Sources approved by the owner: stable `gitlode@0.12.0`, next `integration/v0.13.
 Both are pinned in `config/sources.json`; changing a branch upstream does not change a build.
 
 Start with the [documentation guide](docs/README.md) for durable knowledge, PoC work, handoffs,
-and feedback proposals. See [development](docs/durable/development.md), [architecture](docs/durable/architecture.md),
-[milestones and review gates](docs/temporary/poc/plan.md), and [evaluation evidence](docs/temporary/poc/evaluation.md).
+and feedback proposals. See [development](docs/contributing/development.md), [architecture](docs/design/architecture.md),
+[milestones and review gates](docs/poc/plan.md), and [evaluation evidence](docs/poc/evaluation.md).

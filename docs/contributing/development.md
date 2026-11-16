@@ -16,14 +16,14 @@ npm run content:stage
 `source:acquire` needs outbound HTTPS to GitHub; `content:stage` is offline after acquisition.
 Each successful stage prints a new directory with a manifest and 12 raw Markdown files (six per
 edition). Inspect that manifest to identify exact inputs. No preview commands exist yet; see
-[the next milestone](../temporary/poc/plan.md). Do not mistake staged Markdown for a built site.
+[the next milestone](../poc/plan.md). Do not mistake staged Markdown for a built site.
 
 ## Development tooling conventions
 
 Tooling alignment is bidirectional: both projects can benefit from each other's choices. Record
-cross-project suggestions in `../temporary/proposals/` and continue authorized PoC work using the
+cross-project suggestions in `../proposals/` and continue authorized PoC work using the
 current local configuration. See the [documentation lifecycle](../README.md) and the open
-[environment feedback](../temporary/proposals/development-environment.md). Pending upstream
+[environment feedback](../proposals/development-environment.md). Pending upstream
 adoption is not a prerequisite for local development.
 
 The reference is gitlode's development configuration at
@@ -53,7 +53,7 @@ and the contributor lint policy. Use it as a baseline when evolving this project
 - Dependencies remain exact-pinned with a committed lockfile. `npm run lockfile:sync` follows
   the upstream lockfile-refresh convention. CI runs the same `npm run check` used locally.
 
-Follow the [current handoff](../temporary/handoff/current.md) for the working branch and
+Follow the [current handoff](../handoff/current.md) for the working branch and
 integration instructions. Commit at practical work increments; do not merge automatically.
 
 ## Updating inputs

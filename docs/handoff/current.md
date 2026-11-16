@@ -9,11 +9,12 @@ Replace or retire this note when the next increment is handed off; migrate lasti
 - Repository: `gitlode/docs`; work branch: `work/initial-poc`.
 - `0ef1673`: initial pinned acquisition/staging foundation.
 - `f983e3c`: development tooling alignment with gitlode itself.
-- Documentation organization now separates durable knowledge from PoC work and feedback proposals.
+- Documentation is organized by purpose: `design/`, `contributing/`, `poc/`, `handoff/`, and
+  `proposals/`. Durable and temporary describe document lifecycles, not parent directories.
 - Working increments should be committed; the owner plans a squash merge to `main`.
 
-Use [development](../../durable/development.md) for commands and
-[architecture](../../durable/architecture.md) for current contracts. The
+Use [development](../contributing/development.md) for commands and
+[architecture](../design/architecture.md) for current contracts. The
 [PoC plan](../poc/plan.md) owns milestones; [evaluation](../poc/evaluation.md) owns test evidence.
 Both SSG previews remain unimplemented. Next action: begin comparable previews from the existing
 staging pipeline, including safe Markdown handling and link normalization.

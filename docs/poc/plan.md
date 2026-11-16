@@ -11,7 +11,7 @@ The owner approved stable `gitlode@0.12.0` and next `integration/v0.13.0` during
 The existing checkout already points to the public `gitlode/docs` repository, so no new repository
 or rename is needed for this increment. GitHub Pages remains the required production host.
 Project documents are English. The original [kickoff contract](kickoff.md) is retained verbatim;
-later owner instructions refine it, including the [documentation lifecycle](../../README.md).
+later owner instructions refine it, including the [documentation lifecycle](../README.md).
 
 Cross-project tooling feedback is tracked under `../proposals/` for separate review. Continue the
 PoC using documented local choices without waiting for commonization approval. See

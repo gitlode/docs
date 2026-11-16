@@ -59,7 +59,7 @@ not yet copied; asset validation and link rewriting are pending and must precede
 Japanese translation sources belong to this repository. Missing translations and source changes
 are distinct conditions; freshness must use file-level identity rather than a repository-wide commit.
 Stable content must not silently use next translations. The unimplemented metadata design is tracked
-in the [PoC proposal](../temporary/poc/translation-metadata.md).
+in the [PoC proposal](../poc/translation-metadata.md).
 
 ## CI and future publishing
 

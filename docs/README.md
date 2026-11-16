@@ -5,11 +5,12 @@ in the product site's publication allowlist. Project documentation is written in
 
 ## Durable documentation
 
-`durable/` contains maintained knowledge that survives the PoC and production operation:
+Documents are organized by subject and purpose, not by a `durable` or `temporary` parent directory.
+The following homes contain maintained knowledge that survives the PoC and production operation:
 
-- [Architecture](durable/architecture.md): ownership, current contracts, boundaries, and constraints.
-- [Development](durable/development.md): supported workflows, tooling, and maintenance procedures.
-- Accepted architecture decisions belong in `durable/decisions/` when they exist. Preserve their
+- [Architecture](design/architecture.md): ownership, current contracts, boundaries, and constraints.
+- [Development](contributing/development.md): supported workflows, tooling, and maintenance procedures.
+- Accepted architecture decisions belong in `decisions/` when they exist. Preserve their
   rationale and consequences; mark superseded decisions rather than silently replacing history.
 
 Durable documents describe the current system and explicitly distinguish unimplemented proposals.
@@ -17,14 +18,14 @@ They are the canonical home for lasting contracts, not session logs or task chec
 
 ## Temporary documentation
 
-`temporary/` contains tracked working material with a limited purpose:
+The following homes contain tracked working material with a limited purpose:
 
-- `poc/`: [plan](temporary/poc/plan.md), [original kickoff](temporary/poc/kickoff.md),
-  [evaluation evidence](temporary/poc/evaluation.md), [SSG proposal](temporary/poc/ssg-proposal.md),
-  and [translation metadata draft](temporary/poc/translation-metadata.md).
-- `handoff/`: [current continuation notes](temporary/handoff/current.md) for human/LLM and
+- `poc/`: [plan](poc/plan.md), [original kickoff](poc/kickoff.md),
+  [evaluation evidence](poc/evaluation.md), [SSG proposal](poc/ssg-proposal.md),
+  and [translation metadata draft](poc/translation-metadata.md).
+- `handoff/`: [current continuation notes](handoff/current.md) for human/LLM and
   session-to-session transfer. Link to canonical docs instead of restating their contracts.
-- `proposals/`: [development environment feedback](temporary/proposals/development-environment.md)
+- `proposals/`: [development environment feedback](proposals/development-environment.md)
   and future suggestions from this project to gitlode itself.
 
 Temporary does not mean disposable before review. Keep active evidence and proposals in Git.

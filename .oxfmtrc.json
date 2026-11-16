@@ -4,7 +4,7 @@
     ".generated/**",
     "node_modules/**",
     "package-lock.json",
-    "docs/temporary/poc/kickoff.md"
+    "docs/poc/kickoff.md"
   ],
   "sortImports": true
 }
