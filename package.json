@@ -1,0 +1,54 @@
+{
+  "name": "@gitlode/docs",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Selective, versioned documentation publishing for gitlode",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gitlode/docs.git"
+  },
+  "type": "module",
+  "scripts": {
+    "typecheck": "tsc --noEmit && vue-tsc --noEmit -p candidates/vitepress/tsconfig.json",
+    "test": "node --experimental-strip-types --test test/*.test.ts",
+    "format": "node -e \"console.error('Error: Please run format:check or format:write instead.'); process.exit(1)\"",
+    "format:check": "oxfmt --check .",
+    "format:write": "oxfmt .",
+    "lint": "oxlint src test candidates",
+    "lint:fix": "oxlint --fix src test candidates",
+    "lockfile:sync": "npm install --package-lock-only --ignore-scripts",
+    "check": "npm run format:check && npm run lint && npm run typecheck && npm test",
+    "source:acquire": "node --experimental-strip-types src/publishing/cli.ts acquire",
+    "content:stage": "node --experimental-strip-types src/publishing/cli.ts stage",
+    "previews:prepare": "node --experimental-strip-types src/publishing/preview-cli.ts prepare",
+    "previews:build": "node --experimental-strip-types src/publishing/preview-cli.ts build",
+    "previews:verify": "node --experimental-strip-types src/publishing/preview-cli.ts verify",
+    "search:verify": "node --experimental-strip-types src/publishing/search-probe.ts",
+    "preview:vitepress": "node --experimental-strip-types src/publishing/preview-cli.ts preview vitepress",
+    "preview:starlight": "node --experimental-strip-types src/publishing/preview-cli.ts preview starlight"
+  },
+  "devDependencies": {
+    "@astrojs/markdown-remark": "7.3.9",
+    "@astrojs/starlight": "0.43.1",
+    "@types/mdast": "4.0.4",
+    "@types/node": "22.20.5",
+    "astro": "7.4.12",
+    "mdast-util-to-string": "4.0.0",
+    "minisearch": "7.2.0",
+    "oxfmt": "0.78.0",
+    "oxlint": "1.77.0",
+    "parse5": "7.3.0",
+    "remark": "15.0.1",
+    "remark-gfm": "4.0.1",
+    "sirv": "3.0.2",
+    "typescript": "5.9.3",
+    "unist-util-visit": "5.2.0",
+    "vitepress": "1.6.4",
+    "vue": "3.5.45",
+    "vue-tsc": "3.3.14"
+  },
+  "engines": {
+    "node": ">=22.23.4 <23",
+    "npm": ">=11 <12"
+  }
+}

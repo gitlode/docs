@@ -1,0 +1,46 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": ["eslint", "typescript", "unicorn", "import", "promise"],
+  "env": { "node": true, "es2022": true },
+  "categories": {
+    "correctness": "off",
+    "suspicious": "off",
+    "style": "off",
+    "perf": "off",
+    "restriction": "off",
+    "pedantic": "off",
+    "nursery": "off"
+  },
+  "rules": {
+    // Explicit, proportionate subset of gitlode's rules; avoid changing presets on upgrades.
+    "eqeqeq": "error",
+    "no-empty": "error",
+    "no-cond-assign": "error",
+    "no-constant-binary-expression": "error",
+    "no-unreachable": "error",
+    "no-unused-expressions": "error",
+    "no-useless-catch": "error",
+    "no-unsafe-optional-chaining": "error",
+    "no-self-assign": "error",
+    "use-isnan": "error",
+    "valid-typeof": "error",
+    "no-debugger": "error",
+    "no-var": "error",
+    "prefer-const": "error",
+    "no-async-promise-executor": "error",
+    "no-promise-executor-return": "error",
+    "promise/no-multiple-resolved": "error",
+    "no-invalid-regexp": "error",
+    "no-duplicate-imports": ["error", { "allowSeparateTypeImports": true }],
+    "import/no-commonjs": "error",
+    "import/no-dynamic-require": "error",
+    "import/no-absolute-path": "error",
+    "import/no-self-import": "error",
+    "unicorn/prefer-node-protocol": "error",
+    "typescript/consistent-type-imports": "error",
+    "typescript/no-explicit-any": "error",
+    "typescript/no-non-null-assertion": "error"
+    // Operational console output is intentional in this publishing toolchain.
+  },
+  "options": { "reportUnusedDisableDirectives": "error" }
+}

@@ -1,0 +1,11 @@
+{
+  "translations": [
+    {
+      "edition": "next",
+      "locale": "ja",
+      "sourcePath": "packages/gitlode/docs/profiling.md",
+      "sourceSha256": "9faaccb116a7fd5136214404f2dced2dda92aa92c18af86d3bd99a31a55495a3",
+      "translationPath": "translations/ja/next/profiling.md"
+    }
+  ]
+}
