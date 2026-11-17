@@ -1,23 +1,27 @@
-# 0001 — Static site generator selection
+﻿# 0001 — 静的サイトジェネレーターの選定提案
 
-Status: **Proposed evaluation; selection pending human approval.**
+状態：**比較評価中。SSGの選定はオーナーの承認待ち。**
+判断者：プロジェクトオーナー。次の対応：残る比較シナリオの実装と評価。
+選定後は確定した理由と条件をdurableな意思決定記録へ移す。
 
-## Context
+## 背景
 
-Canonical English Markdown remains upstream. The documentation repository must support selective
-publication, navigation/TOC, English/Japanese, stable/next, and GitHub Pages. The same repository
-must survive the comparative PoC. [The evaluation](evaluation.md) now includes English static
-preview evidence. Localization, version assembly, and human usability review remain incomplete.
+英語Markdownの正本はgitlode本体に保持する。ドキュメントプロジェクトは選択的な公開、
+ナビゲーション・目次、英語・日本語、stable／next、GitHub Pagesに対応し、PoC後も継続して利用する。
+[比較結果](evaluation.md)には英語・日本語プレビューの検証とオーナーによる確認を記録している。
+未翻訳注釈の視認性改善、複数バージョン統合、残る操作性確認は未完了である。
 
-## Proposal
+## 現時点の提案
 
-Retain both VitePress and Astro Starlight adapters against the same immutable staging manifest.
-Keep Docusaurus as reference only. Defer a preferred-SSG recommendation until both candidates have
-completed the required comparison scenarios. The final proposal must name a recommendation, show evidence and trade-offs,
-list required custom code, and present known failures before asking the owner to select.
+同じ固定済みの入力に対してVitePressとAstro Starlightの両アダプターを維持する。
+Docusaurusは参考候補に留める。必要な比較シナリオが揃うまで、推奨SSGの確定は保留する。
 
-## Consequences and review gate
+最終提案では推奨候補、判断の根拠、利点と制約、必要な独自コード、既知の問題を提示し、
+オーナーに選定を依頼する。未翻訳注釈は、視認性という共通の達成条件と、その実現・保守負担を
+分けて評価する。標準スタイルの有無だけで選定しない。
 
-Maintain both candidates until human review. Do not remove either, finalize selection, or treat this
-ADR as approval to launch production. After selection, retain the selected implementation here,
-remove comparison-only code/dependencies, and prepare a separate production-readiness review.
+## 選定後の扱い
+
+人による判断までは両候補を保持する。この資料は候補削除や本番公開の承認を意味しない。
+選定後は採用実装を同じリポジトリに残し、比較専用のコード・依存関係を除去する。
+本番移行の準備状況は別途レビューする。

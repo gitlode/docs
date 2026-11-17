@@ -1,51 +1,57 @@
-# Comparative PoC evidence
+﻿# PoC比較結果のまとめ
 
-Status: English comparison previews implemented. Full PoC comparison is still incomplete.
-Observation date: 2026-11-16, Asia/Tokyo.
+状態：英語・日本語の比較プレビューを実装済み。PoC全体の比較とSSG選定は未完了。
+更新日：2026-11-17（日本時間）。判断者：プロジェクトオーナー。
+次の対応：未翻訳注釈の改善、複数バージョン統合、比較結果の更新。
+SSG選定が完了するまで判断材料として保持する。
 
-## Verified inputs
+## 中間評価
 
-| Edition | Requested ref                    | Exact commit                               |
-| ------- | -------------------------------- | ------------------------------------------ |
-| Stable  | `refs/tags/gitlode@0.12.0`       | `76b124e23fcc069be1278629cf01b62ae1456c7a` |
-| Next    | `refs/heads/integration/v0.13.0` | `90512564d76490088ecc99da7596128df1c45a2c` |
+オーナーによるプレビュー確認では、利用者視点の主要な機能に大きな差はない。
+ただし未翻訳注釈はStarlightの標準表示に利点があり、VitePressのプレーンな表示は
+本文との区別・気づきやすさに改善が必要である。詳細は[日本語対応の比較結果](localization.md)を参照。
 
-Both contain all six kickoff corpus paths without substitutions. `config/publication.json`
-is the exact list. The next tree contains telemetry design material absent from stable, confirming
-that the two refs are meaningful distinct source snapshots. No canonical source was modified.
-The design README links to other durable docs and `../handoff/`, so directory landing pages must
-exercise links outside the allowlist. Those targets must not be automatically published.
+装飾の好みの重みは低く保ちつつ、注釈の視認性は機能の達成条件として評価する。
+さらに、その状態を実現・維持するための追加作業を比較する。現時点では候補を選定しない。
 
-## Local evidence
+| 評価項目                | VitePress                              | Starlight                                | 残る確認                           |
+| ----------------------- | -------------------------------------- | ---------------------------------------- | ---------------------------------- |
+| Markdownの再現          | 静的検証に合格                         | 静的検証に合格                           | 網羅的な操作・アクセシビリティ確認 |
+| サイドバー・目次        | 静的検証に合格                         | 静的検証に合格                           | 同上                               |
+| 入力Markdownの安全性    | 共通検証と拡張機能の制限               | 共通検証とplain Markdown                 | 対象拡張時の再確認                 |
+| 日本語・未翻訳ページ    | 言語切り替え、独自フォールバックを検証 | 標準の言語切り替え・フォールバックを検証 | 注釈の視認性を同じ条件で再評価     |
+| 翻訳元の更新検知        | 共通処理のテストに合格                 | 同左                                     | 運用時の翻訳レビュー方針           |
+| stable／nextのPages配置 | nextの英日でネストしたパスを検証       | 同左                                     | 統合成果物とバージョン切り替え     |
+| 検索                    | 未検証                                 | 未検証                                   | 英日クエリーとインデックス範囲     |
+| 構築・保守負担          | 未翻訳表示に独自処理が必要             | 未翻訳表示に標準機能を利用               | 全機能実装後の追加コードと更新負担 |
+| ビルド時間・サイズ      | 測定済み                               | 測定済み                                 | 単発測定のため性能順位は未確定     |
 
-- Node 22.23.4 / npm 11.11.0 on Windows for the preview increment.
-- Locked clean installation (`npm ci --ignore-scripts`) succeeded.
-- `npm run check`: formatting, lint, type checks, and publishing/Markdown/output fixture tests.
-- `npm run source:acquire`: fetched and verified both approved refs/pins.
-- `npm run content:stage`: staged six byte-preserved documents for each edition and emitted provenance.
-- Only selected Markdown enters staging; agent/handoff files are excluded by validation.
-- `npm run previews:build`: both next-English sites and generated output checks pass.
-- [English preview evidence](english-previews.md) records commands, versions, observations, and limitations.
-- Remote CI and clean-clone execution on another machine remain unverified.
+## 確認済みの入力
 
-## Comparison to collect
+| バージョン | 参照元ref                        | 固定コミット                               |
+| ---------- | -------------------------------- | ------------------------------------------ |
+| stable     | `refs/tags/gitlode@0.12.0`       | `76b124e23fcc069be1278629cf01b62ae1456c7a` |
+| next       | `refs/heads/integration/v0.13.0` | `90512564d76490088ecc99da7596128df1c45a2c` |
 
-| Criterion               | VitePress                               | Astro Starlight                         | Required evidence                                                    |
-| ----------------------- | --------------------------------------- | --------------------------------------- | -------------------------------------------------------------------- |
-| Rendering fidelity      | Static checks pass                      | Static checks pass                      | Same source hashes; code-block text and table counts checked         |
-| Navigation/TOC          | Static checks pass                      | Static checks pass                      | Sidebar links, TOC presence, single H1, README routes and fragments  |
-| Markdown safety         | Shared validation + disabled extensions | Shared validation + plain Markdown      | Includes, active HTML, interpolation, unsafe URL and image rejection |
-| Japanese/missing pages  | Not tested                              | Not tested                              | Owned translated page; missing translation; language navigation      |
-| Stable/next Pages paths | Next-English nested base passes         | Next-English nested base passes         | Combined artifact and version navigation still pending               |
-| Local search            | Not tested                              | Not tested                              | English/Japanese sample queries; index scope                         |
-| Maintenance cost        | Small config; base-specific URLs        | Small config; frontmatter/H1 adaptation | Long-term assessment pending; dependency findings recorded           |
-| Build performance/size  | Recorded in build.json                  | Recorded in build.json                  | Single-run supporting evidence, not a benchmark                      |
+両方に`config/publication.json`の6文書が存在し、代替ファイルへの置換はしていない。
+nextにはstableにないtelemetry設計資料があり、異なるスナップショットを取得できている。
+正本は変更していない。designのREADMEから参照する公開対象外の文書やhandoffは、
+リンクが存在しても自動で公開対象へ追加しない。
 
-VitePress explicitly compiles Markdown as Vue components, so untrusted source must be constrained
-before rendering ([official guide](https://vitepress.dev/guide/using-vue)). Its Markdown extensions
-also support file inclusion ([official guide](https://vitepress.dev/guide/markdown)). These are
-implementation constraints, not observed defects in the gitlode corpus.
+## 検証の根拠
 
-The English increment alone does not support final SSG selection. Keep the [decision proposal](ssg-proposal.md)
-open through localization, multi-version assembly, and human usability review. Those scenarios,
-the recommendation, hosted CI verification, and PoC exit approval remain incomplete.
+- Windows、Node 22.23.4／npm 11.11.0で実施。
+- ロックファイルによるインストール、format・lint・型検査・テストに成功。
+- 両refの取得、固定コミットの検証、各6文書のバイト保持と来歴記録に成功。
+- agent／handoff文書を公開対象から除外。
+- 両SSGのnext英日ビルドと出力検証、有限HTTP検証に成功。
+- 英語段階の詳しい技術記録・測定値は[英語プレビューの実装記録](english-previews.md)に保持。
+- 日本語段階の測定・制約・人による確認結果は[日本語対応の比較結果](localization.md)に記載。
+- 別マシンのクリーンクローンとホスト上のCIは未確認。
+
+VitePress向けには、MarkdownのVueコンポーネント化やファイル取り込みを考慮して入力を制限している。
+これは実装上の制約であり、今回のgitlode文書で問題が起きたという意味ではない。
+関連する実装・依存関係の検証記録は英語プレビューの実装記録を参照。
+
+SSGの最終判断には複数バージョン統合、残る操作性確認、保守負担と依存関係の評価が必要である。
+[選定提案](ssg-proposal.md)は未確定のまま保持し、本番移行とPoC終了はオーナーの判断を待つ。

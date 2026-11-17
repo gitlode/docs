@@ -10,7 +10,8 @@ the owner plans to squash merge into `main`. No push or merge has been performed
 The owner approved stable `gitlode@0.12.0` and next `integration/v0.13.0` during kickoff.
 The existing checkout already points to the public `gitlode/docs` repository, so no new repository
 or rename is needed for this increment. GitHub Pages remains the required production host.
-Project documents are English. The original [kickoff contract](kickoff.md) is retained verbatim;
+Durable and LLM-oriented documents are English; owner-facing PoC result summaries are Japanese.
+The original [kickoff contract](kickoff.md) is retained verbatim;
 later owner instructions refine it, including the [documentation lifecycle](../README.md).
 
 Cross-project tooling feedback is tracked under `../proposals/` for separate review. Continue the

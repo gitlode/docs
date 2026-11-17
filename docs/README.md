@@ -1,7 +1,10 @@
 # Documentation guide
 
 This directory documents the documentation system, not the gitlode product. It is not included
-in the product site's publication allowlist. Project documentation is written in English.
+in the product site's publication allowlist. Durable documentation, LLM-oriented working material,
+and code comments are written in English. PoC result summaries primarily reviewed by the human
+owner are written in Japanese (including `poc/evaluation.md` and `poc/localization.md`).
+Choose language by audience, not merely by directory. Preserve historical kickoff material verbatim.
 
 ## Durable documentation
 

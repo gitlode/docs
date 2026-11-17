@@ -32,6 +32,13 @@ The SSG recommendation is not yet ready. Search remains disabled for this increm
 
 ## Pending review
 
+On 2026-11-17 the owner reviewed localized previews: no major end-user difference except the
+missing-translation notice. Starlight's styled notice is distinct from body text; VitePress's
+current plain paragraph can be overlooked. Treat notice discoverability as a functional acceptance
+criterion, with default support and additional implementation/maintenance cost evaluated separately.
+See the Japanese [localization results](../poc/localization.md). Owner-facing PoC result summaries
+must now be Japanese; durable and LLM-oriented documents remain English.
+
 [Environment alignment feedback](../proposals/development-environment.md) is recorded for later
 cross-project review. Keep the current local configuration and continue the PoC without waiting
 for that review. SSG selection and production launch still require their separate human gates.

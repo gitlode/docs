@@ -1,72 +1,87 @@
-# Localization comparison evidence
+﻿# 日本語対応の比較結果
 
-Status: implemented locally on 2026-11-16; human review pending.
-Decision authority: human project owner. Next action: review both locales, then assemble both
-editions with version navigation. Retain this evidence until the SSG decision is recorded.
+状態：2026-11-16に実装・検証済み。2026-11-17にオーナーがプレビューを確認。
+判断者：プロジェクトオーナー。次の工程：注釈の改善と再確認、stable／next統合。
+SSG選定まで判断材料として保持し、確定した契約は設計資料へ移す。
 
-The owner reviewed both English previews and found the important end-user functions equivalent.
-Visual theme differences have low weight in this PoC. This increment compares localization work
-and maintenance without selecting an SSG.
+## 現時点の評価
 
-## Reproduction and scope
+オーナーの確認では、英語・日本語ともに利用者視点の主要な機能に大きな差はない。
+ただし未翻訳注釈は、Starlightではスタイルにより本文と区別できる一方、VitePressでは
+プレーンな段落のため見逃す可能性がある。単なる装飾の好みではなく、未翻訳であることを
+利用者に伝える機能の差として評価する。
 
-Run `npm run previews:build`, then `npm run previews:verify`. For interactive review run
-`npm run preview:vitepress` and `npm run preview:starlight` in separate terminals; stop each with
-Ctrl+C. Existing English URLs still work. Japanese examples:
+評価は二つに分ける。
+
+1. **必要な体験を実現できているか**：本文と区別でき、読み始める前に未翻訳と気づけること。
+   色だけに依存せず明示的な文言も残す。両候補に共通の達成条件を適用する。
+2. **実現・維持の負担**：標準で得られる範囲、追加する設定やコード、テーマ更新時の確認を比較する。
+   同じ見た目に仕上げる必要はない。
+
+現状は「Starlightは標準の注釈表示に利点がある」「VitePressのPoC実装は視認性の改善が必要」と評価する。
+VitePressで実現できないことを示す結果ではなく、この差だけでSSGを決定しない。
+注釈の存在を確認する自動テストだけでは、気づきやすさの合格判定はできない。
+次の改善ではVitePressの注釈を本文から区別し、実装量を記録したうえで同じ条件で再確認する。
+この記録の更新時点ではスタイルの変更は行っていない。
+
+## 比較表
+
+| 観点                       | VitePress                                        | Starlight                              |
+| -------------------------- | ------------------------------------------------ | -------------------------------------- |
+| 同じページでの言語切り替え | 標準の言語ナビゲーション                         | 標準の言語セレクター                   |
+| 未翻訳の日本語URL          | 生成処理で英語ページを作成                       | 英語エントリーから標準機能で生成       |
+| 未翻訳注釈と本文の言語指定 | 小さな独自レンダラーで付与。現状はプレーンな段落 | 標準の注釈スタイルと英語本文の言語指定 |
+| 翻訳元の更新検知           | 共通のファイル単位メタデータと警告               | 同左                                   |
+| サイドバー                 | 生成処理が言語別タイトル・リンクを提供           | コンテンツから標準機能で言語を解決     |
+
+Starlightではフォールバック関連の独自コードを減らせる。一方、翻訳管理、ハッシュ比較、
+安全性の検証、バージョン統合はどちらでも必要となる。VitePressの現在の追加処理は
+カスタムテーマや入力MarkdownのHTML許可を必要としていない。
+
+## 確認方法と対象
+
+`npm run previews:build`、`npm run previews:verify`でビルドと有限HTTP検証を行う。
+目視確認は別々のターミナルで`npm run preview:vitepress`と`npm run preview:starlight`を実行し、
+それぞれCtrl+Cで停止する。既存の英語URLも利用できる。
 
 - `http://127.0.0.1:4173/docs/vitepress/next/ja/profiling/`
 - `http://127.0.0.1:4174/docs/starlight/next/ja/profiling/`
 
-The next Profiling Guide is a complete owned translation example, marked as awaiting human
-language review. Other five Japanese documents intentionally use English fallback. Use `usage/`
-to compare missing-page behavior. All six English pages remain canonical upstream content.
+nextのProfiling Guideは本リポジトリ所有の翻訳例で、人による翻訳校閲前と明記している。
+残り5ページは意図的に未翻訳としている。`usage/`などで英語フォールバックを確認できる。
+英語6ページはgitlode本体を正本とする。
 
-## Observations
+## 検証記録
 
-| Concern                          | VitePress                                          | Starlight                                                 |
-| -------------------------------- | -------------------------------------------------- | --------------------------------------------------------- |
-| Same-page locale switch          | Native locale navigation                           | Native locale selector                                    |
-| Missing Japanese pages           | Pipeline emits English fallback pages              | Native generation from English entries                    |
-| Missing notice and body language | Small trusted Markdown renderer wrapper            | Native localized notice and English main content language |
-| Translation freshness            | Shared file-level metadata and warning             | Same shared metadata and warning                          |
-| Sidebar                          | Pipeline supplies locale-specific titles and links | Native locale resolution from content entries             |
+成功した実行は`.generated/previews/run-QUqiZv`。nextの固定コミットは
+`90512564d76490088ecc99da7596128df1c45a2c`。生成物はローカルのみで、Gitには含めない。
 
-Starlight removes some fallback code from this repository. It does not remove translation ownership,
-source-hash comparison, security validation, or edition assembly. The wrapper in VitePress does not
-enable imported HTML or require a custom theme. Neither result alone establishes an overall winner.
+| 測定項目                                    | VitePress | Starlight |
+| ------------------------------------------- | --------: | --------: |
+| ビルド時間（ms、ローカルのウォーム実行1回） |     4,220 |     4,838 |
+| 出力サイズ（バイト）                        | 2,156,619 | 1,203,515 |
+| HTMLファイル数（404を含む）                 |        16 |        15 |
+| 検証したローカルhref/srcリンク数            |       558 |       963 |
 
-## Local verification
+VitePressには言語選択用のルートページがあり、Starlightは`/en/`または`/ja/`から開始する。
+単発の観測値であり、性能順位を確定するベンチマークではない。
 
-Successful run `.generated/previews/run-QUqiZv` used the pinned next commit
-`90512564d76490088ecc99da7596128df1c45a2c`. Generated artifacts are ignored and machine-local.
+両候補の各12文書ルートについて、リンク・フラグメント、H1、サイドバー・目次、コードと表、
+文書と本文の言語、同一ページへの言語切り替え先、未翻訳注釈を検証した。
+テストは翻訳状態、バージョン分離、不正な宣言、シンボリックリンク、誤った言語表示も確認する。
+HTTP検証は両言語の入口、翻訳済み・未翻訳ページ、英語ページ、404を対象とした。
+確認用ポート52825／52826は終了後にホスト上で解放を確認した。
 
-| Measurement                             | VitePress | Starlight |
-| --------------------------------------- | --------: | --------: |
-| Build milliseconds (one warm local run) |     4,220 |     4,838 |
-| Output bytes                            | 2,156,619 | 1,203,515 |
-| HTML files including 404                |        16 |        15 |
-| Validated local href/src links          |       558 |       963 |
+## 制約と残作業
 
-VitePress has an additional language-choice root page; Starlight starts at `/en/` or `/ja/`.
-These measurements are observations, not a repeatable performance benchmark.
-
-Both builds passed local targets/fragments, single H1, sidebar/TOC, source code blocks and tables,
-document/content language, native same-page switch targets, and fallback-notice assertions for all
-12 document routes per candidate. Tests separately cover current/changed/missing translation states,
-edition isolation, invalid declarations, symlinks, and incorrect localization output.
-Bounded HTTP checks covered both locale homes, a translated page, a fallback page, English content,
-and a 404. Owned ports 52825/52826 were confirmed released in the host after the checks.
-
-## Limits and remaining work
-
-- Browser click/keyboard/mobile verification of this new locale increment remains a human review
-  item; static control targets and HTTP responses were checked, not interactive browser behavior.
-- Language controls do not translate fragment IDs. An English section fragment may not exist
-  after switching to a translated Japanese heading. Locale switching at page level is checked.
-- English fallback body links stay English, while Japanese sidebar navigation stays Japanese.
-- Matching source hashes do not imply translation accuracy or approval. Changed-source warnings
-  have unit coverage; the normal pinned example currently has a matching hash.
-- Starlight still reports optional i18n collection/custom-404 warnings; both fallback and default
-  404 output build successfully. Search remains disabled.
-- Combined stable/next output, stable translation snapshot policy, deployment, hosted CI,
-  dependency findings, and final SSG selection remain pending.
+- オーナーのプレビュー確認は済んでいるが、キーボード・モバイル・アクセシビリティの網羅的な
+  検証完了を意味しない。注釈の視認性は改善後に再確認する。
+- 言語切り替えでは見出しのフラグメントIDを翻訳しないため、日本語の見出しに切り替えた際に
+  元の節の位置を引き継げない場合がある。ページ単位の切り替え先は検証済み。
+- 英語フォールバックの本文リンクは英語へ、日本語サイドバーは日本語へ移動する。
+- ハッシュ一致は翻訳品質や承認を意味しない。更新警告はユニットテストで検証しているが、
+  通常の固定サンプルはハッシュが一致した状態である。
+- Starlightの任意のi18nコレクション・独自404に関する警告は残る。フォールバックと標準404は
+  ビルドできている。検索は無効のまま。
+- stable／next統合、stable翻訳スナップショット方針、デプロイ、ホスト上のCI、依存関係の指摘への対応、
+  最終的なSSG選定は未完了。

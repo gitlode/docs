@@ -4,7 +4,8 @@ Read [the documentation guide](docs/README.md), [the project plan](docs/poc/plan
 [development workflow](docs/contributing/development.md) before changing implementation.
 The owner's kickoff contract is preserved in [docs/poc/kickoff.md](docs/poc/kickoff.md).
 
-- Write project documentation and code comments in English.
+- Write durable documentation, LLM-oriented documents, and code comments in English.
+  Write PoC result summaries primarily reviewed by the human owner in Japanese.
 - Keep canonical English documentation upstream; transform only generated copies.
 - Never expand publication by following links automatically. Keep publication and navigation separate.
 - Treat imported Markdown as untrusted input. Do not execute upstream code or enable executable MDX.

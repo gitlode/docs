@@ -1,5 +1,9 @@
 # English comparison previews
 
+Historical engineering evidence for the English-only increment; retained in English for maintenance.
+The current owner-facing comparison is summarized in Japanese in [evaluation](evaluation.md),
+including subsequent localization results and owner observations.
+
 Status: implemented comparison increment; not a production-readiness or SSG-selection decision.
 Observed: 2026-11-16, Asia/Tokyo. Maintainer: documentation project. Review authority: human owner.
 Keep this evidence through SSG review; migrate accepted contracts into architecture docs afterwards.
