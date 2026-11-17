@@ -1,6 +1,6 @@
-# Current PoC handoff
+﻿# Current PoC handoff
 
-Status: active continuation note, updated 2026-11-16.
+Status: active continuation note, updated 2026-11-17.
 Maintainer: the next human or LLM working on the PoC. Decision authority: human project owner.
 Replace or retire this note when the next increment is handed off; migrate lasting facts to durable docs.
 
@@ -51,7 +51,7 @@ full interactive/mobile browser validation remain unverified.
 
 No upstream modifications or remote publication are implied by this handoff.
 
-The VitePress notice now uses the default theme custom-block warning classes before the H1, with a Japanese title, explanation and role=note. No custom CSS or dependency was added. Checks/builds pass; headless Edge produced no screenshot, so visual re-review remains pending.
+The VitePress notice now uses the default theme custom-block warning classes before the H1, with a Japanese title, explanation and role=note. No custom CSS or dependency was added. Checks/builds pass; headless Edge produced no screenshot, the owner subsequently reviewed the preview and accepted notice parity.
 
 Owner accepted notice parity after re-review. A separate investigation confirmed Profiling Guide's
 three body references (telemetry once, CLI twice) resolve to pinned GitHub URLs in both candidates
@@ -60,3 +60,5 @@ externalizes unselected existing files. The owner expects documentation referenc
 the site. This expectation is not yet enforced by validation. See the Japanese localization evidence
 for findings and proposed explicit-publication/link-policy follow-up; no publication expansion or
 link implementation change was made during the investigation.
+
+Owner decision (2026-11-17): links to documents outside the PoC publication scope may remain external GitHub links. Do not fix or expand publication for this issue during the PoC; it is an accepted limitation, not a blocker. Production must address internal documentation references before launch. Track publication scope and internal-link validation in the production-readiness review, owned by the documentation project; distinguish intentionally external source-code/excluded-material links.
