@@ -1,4 +1,4 @@
-# Implementation plan
+﻿# Implementation plan
 
 Status: Combined-edition increment implemented locally; comparative PoC remains in progress.
 Owner: human project owner. Implementation: Codex working in `gitlode/docs` on `work/initial-poc`.
@@ -35,8 +35,8 @@ Do not create empty candidate directories or claim previews before the rendering
 
 ## Next implementation tasks
 
-1. Compare native local search cheaply on the English/Japanese corpus; record limitations rather
-   than building advanced search. Search quality is not a release gate.
+1. Native search comparison is owner-reviewed: both sufficient, VitePress more feature-rich, but
+   not decisive for selection. Retain query limitations; do not add search customization.
 2. Verify clean-clone reproducibility and hosted CI without deployment privileges.
 3. Consolidate maintenance costs, dependency findings, warnings, and accepted limitations.
 4. Complete the Japanese comparison report and recommendation for human SSG selection.

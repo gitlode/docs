@@ -74,3 +74,5 @@ Owner changed version-switch requirements: always open the other edition's local
 preserve document identity. Controls belong with language navigation in the header (Starlight also
 inherits its mobile preferences placement). This is sufficient by design; no cross-version page
 mapping is wanted. Language switching still retains the current document.
+
+Owner search review: both candidates are sufficient; VitePress is judged more feature-rich in browser use. Search is not a key selection factor and this compares defaults only, so the difference is not decisive. Customization could change the comparison but this is unverified. Keep narrow Japanese query observations separate from this overall usability judgment. Next: clean-clone/hosted-CI verification and maintenance evaluation, not additional search customization.
