@@ -43,8 +43,9 @@ only built static files on loopback; it does not run either SSG's development se
 Use the language selector to switch the current page. Japanese `profiling/` is translated;
 `usage/` and the other four documents intentionally demonstrate English fallback.
 Rebuild after changes. Ports are fixed; stop an existing preview before starting another on that port.
-The page-top version links preserve the current locale and document, and reload the target edition.
-Fragments are intentionally dropped because headings can differ. Stable has no owned translations
+The header version links preserve the current locale and open the target edition home with a full
+reload. They do not retain the current document or fragment. Starlight uses its language selector
+area in the mobile preferences menu on narrow screens. Stable has no owned translations
 in this corpus and uses English fallback; next Profiling Guide has the Japanese example.
 `npm run previews:build -- stable` or `-- next` remains available for a single-edition diagnostic
 build without version controls. Run the default build again to restore the combined preview.

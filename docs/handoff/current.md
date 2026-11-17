@@ -65,7 +65,12 @@ link implementation change was made during the investigation.
 Owner decision (2026-11-17): links to documents outside the PoC publication scope may remain external GitHub links. Do not fix or expand publication for this issue during the PoC; it is an accepted limitation, not a blocker. Production must address internal documentation references before launch. Track publication scope and internal-link validation in the production-readiness review, owned by the documentation project; distinguish intentionally external source-code/excluded-material links.
 
 Default previews:build now builds both editions and both candidates into combined-*/dist mounted
-at /docs/. The same preview commands/URLs work; version links are above page content and force full
+at /docs/. The same preview commands/URLs work; version links are in the header, target the locale home, and force full
 reload. Upstream staging is shared; stable Japanese pages intentionally all fall back to English.
 Owner declared untranslated-document comparison complete. Do not reopen it or the accepted
 out-of-scope external-link limitation. See docs/poc/versions.md for Japanese review evidence.
+
+Owner changed version-switch requirements: always open the other edition's locale home; do not
+preserve document identity. Controls belong with language navigation in the header (Starlight also
+inherits its mobile preferences placement). This is sufficient by design; no cross-version page
+mapping is wanted. Language switching still retains the current document.

@@ -5,8 +5,7 @@ import { computed } from "vue";
 import site from "../../site.json";
 
 const { page } = useData();
-const relative = computed(() => page.value.relativePath.replace(/index\.md$/, ""));
-const locale = computed(() => relative.value.split("/")[0]);
+const locale = computed(() => page.value.relativePath.split("/")[0]);
 const editions = ["stable", "next"];
 const candidateBase = site.base.replace(/(?:stable|next)\/$/, "");
 const label = computed(() => (locale.value === "ja" ? "バージョン" : "Version"));
@@ -24,7 +23,7 @@ const label = computed(() => (locale.value === "ja" ? "バージョン" : "Versi
     <template v-for="edition in editions" :key="edition">
       <strong v-if="edition === site.edition" aria-current="page">{{ edition }}</strong>
       <!-- target=_self bypasses VitePress's SPA router for separately built editions. -->
-      <a v-else :href="`${candidateBase}${edition}/${relative}`" target="_self">{{ edition }}</a>
+      <a v-else :href="`${candidateBase}${edition}/${locale}/`" target="_self">{{ edition }}</a>
     </template>
   </nav>
 </template>
@@ -32,10 +31,10 @@ const label = computed(() => (locale.value === "ja" ? "バージョン" : "Versi
 <style scoped>
 .version-switch {
   display: flex;
-  flex-wrap: wrap;
+  white-space: nowrap;
   gap: 0.75rem;
   align-items: baseline;
-  margin-bottom: 1.5rem;
+  margin-inline: 0.75rem;
   font-size: 0.875rem;
 }
 a {

@@ -18,22 +18,25 @@ export function validateVersionNavigation(
   route: string,
 ): VersionNavigationStatistics {
   const other = edition === "stable" ? "next" : "stable";
-  const target = `/docs/${candidate}/${other}/${locale}/${route}`;
+  const target = `/docs/${candidate}/${other}/${locale}/`;
   let controls = 0;
   let validControls = 0;
+  let headerControls = 0;
 
   function text(node: DefaultTreeAdapterMap["node"]): string {
     if ("value" in node) return node.value;
     if ("tagName" in node && ["script", "style", "template"].includes(node.tagName)) return "";
     return "childNodes" in node ? node.childNodes.map(text).join("") : "";
   }
-  function inspect(node: DefaultTreeAdapterMap["node"]): void {
+  function inspect(node: DefaultTreeAdapterMap["node"], inHeader = false): void {
+    if ("tagName" in node && node.tagName === "header") inHeader = true;
     if (
       "tagName" in node &&
       node.tagName === "nav" &&
       node.attrs.some((a) => a.name === "data-version-navigation")
     ) {
       controls++;
+      if (inHeader) headerControls++;
       let current = false;
       let counterpart = false;
       function inspectControl(child: DefaultTreeAdapterMap["node"]): void {
@@ -54,10 +57,10 @@ export function validateVersionNavigation(
       inspectControl(node);
       if (current && counterpart) validControls++;
     }
-    if ("childNodes" in node) for (const child of node.childNodes) inspect(child);
+    if ("childNodes" in node) for (const child of node.childNodes) inspect(child, inHeader);
   }
   inspect(parse(html));
-  if (controls === 0 || validControls !== controls)
+  if (headerControls === 0 || validControls !== controls)
     throw new Error(
       `${candidate}: ${edition}/${locale}/${route}: invalid version navigation to ${target}`,
     );

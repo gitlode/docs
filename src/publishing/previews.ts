@@ -219,8 +219,8 @@ export function preparePreviews(
       safeDirectory(siteRoot, "public");
       safeDirectory(siteRoot, "components");
       copyFileSync(
-        join(root, "candidates/starlight/VersionedPageTitle.astro"),
-        join(siteRoot, "components/VersionedPageTitle.astro"),
+        join(root, "candidates/starlight/VersionedLanguageSelect.astro"),
+        join(siteRoot, "components/VersionedLanguageSelect.astro"),
       );
       copyFileSync(join(root, "candidates/favicon.svg"), join(siteRoot, "public/favicon.svg"));
       copyFileSync(

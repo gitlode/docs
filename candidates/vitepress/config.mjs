@@ -51,7 +51,7 @@ export default defineConfig({
               link: `/${locale}/${page.route}`,
             })),
           })),
-          nav: [{ text: site.edition, link: `/${locale}/` }],
+          nav: site.combined ? [] : [{ text: site.edition, link: `/${locale}/` }],
         },
       },
     ]),

@@ -111,12 +111,14 @@ to an existing Pages deployment), then deploy through a trusted job with scoped 
 
 ## Version navigation
 
-VitePress extends the default theme's doc-before slot with a small Vue control. Starlight wraps
-PageTitle with an Astro control. Both show the current edition and link to the same locale/document
-in the other edition. Full-page navigation avoids carrying a separately built site's client state
-across editions. Section fragments are dropped rather than assumed compatible. Current publication
-requires all six documents in both editions; handling pages absent in another edition remains future
-scope. Combined output validation checks all 56 document/locale-home controls and their targets.
+VitePress extends the default theme's nav-bar-content-before slot with a small Vue control.
+Starlight wraps LanguageSelect with an Astro control, placing it beside the language selector in
+both the desktop header and the theme's mobile preferences menu. Both show the current edition
+and link to the other edition's home in the current locale, regardless of the current document.
+Full-page navigation avoids carrying separately built client state across editions. No document
+mapping or fragment preservation is needed. This simple switch is the owner's required behavior,
+not a compromise for missing features. Combined validation checks locale-home targets and header
+placement across all 56 document/locale-home pages.
 
 The owner accepted external GitHub links for documents outside the six-document PoC scope.
 Production must address internal documentation references before launch, without automatically
