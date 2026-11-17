@@ -52,3 +52,11 @@ full interactive/mobile browser validation remain unverified.
 No upstream modifications or remote publication are implied by this handoff.
 
 The VitePress notice now uses the default theme custom-block warning classes before the H1, with a Japanese title, explanation and role=note. No custom CSS or dependency was added. Checks/builds pass; headless Edge produced no screenshot, so visual re-review remains pending.
+
+Owner accepted notice parity after re-review. A separate investigation confirmed Profiling Guide's
+three body references (telemetry once, CLI twice) resolve to pinned GitHub URLs in both candidates
+and locales because the two target files are outside publication.json. rewriteLink deliberately
+externalizes unselected existing files. The owner expects documentation references to stay inside
+the site. This expectation is not yet enforced by validation. See the Japanese localization evidence
+for findings and proposed explicit-publication/link-policy follow-up; no publication expansion or
+link implementation change was made during the investigation.
