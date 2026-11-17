@@ -24,8 +24,9 @@ edition). Inspect that manifest to identify exact inputs. Do not mistake staged 
 ## Comparison previews
 
 `npm run previews:prepare` creates trusted candidate inputs from a single staging run. The default
-edition is `next`. `npm run previews:build` prepares, builds, and validates both candidates, then
-prints a unique `.generated/previews/run-*/` directory. `inputs.json` records identical source
+edition for preparation is `next`. `npm run previews:build` defaults to both editions and candidates,
+then prints a unique `.generated/previews/combined-*/dist` complete artifact mounted at `/docs/`.
+Four builds share one upstream staging manifest. Each edition retains its own build report. `inputs.json` records identical source
 hashes for both candidates; `build.json` adds output checks and measurements. A failed build does
 not replace the `.generated/preview.json` pointer to the last successful build.
 
@@ -42,8 +43,14 @@ only built static files on loopback; it does not run either SSG's development se
 Use the language selector to switch the current page. Japanese `profiling/` is translated;
 `usage/` and the other four documents intentionally demonstrate English fallback.
 Rebuild after changes. Ports are fixed; stop an existing preview before starting another on that port.
-`npm run previews:build -- stable` selects stable explicitly, but historical-source defects may
-fail validation. It does not assemble a combined deployment or supply version switching.
+The page-top version links preserve the current locale and document, and reload the target edition.
+Fragments are intentionally dropped because headings can differ. Stable has no owned translations
+in this corpus and uses English fallback; next Profiling Guide has the Japanese example.
+`npm run previews:build -- stable` or `-- next` remains available for a single-edition diagnostic
+build without version controls. Run the default build again to restore the combined preview.
+The complete artifact includes both candidates, both editions, both locales, a comparison landing,
+404 and `.nojekyll`. It is a Pages-path simulation; nothing is deployed. Preview commands still
+use ports 4173/4174 and existing URLs, but both serve the complete artifact in combined mode.
 
 The Starlight adapter uses Astro's unified processor explicitly. Imported files remain plain `.md`;
 Starlight's transitive MDX dependency does not grant permission to import `.mdx`. SSG configuration
@@ -138,7 +145,7 @@ symlink blobs, output path containment, Markdown safety, route/link rewriting, a
 validation failures. Generated test fixtures remain ignored for diagnosis.
 
 `.github/workflows/docs.yml` performs these checks plus real upstream acquisition/staging on PRs,
-main pushes, and manual runs, followed by both next English/Japanese builds and output validation. Hosted
+main pushes, and manual runs, followed by all four edition/candidate builds and combined English/Japanese validation and output validation. Hosted
 execution has not yet been observed. See [preview evidence](../poc/english-previews.md) for local
 checks and the remaining browser, localization, and deployment acceptance work.
 

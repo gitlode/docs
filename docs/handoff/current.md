@@ -27,7 +27,8 @@ for all verification processes. A previous shell/tool exit left a Node child hol
 preview ports; do not treat wrapper completion as evidence of child termination.
 
 Localization is implemented: see [evidence](../poc/localization.md).
-Next action: combined stable/next artifact assembly and version navigation. Keep both candidates and the existing human decision gate.
+Combined stable/next artifact assembly and version navigation are implemented locally.
+Next action: owner review of version navigation, then remaining PoC evaluation (including search). Keep both candidates and the existing human decision gate.
 The SSG recommendation is not yet ready. Search remains disabled for this increment.
 
 ## Pending review
@@ -62,3 +63,9 @@ for findings and proposed explicit-publication/link-policy follow-up; no publica
 link implementation change was made during the investigation.
 
 Owner decision (2026-11-17): links to documents outside the PoC publication scope may remain external GitHub links. Do not fix or expand publication for this issue during the PoC; it is an accepted limitation, not a blocker. Production must address internal documentation references before launch. Track publication scope and internal-link validation in the production-readiness review, owned by the documentation project; distinguish intentionally external source-code/excluded-material links.
+
+Default previews:build now builds both editions and both candidates into combined-*/dist mounted
+at /docs/. The same preview commands/URLs work; version links are above page content and force full
+reload. Upstream staging is shared; stable Japanese pages intentionally all fall back to English.
+Owner declared untranslated-document comparison complete. Do not reopen it or the accepted
+out-of-scope external-link limitation. See docs/poc/versions.md for Japanese review evidence.

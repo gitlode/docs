@@ -2,6 +2,7 @@ import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import {
   copyFileSync,
+  cpSync,
   existsSync,
   lstatSync,
   mkdtempSync,
@@ -19,6 +20,7 @@ import { startPreview, withPreviews } from "./preview-server.ts";
 import { loadTranslation } from "./translations.ts";
 import { validateLocalization } from "./validate-localization.ts";
 import { validateOutput, validateRendering } from "./validate-output.ts";
+import { validateVersionNavigation } from "./validate-version.ts";
 
 const root = resolve(import.meta.dirname, "../..");
 type Candidate = "vitepress" | "starlight";
@@ -62,13 +64,18 @@ function sourceTree(commit: string): SourceTree {
   return tree;
 }
 
-export function preparePreviews(editionName = "next") {
+export function preparePreviews(
+  editionName = "next",
+  options: { staging?: string; combined?: boolean } = {},
+) {
   if (!["stable", "next"].includes(editionName)) throw new Error("Edition must be stable or next.");
-  const staging = stage(
-    root,
-    json<Sources>(join(root, "config/sources.json")),
-    json<Publication>(join(root, "config/publication.json")),
-  );
+  const staging =
+    options.staging ??
+    stage(
+      root,
+      json<Sources>(join(root, "config/sources.json")),
+      json<Publication>(join(root, "config/publication.json")),
+    );
   const manifest = json<Manifest>(join(staging, "manifest.json"));
   const edition = manifest.editions.find((e) => e.name === editionName);
   if (!edition) throw new Error("Missing edition in staging manifest.");
@@ -151,7 +158,11 @@ export function preparePreviews(editionName = "next") {
     write(
       siteRoot,
       "site.json",
-      JSON.stringify({ edition: editionName, base, navigation: groups }, null, 2),
+      JSON.stringify(
+        { edition: editionName, base, navigation: groups, combined: options.combined ?? false },
+        null,
+        2,
+      ),
     );
     for (const page of pages) {
       // Leave absent Japanese entries to Starlight's native fallback.
@@ -197,12 +208,20 @@ export function preparePreviews(editionName = "next") {
       write(siteRoot, "content/index.md", "# gitlode\n\n[English](/en/) · [日本語](/ja/)\n");
     if (candidate === "vitepress") {
       safeDirectory(siteRoot, ".vitepress");
+      cpSync(join(root, "candidates/vitepress/theme"), join(siteRoot, ".vitepress/theme"), {
+        recursive: true,
+      });
       copyFileSync(
         join(root, "candidates/vitepress/config.mjs"),
         join(siteRoot, ".vitepress/config.mjs"),
       );
     } else {
       safeDirectory(siteRoot, "public");
+      safeDirectory(siteRoot, "components");
+      copyFileSync(
+        join(root, "candidates/starlight/VersionedPageTitle.astro"),
+        join(siteRoot, "components/VersionedPageTitle.astro"),
+      );
       copyFileSync(join(root, "candidates/favicon.svg"), join(siteRoot, "public/favicon.svg"));
       copyFileSync(
         join(root, "candidates/starlight/astro.config.mjs"),
@@ -232,8 +251,8 @@ function cli(candidate: Candidate) {
   );
 }
 
-export function buildPreviews(edition = "next") {
-  const { output, report } = preparePreviews(edition);
+function buildEdition(edition: string, options: { staging?: string; combined?: boolean } = {}) {
+  const { output, report } = preparePreviews(edition, options);
   const measurements: Record<string, number> = {};
   const validation: Record<string, ReturnType<typeof validateOutput>> = {};
   const localization: Record<string, ReturnType<typeof validateLocalization>[]> = {};
@@ -247,12 +266,13 @@ export function buildPreviews(edition = "next") {
       { cwd: root, stdio: "inherit", env: { ...process.env, ASTRO_TELEMETRY_DISABLED: "1" } },
     );
     measurements[candidate] = Math.round(performance.now() - started);
-    validation[candidate] = validateOutput(
-      join(siteRoot, "dist"),
-      report.candidates[candidate].base,
-      ["en/", "ja/", ...report.candidates[candidate].pages.map((p) => p.route)],
-      candidate === "vitepress",
-    );
+    if (!options.combined)
+      validation[candidate] = validateOutput(
+        join(siteRoot, "dist"),
+        report.candidates[candidate].base,
+        ["en/", "ja/", ...report.candidates[candidate].pages.map((p) => p.route)],
+        candidate === "vitepress",
+      );
     const site = json<{ navigation: { pages: { route: string }[] }[] }>(
       join(siteRoot, "site.json"),
     );
@@ -288,11 +308,118 @@ export function buildPreviews(edition = "next") {
       2,
     ),
   );
+  return { output, report };
+}
+
+function selectPreview(output: string) {
   const latest = join(root, ".generated/preview.json");
   if (existsSync(latest) && lstatSync(latest).isSymbolicLink())
     throw new Error("Unsafe preview pointer.");
   writeFileSync(latest, JSON.stringify({ output }, null, 2));
-  console.log(`Built both candidates: ${output}`);
+}
+
+export function buildPreviews(edition = "all") {
+  if (edition !== "all") {
+    const { output } = buildEdition(edition);
+    selectPreview(output);
+    console.log(`Built both candidates: ${output}`);
+    return output;
+  }
+  const staging = stage(
+    root,
+    json<Sources>(join(root, "config/sources.json")),
+    json<Publication>(join(root, "config/publication.json")),
+  );
+  const output = mkdtempSync(join(safeDirectory(root, ".generated/previews"), "combined-"));
+  const dist = safeDirectory(output, "dist");
+  const editions = (["stable", "next"] as const).map((name) =>
+    buildEdition(name, { staging, combined: true }),
+  );
+  const expected: string[] = [];
+  const versionNavigation: ReturnType<typeof validateVersionNavigation>[] = [];
+  for (const { report } of editions) {
+    if (report.edition !== "stable" && report.edition !== "next")
+      throw new Error("Invalid built edition.");
+    for (const candidate of ["vitepress", "starlight"] as const) {
+      const site = report.candidates[candidate];
+      const prefix = `${candidate}/${report.edition}/`;
+      cpSync(join(site.root, "dist"), join(dist, prefix), {
+        recursive: true,
+        errorOnExist: true,
+        force: false,
+      });
+      expected.push(
+        ...["en/", "ja/", ...site.pages.map((page) => page.route)].map((route) => prefix + route),
+      );
+      for (const locale of ["en", "ja"] as const) {
+        const routes = [
+          "",
+          ...site.pages.filter((page) => page.locale === locale).map((page) => page.route.slice(3)),
+        ];
+        for (const route of routes) {
+          versionNavigation.push(
+            validateVersionNavigation(
+              readFileSync(join(dist, prefix, locale, route, "index.html"), "utf8"),
+              candidate,
+              report.edition,
+              locale,
+              route,
+            ),
+          );
+        }
+      }
+    }
+  }
+  write(
+    dist,
+    "index.html",
+    '<!doctype html><html lang="en"><meta charset="utf-8"><title>gitlode documentation comparison</title><h1>gitlode documentation comparison</h1>' +
+      ["vitepress", "starlight"]
+        .flatMap((candidate) =>
+          ["stable", "next"].flatMap((name) =>
+            ["en", "ja"].map(
+              (locale) =>
+                `<p><a href="/docs/${candidate}/${name}/${locale}/">${candidate} / ${name} / ${locale}</a></p>`,
+            ),
+          ),
+        )
+        .join("") +
+      "</html>",
+  );
+  write(
+    dist,
+    "404.html",
+    '<!doctype html><html lang="en"><meta charset="utf-8"><title>Not found</title><h1>Not found</h1><a href="/docs/">Documentation comparison</a></html>',
+  );
+  write(dist, ".nojekyll", "");
+  const validation = validateOutput(dist, "/docs/", expected);
+  const candidates = Object.fromEntries(
+    ["vitepress", "starlight"].map((candidate) => [
+      candidate,
+      { root: output, base: "/docs/", entry: `${candidate}/next/en/` },
+    ]),
+  );
+  write(
+    output,
+    "build.json",
+    JSON.stringify(
+      {
+        edition: "all",
+        staging,
+        candidates,
+        editions: editions.map(({ output: editionOutput, report }) => ({
+          output: editionOutput,
+          ...report,
+        })),
+        validation,
+        versionNavigation,
+      },
+      null,
+      2,
+    ),
+  );
+  selectPreview(output);
+  console.log(`Built complete comparison artifact: ${dist}`);
   return output;
 }
 
@@ -300,9 +427,14 @@ function previewConfiguration(candidate: string, port?: number) {
   if (candidate !== "vitepress" && candidate !== "starlight")
     throw new Error("Unknown preview candidate.");
   const { output } = json<{ output: string }>(join(root, ".generated/preview.json"));
-  const report = json<ReturnType<typeof preparePreviews>["report"]>(join(output, "build.json"));
+  const report = json<{
+    edition: string;
+    candidates: Record<Candidate, { root: string; base: string; entry?: string }>;
+  }>(join(output, "build.json"));
   return {
     directory: join(report.candidates[candidate].root, "dist"),
+    entry: report.candidates[candidate].entry ?? "en/",
+    prefixes: report.edition === "all" ? [`${candidate}/stable/`, `${candidate}/next/`] : [""],
     base: report.candidates[candidate].base,
     port: port ?? (candidate === "vitepress" ? 4173 : 4174),
   };
@@ -311,16 +443,16 @@ function previewConfiguration(candidate: string, port?: number) {
 export async function preview(candidate: string) {
   const config = previewConfiguration(candidate);
   const server = await startPreview(config.directory, config.base, config.port);
-  console.log("Preview: " + server.url + "en/");
+  console.log("Preview: " + server.url + config.entry);
   return server;
 }
 
 export async function verifyPreviews() {
   // Ephemeral ports avoid interfering with a developer's interactive previews.
-  await withPreviews(
-    [previewConfiguration("vitepress", 0), previewConfiguration("starlight", 0)],
-    async (previews) => {
-      for (const preview of previews) {
+  const configs = [previewConfiguration("vitepress", 0), previewConfiguration("starlight", 0)];
+  await withPreviews(configs, async (previews) => {
+    for (const [index, preview] of previews.entries()) {
+      for (const prefix of configs[index].prefixes) {
         for (const [path, expected] of [
           ["en/", 200],
           ["ja/", 200],
@@ -329,16 +461,18 @@ export async function verifyPreviews() {
           ["en/design/plugins/", 200],
           ["not-found/", 404],
         ] as const) {
-          const response = await fetch(preview.url + path, { signal: AbortSignal.timeout(5000) });
+          const response = await fetch(preview.url + prefix + path, {
+            signal: AbortSignal.timeout(5000),
+          });
           await response.arrayBuffer();
           if (response.status !== expected)
             throw new Error(
-              "Unexpected HTTP status: " + response.status + " for " + preview.url + path,
+              "Unexpected HTTP status: " + response.status + " for " + preview.url + prefix + path,
             );
         }
-        console.log("Verified: " + preview.url);
       }
-    },
-  );
+      console.log("Verified: " + preview.url);
+    }
+  });
   console.log("Verification complete; all owned preview listeners and connections closed.");
 }

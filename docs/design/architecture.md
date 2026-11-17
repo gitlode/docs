@@ -8,8 +8,7 @@ Its own `docs/` directory is never automatically published as product documentat
 
 Current flow: `config/sources.json` -> Git object acquisition -> explicit allowlist -> byte-preserving
 staging/provenance -> shared Markdown preparation -> candidate adapters -> English/Japanese static builds
-and output validation. Complete stable/next artifact assembly and the human SSG
-decision remain subsequent milestones.
+and output validation. Stable/next artifact assembly is implemented locally; the human SSG decision and deployment remain pending.
 
 ## Acquisition and pins
 
@@ -66,8 +65,13 @@ Starlight receives paths including its base. External HTTP(S) links are not fetc
 
 `previews.ts` owns candidate staging and build orchestration. Each run copies trusted configurations
 from `candidates/` into unique generated roots and emits matching source hashes in `inputs.json`.
-The next sites use `/docs/<candidate>/next/{en,ja}/`; this is a nested-path simulation, not
-a combined Pages deployment. `build.json` records validation and timings. Only successful runs
+Sites use `/docs/<candidate>/{stable,next}/{en,ja}/`. The default build assembles all four
+edition/candidate builds into a fresh `combined-*/dist` artifact using one upstream staging manifest.
+Only static dist files enter it; source snapshots and provenance reports remain outside deployment.
+Combined href/src and fragment validation runs after assembly, so version links can resolve across
+builds. No existing deployment or previous artifact is appended to. Local translations/configs
+should not be edited during a build; their generated snapshots record the actual render input.
+This is a local Pages-path simulation, not an executed deployment. `build.json` records validation and timings. Only successful runs
 update the local preview pointer. The loopback preview server exposes static output, without SSG
 development middleware. See the [development workflow](../contributing/development.md).
 
@@ -101,6 +105,19 @@ See [localization evidence](../poc/localization.md) for current limitations.
 ## CI and future publishing
 
 PR CI has only `contents: read`, installs locked dependencies, checks types/tests, acquires public
-source, stages both editions, then builds and validates both next candidates in English and Japanese. It does not
+source, stages both editions, then builds and validates both candidates and editions in English and Japanese. It does not
 deploy. Production must assemble one complete artifact (never append a version
 to an existing Pages deployment), then deploy through a trusted job with scoped Pages/OIDC rights.
+
+## Version navigation
+
+VitePress extends the default theme's doc-before slot with a small Vue control. Starlight wraps
+PageTitle with an Astro control. Both show the current edition and link to the same locale/document
+in the other edition. Full-page navigation avoids carrying a separately built site's client state
+across editions. Section fragments are dropped rather than assumed compatible. Current publication
+requires all six documents in both editions; handling pages absent in another edition remains future
+scope. Combined output validation checks all 56 document/locale-home controls and their targets.
+
+The owner accepted external GitHub links for documents outside the six-document PoC scope.
+Production must address internal documentation references before launch, without automatically
+publishing arbitrary linked files. See the PoC evaluation for the deferred acceptance item.
