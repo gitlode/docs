@@ -28,7 +28,7 @@ export default defineConfig({
       expressiveCode: {
         frames: { extractFileNameFromCode: false, removeCommentsWhenCopyingTerminalFrames: false },
       },
-      pagefind: false,
+      pagefind: true,
     }),
   ],
 });

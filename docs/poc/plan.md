@@ -26,7 +26,7 @@ PoC using documented local choices without waiting for commonization approval. S
 | 2. Acquire and stage     | Pin both refs; select six real documents; preserve bytes and provenance; reject unsafe paths/symlinks                 | Implemented and locally tested            |
 | 3. Comparable previews   | Add VitePress and Starlight under `candidates/`; same staged input; titles, README routing, sidebar, TOC, code fences | Implemented; see English preview evidence |
 | 4. Localization          | Owned Japanese example, missing-page behavior, native/custom fallback comparison, file-level freshness tests          | Owner accepted; comparison complete       |
-| 5. Pages simulation      | Both editions/locales under nested `/docs/` paths; complete artifact; links/assets validation; PR build               | Implemented locally; human review pending |
+| 5. Pages simulation      | Both editions/locales under nested `/docs/` paths; complete artifact; links/assets validation; PR build               | Implemented; owner accepted version UX    |
 | 6. Evidence and proposal | Timings, sizes, warnings, screenshots/manual review, reproducible comparison, proposed recommendation                 | Pending                                   |
 | 7. Human selection gate  | Owner reviews both previews and approves an SSG; only then remove a candidate                                         | Human decision pending                    |
 
@@ -35,12 +35,13 @@ Do not create empty candidate directories or claim previews before the rendering
 
 ## Next implementation tasks
 
-1. Review the [English previews and limitations](english-previews.md) before extending the corpus.
-2. Review [localization evidence](localization.md) and the owned Japanese example in both candidates.
-3. Keep stable/next translation ownership explicit; file-level metadata tests now pass.
-4. Exercise both source editions in one complete Pages-style artifact, including version links.
-5. Address remaining dependency findings and add imported asset support only with explicit selection
-   and validation. Do not expand publication merely to hide link errors.
+1. Compare native local search cheaply on the English/Japanese corpus; record limitations rather
+   than building advanced search. Search quality is not a release gate.
+2. Verify clean-clone reproducibility and hosted CI without deployment privileges.
+3. Consolidate maintenance costs, dependency findings, warnings, and accepted limitations.
+4. Complete the Japanese comparison report and recommendation for human SSG selection.
+5. Keep explicit asset selection, production publication scope, and translation snapshot policy
+   visible as follow-up; do not expand publication merely to hide link errors.
 
 ## Owner review points
 

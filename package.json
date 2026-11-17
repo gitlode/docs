@@ -23,6 +23,7 @@
     "previews:prepare": "node --experimental-strip-types src/publishing/preview-cli.ts prepare",
     "previews:build": "node --experimental-strip-types src/publishing/preview-cli.ts build",
     "previews:verify": "node --experimental-strip-types src/publishing/preview-cli.ts verify",
+    "search:verify": "node --experimental-strip-types src/publishing/search-probe.ts",
     "preview:vitepress": "node --experimental-strip-types src/publishing/preview-cli.ts preview vitepress",
     "preview:starlight": "node --experimental-strip-types src/publishing/preview-cli.ts preview starlight"
   },
@@ -33,6 +34,7 @@
     "@types/node": "22.20.5",
     "astro": "7.4.12",
     "mdast-util-to-string": "4.0.0",
+    "minisearch": "7.2.0",
     "oxfmt": "0.78.0",
     "oxlint": "1.77.0",
     "parse5": "7.3.0",

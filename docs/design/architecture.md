@@ -111,6 +111,12 @@ to an existing Pages deployment), then deploy through a trusted job with scoped 
 
 ## Version navigation
 
+Native local search is enabled per edition: VitePress's local provider builds locale indexes;
+Starlight builds Pagefind indexes from each edition's static HTML. Combined assembly preserves
+these separate search assets rather than merging editions. Japanese fallback pages are indexed
+at their Japanese routes, including their English bodies. Query probes and limitations are recorded
+in [search evidence](../poc/search.md). This does not establish comprehensive Japanese search quality.
+
 VitePress extends the default theme's nav-bar-content-before slot with a small Vue control.
 Starlight wraps LanguageSelect with an Astro control, placing it beside the language selector in
 both the desktop header and the theme's mobile preferences menu. Both show the current edition

@@ -148,6 +148,18 @@ Use exact file paths in `config/publication.json`; adding to the sidebar is a se
 
 ## Validation
 
+`npm run search:verify` probes the built native local search indexes after a combined build.
+VitePress uses MiniSearch with the default UI query options; Starlight uses the generated Pagefind
+runtime. The probe runs in Node with a minimal Pagefind language shim, not a browser or simulated
+search UI. It records query results in the generated run's `search.json`, verifies result scope
+and destinations, and closes its ephemeral static server. Missing matches for Japanese substrings
+are observations rather than build failures. See the Japanese [search comparison](../poc/search.md).
+
+The probe intentionally depends on pinned candidate index formats. Revisit it when upgrading the
+SSGs. MiniSearch is explicitly pinned to the installed VitePress dependency version because the
+probe imports it directly. No external search service, tokenizer customization, or cross-version
+index aggregation is configured.
+
 `npm run check` runs formatting validation, linting, type checking, and Node's test runner. Tests create isolated local Git fixtures
 under `.generated/tests/`; they do not use the network. They verify immutable blob reads despite
 dirty worktrees, provenance hashes, repeatability, excluded paths, missing files, invalid refs,

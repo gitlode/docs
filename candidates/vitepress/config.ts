@@ -8,7 +8,10 @@ import type { PreviewSite, PreviewTheme } from "./site.ts";
 const root = resolve(import.meta.dirname, "..");
 const site = JSON.parse(readFileSync(resolve(root, "site.json"), "utf8")) as PreviewSite;
 export default defineConfigWithTheme<PreviewTheme>({
-  themeConfig: { versionSite: { edition: site.edition, base: site.base, combined: site.combined } },
+  themeConfig: {
+    versionSite: { edition: site.edition, base: site.base, combined: site.combined },
+    search: { provider: "local" },
+  },
   title: "gitlode",
   description: `Documentation — ${site.edition} comparison preview`,
   base: site.base,

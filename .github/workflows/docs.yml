@@ -27,3 +27,4 @@ jobs:
       - run: npm run content:stage
       - run: npm run previews:build
       - run: npm run previews:verify
+      - run: npm run search:verify
