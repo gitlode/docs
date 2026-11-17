@@ -95,7 +95,9 @@ External links are rewritten/retained without network availability or upstream-f
 
 The final installation reports three affected packages: VitePress, its Vite dependency, and esbuild
 (two moderate and one high severity package entries). Stable VitePress 1.6.4 declares Vite 5;
-overriding it to a different major is not a supported routine update. Its next release is an alpha,
+overriding it to a different major was not validated in this increment. A maintainer later suggested
+a Vite 6 override as an option in [issue #5201](https://github.com/vuejs/vitepress/issues/5201),
+but this is not a compatibility matrix. Its next release is an alpha,
 which would change the comparison's stability assumptions. Current Astro's earlier critical findings
 are absent after the runtime/dependency update.
 

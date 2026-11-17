@@ -39,7 +39,7 @@ Do not create empty candidate directories or claim previews before the rendering
    not decisive for selection. Retain query limitations; do not add search customization.
 2. Clean-clone reproducibility and hosted CI passed; see reproducibility.md. Pages deployment remains separate.
 3. Maintenance costs, dependency findings, warnings, and limitations are consolidated in maintenance.md.
-4. Owner reviews the Japanese recommendation in ssg-proposal.md: a modest preference for Starlight, not a completed selection.
+4. Owner reviews ssg-proposal.md with future-outlook.md: the current-version Starlight preference is narrow; VitePress v2 is also viable. Its isolated alpha.21 trial passed automated checks, but browser and Ubuntu CI acceptance remain open if selected.
 5. Keep explicit asset selection, production publication scope, and translation snapshot policy
    visible as follow-up; do not expand publication merely to hide link errors.
 

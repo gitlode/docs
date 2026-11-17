@@ -24,7 +24,7 @@ They are the canonical home for lasting contracts, not session logs or task chec
 The following homes contain tracked working material with a limited purpose:
 
 - `poc/`: [plan](poc/plan.md), [original kickoff](poc/kickoff.md),
-  [evaluation evidence](poc/evaluation.md), [SSG proposal](poc/ssg-proposal.md), [maintenance comparison](poc/maintenance.md),
+  [evaluation evidence](poc/evaluation.md), [SSG proposal](poc/ssg-proposal.md), [maintenance comparison](poc/maintenance.md), [future outlook](poc/future-outlook.md),
   [English previews](poc/english-previews.md), and [localization evidence](poc/localization.md), [version comparison](poc/versions.md), [search comparison](poc/search.md), [reproducibility](poc/reproducibility.md), [GitHub setup](poc/github-setup.md), and [translation metadata evaluation](poc/translation-metadata.md).
 - `handoff/`: [current continuation notes](handoff/current.md) for human/LLM and
   session-to-session transfer. Link to canonical docs instead of restating their contracts.
