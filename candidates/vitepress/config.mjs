@@ -26,7 +26,10 @@ export default defineConfig({
         )
           return html;
         return (
-          '<p lang="ja">このコンテンツはまだ日本語訳がありません。</p>\n<div lang="en">' +
+          '<div class="custom-block warning" role="note" aria-label="未翻訳のドキュメント" lang="ja">' +
+          '<p class="custom-block-title">未翻訳のドキュメント</p>' +
+          "<p>このコンテンツはまだ日本語訳がありません。以下に英語の原文を表示しています。</p>" +
+          '</div>\n<div lang="en">' +
           html +
           "</div>\n"
         );

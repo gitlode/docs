@@ -50,3 +50,5 @@ Starlight's i18n/custom-404 warnings are recorded for the localization increment
 full interactive/mobile browser validation remain unverified.
 
 No upstream modifications or remote publication are implied by this handoff.
+
+The VitePress notice now uses the default theme custom-block warning classes before the H1, with a Japanese title, explanation and role=note. No custom CSS or dependency was added. Checks/builds pass; headless Edge produced no screenshot, so visual re-review remains pending.
