@@ -9,7 +9,7 @@
   },
   "type": "module",
   "scripts": {
-    "typecheck": "tsc --noEmit",
+    "typecheck": "tsc --noEmit && vue-tsc --noEmit -p candidates/vitepress/tsconfig.json",
     "test": "node --experimental-strip-types --test test/*.test.ts",
     "format": "node -e \"console.error('Error: Please run format:check or format:write instead.'); process.exit(1)\"",
     "format:check": "oxfmt --check .",
@@ -41,7 +41,9 @@
     "sirv": "3.0.2",
     "typescript": "5.9.3",
     "unist-util-visit": "5.2.0",
-    "vitepress": "1.6.4"
+    "vitepress": "1.6.4",
+    "vue": "3.5.45",
+    "vue-tsc": "3.3.14"
   },
   "engines": {
     "node": ">=22.23.4 <23",

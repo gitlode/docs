@@ -91,6 +91,15 @@ run after an uncatchable process kill. Bounded checks minimize the chance of orp
 
 ## Development tooling conventions
 
+Prefer TypeScript where the framework provides useful type information, including VitePress
+configuration, theme entry points, and Vue SFC scripts (`script setup lang="ts"`). Do not force
+migration when useful type support is absent. `npm run typecheck` checks the pipeline with `tsc`
+and the VitePress configuration/theme/templates with `vue-tsc`. The candidate uses Bundler module
+resolution to match Vite; the publishing scripts retain NodeNext. Generated site metadata has a
+shared TypeScript interface and reaches Vue through typed theme data. The JSON input is trusted
+pipeline output, not a runtime-validated external API. Vue is a direct pinned development dependency
+because the theme imports it; vue-tsc supplies SFC/template type checking.
+
 Tooling alignment is bidirectional: both projects can benefit from each other's choices. Record
 cross-project suggestions in `../proposals/` and continue authorized PoC work using the
 current local configuration. See the [documentation lifecycle](../README.md) and the open

@@ -6,6 +6,8 @@ The owner's kickoff contract is preserved in [docs/poc/kickoff.md](docs/poc/kick
 
 - Write durable documentation, LLM-oriented documents, and code comments in English.
   Write PoC result summaries primarily reviewed by the human owner in Japanese.
+- Prefer TypeScript where the framework provides useful type support, including Vue SFC scripts.
+  Include migrated code in type checks; do not force TypeScript where usable type information is absent.
 - Keep canonical English documentation upstream; transform only generated copies.
 - Never expand publication by following links automatically. Keep publication and navigation separate.
 - Treat imported Markdown as untrusted input. Do not execute upstream code or enable executable MDX.

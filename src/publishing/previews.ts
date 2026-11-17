@@ -208,12 +208,16 @@ export function preparePreviews(
       write(siteRoot, "content/index.md", "# gitlode\n\n[English](/en/) · [日本語](/ja/)\n");
     if (candidate === "vitepress") {
       safeDirectory(siteRoot, ".vitepress");
+      copyFileSync(
+        join(root, "candidates/vitepress/site.ts"),
+        join(siteRoot, ".vitepress/site.ts"),
+      );
       cpSync(join(root, "candidates/vitepress/theme"), join(siteRoot, ".vitepress/theme"), {
         recursive: true,
       });
       copyFileSync(
-        join(root, "candidates/vitepress/config.mjs"),
-        join(siteRoot, ".vitepress/config.mjs"),
+        join(root, "candidates/vitepress/config.ts"),
+        join(siteRoot, ".vitepress/config.ts"),
       );
     } else {
       safeDirectory(siteRoot, "public");

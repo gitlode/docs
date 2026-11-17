@@ -1,13 +1,14 @@
-<script setup>
+<script setup lang="ts">
 import { useData } from "vitepress";
 import { computed } from "vue";
 
-import site from "../../site.json";
+import type { PreviewTheme } from "../site.ts";
 
-const { page } = useData();
+const { page, theme } = useData<PreviewTheme>();
+const site = computed(() => theme.value.versionSite);
 const locale = computed(() => page.value.relativePath.split("/")[0]);
 const editions = ["stable", "next"];
-const candidateBase = site.base.replace(/(?:stable|next)\/$/, "");
+const candidateBase = computed(() => site.value.base.replace(/(?:stable|next)\/$/, ""));
 const label = computed(() => (locale.value === "ja" ? "バージョン" : "Version"));
 </script>
 

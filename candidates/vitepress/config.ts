@@ -1,11 +1,14 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
-import { defineConfig } from "vitepress";
+import { defineConfigWithTheme } from "vitepress";
+
+import type { PreviewSite, PreviewTheme } from "./site.ts";
 
 const root = resolve(import.meta.dirname, "..");
-const site = JSON.parse(readFileSync(resolve(root, "site.json"), "utf8"));
-export default defineConfig({
+const site = JSON.parse(readFileSync(resolve(root, "site.json"), "utf8")) as PreviewSite;
+export default defineConfigWithTheme<PreviewTheme>({
+  themeConfig: { versionSite: { edition: site.edition, base: site.base, combined: site.combined } },
   title: "gitlode",
   description: `Documentation — ${site.edition} comparison preview`,
   base: site.base,
@@ -43,6 +46,7 @@ export default defineConfig({
         label: locale === "en" ? "English" : "日本語",
         lang: locale,
         themeConfig: {
+          versionSite: { edition: site.edition, base: site.base, combined: site.combined },
           outline: [2, 3],
           sidebar: site.navigation.map((group) => ({
             text: group.label,
