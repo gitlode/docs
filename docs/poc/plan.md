@@ -1,6 +1,6 @@
 ﻿# Implementation plan
 
-Status: Combined-edition increment implemented locally; comparative PoC remains in progress.
+Status: Comparative evidence and recommendation prepared; human SSG selection pending.
 Owner: human project owner. Implementation: Codex working in `gitlode/docs` on `work/poc-evaluation` after PR #1.
 The kickoff increment was committed as `0ef1673`. Commit subsequent work at practical increments;
 the owner plans to squash merge into `main`. The owner approved and squash merged PR #1 as b9c53d5; hosted CI passed. The previous work/initial-poc branch is retained. No deployment has been performed.
@@ -27,7 +27,7 @@ PoC using documented local choices without waiting for commonization approval. S
 | 3. Comparable previews   | Add VitePress and Starlight under `candidates/`; same staged input; titles, README routing, sidebar, TOC, code fences | Implemented; see English preview evidence |
 | 4. Localization          | Owned Japanese example, missing-page behavior, native/custom fallback comparison, file-level freshness tests          | Owner accepted; comparison complete       |
 | 5. Pages simulation      | Both editions/locales under nested `/docs/` paths; complete artifact; links/assets validation; PR build               | Implemented; owner accepted version UX    |
-| 6. Evidence and proposal | Timings, sizes, warnings, screenshots/manual review, reproducible comparison, proposed recommendation                 | Pending                                   |
+| 6. Evidence and proposal | Timings, sizes, warnings, screenshots/manual review, reproducible comparison, proposed recommendation                 | Proposal ready for owner review           |
 | 7. Human selection gate  | Owner reviews both previews and approves an SSG; only then remove a candidate                                         | Human decision pending                    |
 
 Milestones are reviewable working increments, not separate disposable repositories.
@@ -38,8 +38,8 @@ Do not create empty candidate directories or claim previews before the rendering
 1. Native search comparison is owner-reviewed: both sufficient, VitePress more feature-rich, but
    not decisive for selection. Retain query limitations; do not add search customization.
 2. Clean-clone reproducibility and hosted CI passed; see reproducibility.md. Pages deployment remains separate.
-3. Consolidate maintenance costs, dependency findings, warnings, and accepted limitations.
-4. Complete the Japanese comparison report and recommendation for human SSG selection.
+3. Maintenance costs, dependency findings, warnings, and limitations are consolidated in maintenance.md.
+4. Owner reviews the Japanese recommendation in ssg-proposal.md: a modest preference for Starlight, not a completed selection.
 5. Keep explicit asset selection, production publication scope, and translation snapshot policy
    visible as follow-up; do not expand publication merely to hide link errors.
 
