@@ -3,7 +3,7 @@
 Status: Combined-edition increment implemented locally; comparative PoC remains in progress.
 Owner: human project owner. Implementation: Codex working in `gitlode/docs` on `work/initial-poc`.
 The kickoff increment was committed as `0ef1673`. Commit subsequent work at practical increments;
-the owner plans to squash merge into `main`. No push or merge has been performed by this session.
+the owner plans to squash merge into `main`. The owner authorized push and Draft PR #1; hosted CI passed. No merge or deployment has been performed.
 
 ## Confirmed inputs
 
@@ -22,7 +22,7 @@ PoC using documented local choices without waiting for commonization approval. S
 
 | Milestone                | Deliverable and verification                                                                                          | Status                                    |
 | ------------------------ | --------------------------------------------------------------------------------------------------------------------- | ----------------------------------------- |
-| 1. Inspect and bootstrap | Verify repository and real source tree; runtime, lockfile, project docs, validation CI                                | Implemented locally; hosted CI not run    |
+| 1. Inspect and bootstrap | Verify repository and real source tree; runtime, lockfile, project docs, validation CI                                | Implemented; hosted CI passed             |
 | 2. Acquire and stage     | Pin both refs; select six real documents; preserve bytes and provenance; reject unsafe paths/symlinks                 | Implemented and locally tested            |
 | 3. Comparable previews   | Add VitePress and Starlight under `candidates/`; same staged input; titles, README routing, sidebar, TOC, code fences | Implemented; see English preview evidence |
 | 4. Localization          | Owned Japanese example, missing-page behavior, native/custom fallback comparison, file-level freshness tests          | Owner accepted; comparison complete       |
@@ -37,7 +37,7 @@ Do not create empty candidate directories or claim previews before the rendering
 
 1. Native search comparison is owner-reviewed: both sufficient, VitePress more feature-rich, but
    not decisive for selection. Retain query limitations; do not add search customization.
-2. Verify clean-clone reproducibility and hosted CI without deployment privileges.
+2. Clean-clone reproducibility and hosted CI passed; see reproducibility.md. Pages deployment remains separate.
 3. Consolidate maintenance costs, dependency findings, warnings, and accepted limitations.
 4. Complete the Japanese comparison report and recommendation for human SSG selection.
 5. Keep explicit asset selection, production publication scope, and translation snapshot policy

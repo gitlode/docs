@@ -168,7 +168,7 @@ validation failures. Generated test fixtures remain ignored for diagnosis.
 
 `.github/workflows/docs.yml` performs these checks plus real upstream acquisition/staging on PRs,
 main pushes, and manual runs, followed by all four edition/candidate builds and combined English/Japanese validation and output validation. Hosted
-execution has not yet been observed. See [preview evidence](../poc/english-previews.md) for local
+execution passed on Ubuntu; see [reproducibility evidence](../poc/reproducibility.md). See [preview evidence](../poc/english-previews.md) for local
 checks and the remaining browser, localization, and deployment acceptance work.
 
 ## Troubleshooting
