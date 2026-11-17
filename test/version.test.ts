@@ -3,7 +3,7 @@ import test from "node:test";
 
 import { validateVersionNavigation } from "../src/publishing/validate-version.ts";
 
-for (const candidate of ["vitepress", "starlight"] as const) {
+for (const candidate of ["vitepress", "vitepress-v2", "starlight"] as const) {
   const render = (edition: "stable" | "next", locale: "en" | "ja") => {
     const other = edition === "stable" ? "next" : "stable";
     const target = `/docs/${candidate}/${other}/${locale}/`;
@@ -53,6 +53,23 @@ for (const candidate of ["vitepress", "starlight"] as const) {
       () => validateVersionNavigation(html, candidate, "next", "ja", "profiling/"),
       /invalid version navigation/,
     );
+  });
+  test(`${candidate}: version controls cannot cross into another SSG candidate`, () => {
+    const html = render("next", "ja");
+    for (const otherCandidate of ["vitepress", "vitepress-v2", "starlight"] as const) {
+      if (otherCandidate === candidate) continue;
+      assert.throws(
+        () =>
+          validateVersionNavigation(
+            html.replace(`/docs/${candidate}/`, `/docs/${otherCandidate}/`),
+            candidate,
+            "next",
+            "ja",
+            "profiling/",
+          ),
+        /invalid version navigation/,
+      );
+    }
   });
   if (candidate === "starlight")
     test("starlight: requires explicit cross-build reload", () => {

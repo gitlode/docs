@@ -1,6 +1,6 @@
 ﻿# Implementation plan
 
-Status: Comparative evidence and recommendation prepared; human SSG selection pending.
+Status: Owner expanded comparison to three equal candidates; selection review deferred.
 Owner: human project owner. Implementation: Codex working in `gitlode/docs` on `work/poc-evaluation` after PR #1.
 The kickoff increment was committed as `0ef1673`. Commit subsequent work at practical increments;
 the owner plans to squash merge into `main`. The owner approved and squash merged PR #1 as b9c53d5; hosted CI passed. The previous work/initial-poc branch is retained. No deployment has been performed.
@@ -27,7 +27,7 @@ PoC using documented local choices without waiting for commonization approval. S
 | 3. Comparable previews   | Add VitePress and Starlight under `candidates/`; same staged input; titles, README routing, sidebar, TOC, code fences | Implemented; see English preview evidence |
 | 4. Localization          | Owned Japanese example, missing-page behavior, native/custom fallback comparison, file-level freshness tests          | Owner accepted; comparison complete       |
 | 5. Pages simulation      | Both editions/locales under nested `/docs/` paths; complete artifact; links/assets validation; PR build               | Implemented; owner accepted version UX    |
-| 6. Evidence and proposal | Timings, sizes, warnings, screenshots/manual review, reproducible comparison, proposed recommendation                 | Proposal ready for owner review           |
+| 6. Evidence and proposal | Timings, sizes, warnings, screenshots/manual review, reproducible comparison, proposed recommendation                 | Expanded three-candidate review pending   |
 | 7. Human selection gate  | Owner reviews both previews and approves an SSG; only then remove a candidate                                         | Human decision pending                    |
 
 Milestones are reviewable working increments, not separate disposable repositories.
@@ -55,3 +55,10 @@ Do not create empty candidate directories or claim previews before the rendering
 
 No deployment, cross-repository notifications, external SaaS, automatic translation generation,
 or production hardening is part of this kickoff increment.
+
+## Owner-directed scope expansion
+
+VitePress v2 alpha.21 is now an equal candidate, not just future reference. Absolute stability is
+not required for this personal project. Preserve v1, v2 and Starlight; complete six builds,
+96 search queries, browser checks and hosted CI, then obtain the owner's v2 preview evaluation
+before revising the selection recommendation. See three-candidates.md.

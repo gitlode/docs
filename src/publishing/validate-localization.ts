@@ -15,7 +15,7 @@ export interface LocalizationStatistics {
 /** Check the candidate's actual locale controls and rendered fallback semantics. */
 export function validateLocalization(
   html: string,
-  candidate: "vitepress" | "starlight",
+  candidate: "vitepress" | "vitepress-v2" | "starlight",
   locale: Locale,
   route: string,
   base: string,
@@ -45,18 +45,18 @@ export function validateLocalization(
       if (node.tagName === "html") documentLanguage = attr("lang") ?? "";
       if (node.tagName === "body") bodyText = text(node);
       inControl ||=
-        candidate === "vitepress"
+        candidate !== "starlight"
           ? (attr("class") ?? "").split(/\s+/).includes("VPNavBarTranslations")
           : node.tagName === "starlight-lang-select";
       if (
         inControl &&
-        (candidate === "vitepress"
+        (candidate !== "starlight"
           ? node.tagName === "a" && attr("href") === languageSwitchTarget
           : node.tagName === "option" && attr("value") === languageSwitchTarget)
       )
         hasSwitch = true;
       inEnglishBody ||=
-        node.tagName === (candidate === "vitepress" ? "div" : "main") && attr("lang") === "en";
+        node.tagName === (candidate !== "starlight" ? "div" : "main") && attr("lang") === "en";
       if (inEnglishBody && /^h[1-6]$/.test(node.tagName)) hasEnglishBody = true;
     }
     if ("childNodes" in node)

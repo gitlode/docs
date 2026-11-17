@@ -24,10 +24,10 @@ edition). Inspect that manifest to identify exact inputs. Do not mistake staged 
 ## Comparison previews
 
 `npm run previews:prepare` creates trusted candidate inputs from a single staging run. The default
-edition for preparation is `next`. `npm run previews:build` defaults to both editions and candidates,
+edition for preparation is `next`. `npm run previews:build` defaults to both editions and all three candidates,
 then prints a unique `.generated/previews/combined-*/dist` complete artifact mounted at `/docs/`.
-Four builds share one upstream staging manifest. Each edition retains its own build report. `inputs.json` records identical source
-hashes for both candidates; `build.json` adds output checks and measurements. A failed build does
+Six builds share one upstream staging manifest. Each edition retains its own build report. `inputs.json` records identical source
+hashes for all candidates; `build.json` adds output checks and measurements. A failed build does
 not replace the `.generated/preview.json` pointer to the last successful build.
 
 Run in separate terminals:
@@ -35,10 +35,12 @@ Run in separate terminals:
 ```sh
 npm run preview:vitepress
 npm run preview:starlight
+npm run preview:vitepress-v2
 ```
 
 Open `http://127.0.0.1:4173/docs/vitepress/next/en/` and
-`http://127.0.0.1:4174/docs/starlight/next/en/`. Stop with Ctrl+C. The shared preview server serves
+`http://127.0.0.1:4174/docs/starlight/next/en/`, plus
+`http://127.0.0.1:4175/docs/vitepress-v2/next/en/`. Stop with Ctrl+C. The shared preview server serves
 only built static files on loopback; it does not run either SSG's development server or watch files.
 Use the language selector to switch the current page. Japanese `profiling/` is translated;
 `usage/` and the other four documents intentionally demonstrate English fallback.
@@ -49,9 +51,9 @@ area in the mobile preferences menu on narrow screens. Stable has no owned trans
 in this corpus and uses English fallback; next Profiling Guide has the Japanese example.
 `npm run previews:build -- stable` or `-- next` remains available for a single-edition diagnostic
 build without version controls. Run the default build again to restore the combined preview.
-The complete artifact includes both candidates, both editions, both locales, a comparison landing,
+The complete artifact includes all three candidates, both editions, both locales, a comparison landing,
 404 and `.nojekyll`. It is a Pages-path simulation; nothing is deployed. Preview commands still
-use ports 4173/4174 and existing URLs, but both serve the complete artifact in combined mode.
+use ports 4173/4174/4175 and existing URLs; all serve the complete artifact in combined mode.
 
 The Starlight adapter uses Astro's unified processor explicitly. Imported files remain plain `.md`;
 Starlight's transitive MDX dependency does not grant permission to import `.mdx`. SSG configuration
@@ -59,11 +61,11 @@ is maintained under `candidates/` and copied into each disposable build root.
 
 ## Verification process lifecycle
 
-For automated HTTP checks, use `npm run previews:verify` after building. It starts both static
+For automated HTTP checks, use `npm run previews:verify` after building. It starts all three static
 servers inside one Node process on OS-assigned ports, checks representative responses with
 five-second request timeouts, and closes all owned listeners and connections in `finally`.
 It also cleans up the first server if the second fails to start. It does not compete for the
-developer's fixed 4173/4174 ports. Regression tests confirm ports can be rebound after successful
+developer's fixed 4173/4174/4175 ports. Regression tests confirm ports can be rebound after successful
 checks, failed checks, and partial startup failures; unrelated listeners are left alone.
 
 Manual `preview:*` commands keep serving until interrupted. Their CLI handles SIGINT/SIGTERM and
@@ -167,7 +169,7 @@ symlink blobs, output path containment, Markdown safety, route/link rewriting, a
 validation failures. Generated test fixtures remain ignored for diagnosis.
 
 `.github/workflows/docs.yml` performs these checks plus real upstream acquisition/staging on PRs,
-main pushes, and manual runs, followed by all four edition/candidate builds and combined English/Japanese validation and output validation. Hosted
+main pushes, and manual runs, followed by all six edition/candidate builds and combined English/Japanese validation and output validation. Hosted
 execution passed on Ubuntu; see [reproducibility evidence](../poc/reproducibility.md). See [preview evidence](../poc/english-previews.md) for local
 checks and the remaining browser, localization, and deployment acceptance work.
 
@@ -194,3 +196,15 @@ commit. Relative links use the canonical document directory. Review translation 
 before updating that hash. A matching hash does not certify translation quality. The current
 Profiling Guide is a PoC example awaiting human language review. Stable translation snapshot policy
 remains open; no next-to-stable substitution occurs.
+
+## Parallel VitePress versions
+
+VitePress 1.6.4 remains `vitepress`; alpha.21 is exact-pinned through the npm alias
+`vitepress-v2`. Each has its own config/theme/tsconfig under candidates and its own generated
+route prefix. The pipeline invokes explicit package CLI paths rather than the ambiguous npm bin.
+V2 client code imports `vitepress-v2/client`; its SSR config bundles the alias via noExternal.
+These two settings support coexistence, not a general v1-to-v2 migration requirement.
+Both Vue candidates are checked with vue-tsc. Keep equivalent behavior when changing either copy.
+Search verification now performs 96 queries; v2 uses its tokenizer and adds the candidate base to
+index result IDs, matching its UI. The probe depends on pinned internal search APIs.
+See [three-candidate evidence](../poc/three-candidates.md) for acceptance status.

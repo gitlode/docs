@@ -65,7 +65,7 @@ Starlight receives paths including its base. External HTTP(S) links are not fetc
 
 `previews.ts` owns candidate staging and build orchestration. Each run copies trusted configurations
 from `candidates/` into unique generated roots and emits matching source hashes in `inputs.json`.
-Sites use `/docs/<candidate>/{stable,next}/{en,ja}/`. The default build assembles all four
+Sites use `/docs/<candidate>/{stable,next}/{en,ja}/`. The default build assembles all six
 edition/candidate builds into a fresh `combined-*/dist` artifact using one upstream staging manifest.
 Only static dist files enter it; source snapshots and provenance reports remain outside deployment.
 Combined href/src and fragment validation runs after assembly, so version links can resolve across
@@ -105,7 +105,7 @@ See [localization evidence](../poc/localization.md) for current limitations.
 ## CI and future publishing
 
 PR CI has only `contents: read`, installs locked dependencies, checks types/tests, acquires public
-source, stages both editions, then builds and validates both candidates and editions in English and Japanese. It does not
+source, stages both editions, then builds and validates all three candidates and both editions in English and Japanese. It does not
 deploy. Production must assemble one complete artifact (never append a version
 to an existing Pages deployment), then deploy through a trusted job with scoped Pages/OIDC rights.
 
@@ -124,8 +124,17 @@ and link to the other edition's home in the current locale, regardless of the cu
 Full-page navigation avoids carrying separately built client state across editions. No document
 mapping or fragment preservation is needed. This simple switch is the owner's required behavior,
 not a compromise for missing features. Combined validation checks locale-home targets and header
-placement across all 56 document/locale-home pages.
+placement across all 84 document/locale-home pages.
 
 The owner accepted external GitHub links for documents outside the six-document PoC scope.
 Production must address internal documentation references before launch, without automatically
 publishing arbitrary linked files. See the PoC evaluation for the deferred acceptance item.
+
+## Three-candidate comparison
+
+The owner admitted VitePress v2 alpha.21 as an equal candidate alongside v1.6.4 and Starlight.
+Candidate IDs are vitepress, vitepress-v2, and starlight. Both VitePress adapters share preparation
+semantics but retain version-specific config/theme imports and independently typechecked files.
+An exact npm alias allows both releases to coexist. Edition switches stay inside their candidate.
+The shared build, validation, HTTP checks and search probes cover all three. Selection is deferred
+until the expanded comparison is reviewed; prerelease status alone is not a disqualifier.

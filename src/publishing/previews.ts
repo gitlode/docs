@@ -23,7 +23,8 @@ import { validateOutput, validateRendering } from "./validate-output.ts";
 import { validateVersionNavigation } from "./validate-version.ts";
 
 const root = resolve(import.meta.dirname, "../..");
-type Candidate = "vitepress" | "starlight";
+const candidates = ["vitepress", "vitepress-v2", "starlight"] as const;
+type Candidate = (typeof candidates)[number];
 interface Document {
   sourcePath: string;
   stagedPath: string;
@@ -107,7 +108,7 @@ export function preparePreviews(
       }
     >,
   };
-  for (const candidate of ["vitepress", "starlight"] as const) {
+  for (const candidate of candidates) {
     const siteRoot = safeDirectory(output, candidate);
     const base = `/docs/${candidate}/${editionName}/`;
     const pages = edition.documents.flatMap((doc) => {
@@ -137,7 +138,7 @@ export function preparePreviews(
             commit: edition.resolvedCommit,
             routes,
             tree,
-            base: `${candidate === "vitepress" ? "/" : base}${contentLocale}/`,
+            base: `${candidate !== "starlight" ? "/" : base}${contentLocale}/`,
           }),
         };
       });
@@ -173,12 +174,12 @@ export function preparePreviews(
           ? "> 翻訳元の英語が更新されています。この翻訳は確認が必要です。\n\n"
           : "";
       const content =
-        candidate === "vitepress"
+        candidate !== "starlight"
           ? `---\ntranslationFallback: ${page.status === "missing"}\n---\n\n${notice}${page.markdown}`
           : `---\ntitle: ${JSON.stringify(page.title)}\n---\n\n${notice}${page.body}`;
       write(
         siteRoot,
-        `${candidate === "vitepress" ? "content" : "src/content/docs"}/${page.route}index.md`,
+        `${candidate !== "starlight" ? "content" : "src/content/docs"}/${page.route}index.md`,
         content + attribution,
       );
     }
@@ -192,31 +193,31 @@ export function preparePreviews(
           .filter((p) => p.locale === locale)
           .map(
             (p) =>
-              `- [${p.title.replace(/[\\`*{}\[\]()#+.!<>_]/g, "\\$&")}](${candidate === "vitepress" ? "/" : base}${p.route})`,
+              `- [${p.title.replace(/[\\`*{}\[\]()#+.!<>_]/g, "\\$&")}](${candidate !== "starlight" ? "/" : base}${p.route})`,
           )
           .join("\n") + "\n";
       parseSafeMarkdown(landing);
       write(
         siteRoot,
-        `${candidate === "vitepress" ? "content" : "src/content/docs"}/${locale}/index.md`,
-        (candidate === "vitepress"
+        `${candidate !== "starlight" ? "content" : "src/content/docs"}/${locale}/index.md`,
+        (candidate !== "starlight"
           ? `# ${title}\n\n`
           : `---\ntitle: ${JSON.stringify(title)}\n---\n\n`) + landing,
       );
     }
-    if (candidate === "vitepress")
+    if (candidate !== "starlight")
       write(siteRoot, "content/index.md", "# gitlode\n\n[English](/en/) · [日本語](/ja/)\n");
-    if (candidate === "vitepress") {
+    if (candidate !== "starlight") {
       safeDirectory(siteRoot, ".vitepress");
       copyFileSync(
-        join(root, "candidates/vitepress/site.ts"),
+        join(root, `candidates/${candidate}/site.ts`),
         join(siteRoot, ".vitepress/site.ts"),
       );
-      cpSync(join(root, "candidates/vitepress/theme"), join(siteRoot, ".vitepress/theme"), {
+      cpSync(join(root, `candidates/${candidate}/theme`), join(siteRoot, ".vitepress/theme"), {
         recursive: true,
       });
       copyFileSync(
-        join(root, "candidates/vitepress/config.ts"),
+        join(root, `candidates/${candidate}/config.ts`),
         join(siteRoot, ".vitepress/config.ts"),
       );
     } else {
@@ -249,8 +250,8 @@ export function preparePreviews(
 function cli(candidate: Candidate) {
   return join(
     root,
-    candidate === "vitepress"
-      ? "node_modules/vitepress/bin/vitepress.js"
+    candidate !== "starlight"
+      ? `node_modules/${candidate}/bin/vitepress.js`
       : "node_modules/astro/bin/astro.mjs",
   );
 }
@@ -261,12 +262,12 @@ function buildEdition(edition: string, options: { staging?: string; combined?: b
   const validation: Record<string, ReturnType<typeof validateOutput>> = {};
   const localization: Record<string, ReturnType<typeof validateLocalization>[]> = {};
   const rendering: Record<string, ReturnType<typeof validateRendering>[]> = {};
-  for (const candidate of ["vitepress", "starlight"] as const) {
+  for (const candidate of candidates) {
     const started = performance.now();
     const siteRoot = report.candidates[candidate].root;
     execFileSync(
       process.execPath,
-      [cli(candidate), "build", ...(candidate === "vitepress" ? [siteRoot] : ["--root", siteRoot])],
+      [cli(candidate), "build", ...(candidate !== "starlight" ? [siteRoot] : ["--root", siteRoot])],
       { cwd: root, stdio: "inherit", env: { ...process.env, ASTRO_TELEMETRY_DISABLED: "1" } },
     );
     measurements[candidate] = Math.round(performance.now() - started);
@@ -275,7 +276,7 @@ function buildEdition(edition: string, options: { staging?: string; combined?: b
         join(siteRoot, "dist"),
         report.candidates[candidate].base,
         ["en/", "ja/", ...report.candidates[candidate].pages.map((p) => p.route)],
-        candidate === "vitepress",
+        candidate !== "starlight",
       );
     const site = json<{ navigation: { pages: { route: string }[] }[] }>(
       join(siteRoot, "site.json"),
@@ -326,7 +327,7 @@ export function buildPreviews(edition = "all") {
   if (edition !== "all") {
     const { output } = buildEdition(edition);
     selectPreview(output);
-    console.log(`Built both candidates: ${output}`);
+    console.log(`Built all candidates: ${output}`);
     return output;
   }
   const staging = stage(
@@ -344,7 +345,7 @@ export function buildPreviews(edition = "all") {
   for (const { report } of editions) {
     if (report.edition !== "stable" && report.edition !== "next")
       throw new Error("Invalid built edition.");
-    for (const candidate of ["vitepress", "starlight"] as const) {
+    for (const candidate of candidates) {
       const site = report.candidates[candidate];
       const prefix = `${candidate}/${report.edition}/`;
       cpSync(join(site.root, "dist"), join(dist, prefix), {
@@ -378,7 +379,7 @@ export function buildPreviews(edition = "all") {
     dist,
     "index.html",
     '<!doctype html><html lang="en"><meta charset="utf-8"><title>gitlode documentation comparison</title><h1>gitlode documentation comparison</h1>' +
-      ["vitepress", "starlight"]
+      candidates
         .flatMap((candidate) =>
           ["stable", "next"].flatMap((name) =>
             ["en", "ja"].map(
@@ -397,8 +398,8 @@ export function buildPreviews(edition = "all") {
   );
   write(dist, ".nojekyll", "");
   const validation = validateOutput(dist, "/docs/", expected);
-  const candidates = Object.fromEntries(
-    ["vitepress", "starlight"].map((candidate) => [
+  const previewCandidates = Object.fromEntries(
+    candidates.map((candidate) => [
       candidate,
       { root: output, base: "/docs/", entry: `${candidate}/next/en/` },
     ]),
@@ -410,7 +411,7 @@ export function buildPreviews(edition = "all") {
       {
         edition: "all",
         staging,
-        candidates,
+        candidates: previewCandidates,
         editions: editions.map(({ output: editionOutput, report }) => ({
           output: editionOutput,
           ...report,
@@ -428,7 +429,7 @@ export function buildPreviews(edition = "all") {
 }
 
 function previewConfiguration(candidate: string, port?: number) {
-  if (candidate !== "vitepress" && candidate !== "starlight")
+  if (candidate !== "vitepress" && candidate !== "vitepress-v2" && candidate !== "starlight")
     throw new Error("Unknown preview candidate.");
   const { output } = json<{ output: string }>(join(root, ".generated/preview.json"));
   const report = json<{
@@ -440,7 +441,7 @@ function previewConfiguration(candidate: string, port?: number) {
     entry: report.candidates[candidate].entry ?? "en/",
     prefixes: report.edition === "all" ? [`${candidate}/stable/`, `${candidate}/next/`] : [""],
     base: report.candidates[candidate].base,
-    port: port ?? (candidate === "vitepress" ? 4173 : 4174),
+    port: port ?? { vitepress: 4173, starlight: 4174, "vitepress-v2": 4175 }[candidate],
   };
 }
 
@@ -453,7 +454,7 @@ export async function preview(candidate: string) {
 
 export async function verifyPreviews() {
   // Ephemeral ports avoid interfering with a developer's interactive previews.
-  const configs = [previewConfiguration("vitepress", 0), previewConfiguration("starlight", 0)];
+  const configs = candidates.map((candidate) => previewConfiguration(candidate, 0));
   await withPreviews(configs, async (previews) => {
     for (const [index, preview] of previews.entries()) {
       for (const prefix of configs[index].prefixes) {

@@ -77,13 +77,13 @@ test("encoded fragments resolve and executable URL schemes fail", () => {
 test("rendering assertions distinguish sidebar, TOC, code and table regressions", () => {
   const source =
     "# Page\n\n## Example\n\n```ts\nconst x: Array<string> = [];\n```\n\n| A | B |\n| - | - |\n| 1 | 2 |\n";
-  for (const candidate of ["vitepress", "starlight"] as const) {
+  for (const candidate of ["vitepress", "vitepress-v2", "starlight"] as const) {
     const sidebar =
-      candidate === "vitepress"
+      candidate !== "starlight"
         ? '<aside class="VPSidebar"><a href="/docs/guide/">Guide</a></aside>'
         : '<nav class="sidebar"><a href="/docs/guide/">Guide</a></nav>';
     const toc =
-      candidate === "vitepress"
+      candidate !== "starlight"
         ? '<nav class="VPDocAsideOutline"></nav>'
         : '<nav aria-labelledby="starlight__on-this-page"></nav>';
     const code = "<pre><code><span>const x: Array&lt;string&gt; = [];</span>\n</code></pre>";
