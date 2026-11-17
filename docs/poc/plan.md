@@ -1,9 +1,9 @@
 ﻿# Implementation plan
 
 Status: Combined-edition increment implemented locally; comparative PoC remains in progress.
-Owner: human project owner. Implementation: Codex working in `gitlode/docs` on `work/initial-poc`.
+Owner: human project owner. Implementation: Codex working in `gitlode/docs` on `work/poc-evaluation` after PR #1.
 The kickoff increment was committed as `0ef1673`. Commit subsequent work at practical increments;
-the owner plans to squash merge into `main`. The owner authorized push and Draft PR #1; hosted CI passed. No merge or deployment has been performed.
+the owner plans to squash merge into `main`. The owner approved and squash merged PR #1 as b9c53d5; hosted CI passed. The previous work/initial-poc branch is retained. No deployment has been performed.
 
 ## Confirmed inputs
 
@@ -46,7 +46,7 @@ Do not create empty candidate directories or claim previews before the rendering
 ## Owner review points
 
 - The six-document corpus is the kickoff minimum; any broader editorial scope can be reviewed
-  after previewing it. The intended Pages base `/docs/` is provisional until deployment review.
+  after previewing it. The owner confirmed the standard https://gitlode.github.io/docs/ URL and `/docs/` base; no custom domain.
 - Stable translation snapshots versus shared translations remains open; never silently reuse
   next translations in stable. The initial example should explicitly identify its source edition.
 - SSG choice and removal, PoC exit acceptance, and production launch require owner approval.

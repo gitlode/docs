@@ -6,7 +6,7 @@ Replace or retire this note when the next increment is handed off; migrate lasti
 
 ## Starting point
 
-- Repository: `gitlode/docs`; work branch: `work/initial-poc`.
+- Repository: `gitlode/docs`; work branch: `work/poc-evaluation` (created from merged main).
 - `0ef1673`: initial pinned acquisition/staging foundation.
 - `f983e3c`: development tooling alignment with gitlode itself.
 - Documentation is organized by purpose: `design/`, `contributing/`, `poc/`, `handoff/`, and
@@ -78,3 +78,5 @@ mapping is wanted. Language switching still retains the current document.
 Owner search review: both candidates are sufficient; VitePress is judged more feature-rich in browser use. Search is not a key selection factor and this compares defaults only, so the difference is not decisive. Customization could change the comparison but this is unverified. Keep narrow Japanese query observations separate from this overall usability judgment. Next: clean-clone/hosted-CI verification and maintenance evaluation, not additional search customization.
 
 Clean-clone verification completed for 7790e7b in .generated/repro-916ea805/checkout with an empty npm cache: install/check/acquire/stage/all builds/HTTP/search pass; checkout clean, ports58169/58170/58175 released and no owned Node process remains. Same machine only, not hosted CI; output is functionally reproducible but not byte-identical. The owner subsequently authorized push and Draft PR #1 (https://github.com/gitlode/docs/pull/1). Ubuntu CI run 44033616926 passed all steps for head 4420aec. No merge/deploy. See docs/poc/reproducibility.md and docs/poc/github-setup.md. Next: consolidate maintenance costs and the Japanese SSG recommendation. Record the checkout/setup-node v4 runtime deprecation warning as maintenance follow-up.
+
+Owner update: PR #1 was approved and squash merged as b9c53d5; local main is updated. Keep work/initial-poc intact. The owner checked GitHub settings and reported no issues. Use the standard https://gitlode.github.io/docs/ URL, without a custom domain. Deployment remains unimplemented; this does not select an SSG or authorize production launch.
