@@ -28,7 +28,7 @@ preview ports; do not treat wrapper completion as evidence of child termination.
 
 Localization is implemented: see [evidence](../poc/localization.md).
 Combined stable/next artifact assembly and version navigation are implemented locally.
-Next action: owner review of version navigation, then remaining PoC evaluation (including search). Keep both candidates and the existing human decision gate.
+Owner accepted version navigation in both candidates after browser review and confirmed the TypeScript migration.\nNext action: remaining PoC evaluation (including search). Keep both candidates and the existing human decision gate.
 The SSG recommendation is not yet ready. Search remains disabled for this increment.
 
 ## Pending review
