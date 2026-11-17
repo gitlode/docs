@@ -12,7 +12,7 @@ export interface VersionNavigationStatistics {
 /** Assert cross-build navigation without treating ordinary body links as version controls. */
 export function validateVersionNavigation(
   html: string,
-  candidate: "vitepress" | "starlight",
+  candidate: "vitepress" | "vitepress-v2" | "starlight",
   edition: Edition,
   locale: "en" | "ja",
   route: string,
@@ -48,7 +48,7 @@ export function validateVersionNavigation(
             // keeps this contract explicit if client routing is introduced later.
             counterpart =
               attr("target") === "_self" &&
-              (candidate === "vitepress" || attr("data-astro-reload") !== undefined);
+              (candidate !== "starlight" || attr("data-astro-reload") !== undefined);
           }
         }
         if ("childNodes" in child)

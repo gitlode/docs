@@ -5,16 +5,16 @@ import { validateLocalization } from "../src/publishing/validate-localization.ts
 
 const notice = "このコンテンツはまだ日本語訳がありません。";
 const changedNotice = "翻訳元の英語が更新されています。この翻訳は確認が必要です。";
-const candidates = ["vitepress", "starlight"] as const;
+const candidates = ["vitepress", "vitepress-v2", "starlight"] as const;
 
 for (const candidate of candidates) {
   const base = `/docs/${candidate}/next/`;
   const target = `${base}en/profiling/`;
   const control =
-    candidate === "vitepress"
+    candidate !== "starlight"
       ? `<div class="VPNavBarTranslations"><a href="${target}">English</a></div>`
       : `<starlight-lang-select><select><option value="${target}">English</option></select></starlight-lang-select>`;
-  const tag = candidate === "vitepress" ? "div" : "main";
+  const tag = candidate !== "starlight" ? "div" : "main";
   const page = (body: string, switcher = control, lang = "ja") =>
     `<html lang="${lang}"><body>${switcher}${body}</body></html>`;
   const fallback = `<p>${notice}</p><${tag} lang="en"><h1>Profiling</h1></${tag}>`;
@@ -60,6 +60,18 @@ for (const candidate of candidates) {
       () => validate(page(`<p>${notice}</p><${tag} lang="en"></${tag}><h1>Profiling</h1>`)),
       /missing English fallback body/,
     );
+  });
+  test(`${candidate}: language controls cannot cross into another SSG candidate`, () => {
+    for (const otherCandidate of candidates) {
+      if (otherCandidate === candidate) continue;
+      assert.throws(
+        () =>
+          validate(
+            page(fallback, control.replace(`/docs/${candidate}/`, `/docs/${otherCandidate}/`)),
+          ),
+        /missing same-page language switch/,
+      );
+    }
   });
 
   test(`${candidate}: distinguishes current and source-changed translations from missing ones`, () => {

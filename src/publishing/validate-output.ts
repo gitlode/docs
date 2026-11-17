@@ -35,7 +35,7 @@ export interface RenderingStatistics {
 /** Small candidate-specific assertions for the comparison's actual rendering requirements. */
 export function validateRendering(
   html: string,
-  candidate: "vitepress" | "starlight",
+  candidate: "vitepress" | "vitepress-v2" | "starlight",
   sourceMarkdown: string,
   expectedSidebarLinks: string[],
 ): RenderingStatistics {
@@ -80,14 +80,14 @@ export function validateRendering(
       const attr = (name: string) => node.attrs.find((item) => item.name === name)?.value ?? "";
       const classes = attr("class").split(/\s+/);
       inSidebar ||=
-        candidate === "vitepress"
+        candidate !== "starlight"
           ? node.tagName === "aside" && classes.includes("VPSidebar")
           : node.tagName === "nav" && classes.includes("sidebar");
       inPre ||= node.tagName === "pre";
       if (inSidebar && node.tagName === "a") sidebarLinks.add(attr("href"));
       if (
         node.tagName === "nav" &&
-        (candidate === "vitepress"
+        (candidate !== "starlight"
           ? classes.includes("VPDocAsideOutline")
           : attr("aria-labelledby") === "starlight__on-this-page")
       )

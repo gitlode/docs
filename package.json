@@ -9,7 +9,7 @@
   },
   "type": "module",
   "scripts": {
-    "typecheck": "tsc --noEmit && vue-tsc --noEmit -p candidates/vitepress/tsconfig.json",
+    "typecheck": "tsc --noEmit && vue-tsc --noEmit -p candidates/vitepress/tsconfig.json && vue-tsc --noEmit -p candidates/vitepress-v2/tsconfig.json",
     "test": "node --experimental-strip-types --test test/*.test.ts",
     "format": "node -e \"console.error('Error: Please run format:check or format:write instead.'); process.exit(1)\"",
     "format:check": "oxfmt --check .",
@@ -25,7 +25,8 @@
     "previews:verify": "node --experimental-strip-types src/publishing/preview-cli.ts verify",
     "search:verify": "node --experimental-strip-types src/publishing/search-probe.ts",
     "preview:vitepress": "node --experimental-strip-types src/publishing/preview-cli.ts preview vitepress",
-    "preview:starlight": "node --experimental-strip-types src/publishing/preview-cli.ts preview starlight"
+    "preview:starlight": "node --experimental-strip-types src/publishing/preview-cli.ts preview starlight",
+    "preview:vitepress-v2": "node --experimental-strip-types src/publishing/preview-cli.ts preview vitepress-v2"
   },
   "devDependencies": {
     "@astrojs/markdown-remark": "7.3.9",
@@ -44,6 +45,7 @@
     "typescript": "5.9.3",
     "unist-util-visit": "5.2.0",
     "vitepress": "1.6.4",
+    "vitepress-v2": "npm:vitepress@2.0.0-alpha.21",
     "vue": "3.5.45",
     "vue-tsc": "3.3.14"
   },

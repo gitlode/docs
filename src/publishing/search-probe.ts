@@ -5,6 +5,7 @@ import { pathToFileURL } from "node:url";
 import MiniSearch from "minisearch";
 import { parse } from "parse5";
 import type { DefaultTreeAdapterMap } from "parse5";
+import { tokenizeSearchText } from "vitepress-v2/dist/client/shared.js";
 
 import { withPreviews } from "./preview-server.ts";
 
@@ -122,30 +123,37 @@ await withPreviews([{ directory: dist, base: "/docs/", port: 0 }], async ([previ
   try {
     for (const edition of ["stable", "next"]) {
       for (const locale of ["en", "ja"]) {
-        const chunkDirectory = join(dist, "vitepress", edition, "assets/chunks");
-        const chunk = readdirSync(chunkDirectory).find((name) =>
-          name.startsWith(`@localSearchIndex${locale}.`),
-        );
-        if (!chunk) throw new Error(`Missing VitePress search chunk: ${edition}/${locale}`);
-        // The version-pinned VitePress adapter emits a module containing serialized MiniSearch JSON.
-        const module = (await import(pathToFileURL(join(chunkDirectory, chunk)).href)) as {
-          default: string;
-        };
-        const index = MiniSearch.loadJSON<{ title: string; titles: string[] }>(module.default, {
-          fields: ["title", "titles", "text"],
-          storeFields: ["title", "titles"],
-          searchOptions: { fuzzy: 0.2, prefix: true, boost: { title: 4, text: 2, titles: 1 } },
-        });
-        for (const query of queries) {
-          record(
-            "vitepress",
-            edition,
-            locale,
-            query,
-            index
-              .search(query)
-              .map((result) => ({ url: String(result.id), title: String(result.title) })),
+        for (const candidate of ["vitepress", "vitepress-v2"] as const) {
+          const chunkDirectory = join(dist, candidate, edition, "assets/chunks");
+          const chunk = readdirSync(chunkDirectory).find((name) =>
+            name.startsWith(`@localSearchIndex${locale}.`),
           );
+          if (!chunk) throw new Error(`Missing search chunk: ${candidate}/${edition}/${locale}`);
+          // Match each pinned version's UI tokenizer and result URL resolution.
+          const module = (await import(pathToFileURL(join(chunkDirectory, chunk)).href)) as {
+            default: string;
+          };
+          const index = MiniSearch.loadJSON<{ title: string; titles: string[] }>(module.default, {
+            ...(candidate === "vitepress-v2" ? { tokenize: tokenizeSearchText } : {}),
+            fields: ["title", "titles", "text"],
+            storeFields: ["title", "titles"],
+            searchOptions: { fuzzy: 0.2, prefix: true, boost: { title: 4, text: 2, titles: 1 } },
+          });
+          for (const query of queries) {
+            record(
+              candidate,
+              edition,
+              locale,
+              query,
+              index.search(query).map((result) => ({
+                url:
+                  candidate === "vitepress-v2"
+                    ? `/docs/${candidate}/${edition}${String(result.id)}`
+                    : String(result.id),
+                title: String(result.title),
+              })),
+            );
+          }
         }
         globals.document = {
           currentScript: null,
