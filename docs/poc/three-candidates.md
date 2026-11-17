@@ -64,3 +64,10 @@ v2へ置換した隔離実験の監査0件は[参考調査](future-outlook.md)�
 4. 検索から文書・節への遷移と、狭い画面の操作。
 
 v1とStarlightの既存評価を取り消すものではなく、v2について同じ観点を確認する。
+
+## Ubuntu CI
+
+[Draft PR #2](https://github.com/gitlode/docs/pull/2)のhead f5acf58に対する
+[run 44048733239](https://github.com/gitlode/docs/actions/runs/44048733239)は全工程成功した。
+クリーンインストール、型検査・66テスト、取得・ステージング、6ビルド、HTTP、96検索照会をUbuntu上でも完了。
+残る比較上の確認はオーナーによるv2プレビュー評価。Pagesへのデプロイは行っていない。
