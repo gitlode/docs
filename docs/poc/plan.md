@@ -62,3 +62,11 @@ VitePress v2 alpha.21 is now an equal candidate, not just future reference. Abso
 not required for this personal project. Preserve v1, v2 and Starlight; complete six builds,
 96 search queries, browser checks and hosted CI, then obtain the owner's v2 preview evaluation
 before revising the selection recommendation. See three-candidates.md.
+
+## Owner review received: 2026-11-18
+
+The owner completed v2 browser review: basic capabilities are comparable to v1, Japanese search
+improved, and no unfinished behavior was observed within the reviewed scope. For this new adoption,
+the owner prefers v2 over v1 based on expected development direction. This is an evaluation,
+not an upstream support guarantee. Next: revise the recommendation around v2 versus Starlight.
+Retain v1 as a comparison baseline; final SSG selection and candidate removal remain pending.
