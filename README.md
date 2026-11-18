@@ -4,32 +4,35 @@ The long-lived documentation publishing repository for [gitlode](https://github.
 Canonical English Markdown remains upstream; this repository owns publication, Japanese translations,
 site implementation, and operations. Project documentation under `docs/` is not product-site content.
 
-**Status:** English comparison previews implemented for VitePress and Astro Starlight, using the
-same six real documents from the pinned next revision. Acquisition, Markdown preparation, HTML
-validation, tests, and build CI are included. Japanese and combined stable/next deployment are next.
-No SSG has been selected and no production deployment is enabled.
+**Status:** VitePress v2 is selected and the implementation is consolidated on
+`2.0.0-alpha.21`. The six-document PoC supports English/Japanese, stable/next, local search,
+and complete artifact validation. No production deployment is enabled.
+See [the accepted decision](docs/decisions/0001-use-vitepress-v2.md).
 
 ## Quick start
 
 Requires Git, Node.js 22.23.4 (see `.node-version`), and npm 11.
 
 ```sh
-npm ci
+npm ci --ignore-scripts
 npm run check
 npm run source:acquire
 npm run content:stage
-npm run previews:build
-npm run previews:verify
+npm run site:build
+npm run site:verify
+npm run search:verify
+npm run preview
 ```
 
-Run `npm run preview:vitepress` and `npm run preview:starlight` in separate terminals, then open:
+Open <http://127.0.0.1:4173/docs/next/en/> or
+<http://127.0.0.1:4173/docs/next/ja/>. Stop the preview with Ctrl+C.
+The preview serves the last successful static build on loopback; rebuild after changing inputs.
+The bounded verification commands close their own temporary listeners automatically.
+These previews simulate the Pages path; they do not deploy the site.
 
-- VitePress: <http://127.0.0.1:4173/docs/vitepress/next/en/>
-- Starlight: <http://127.0.0.1:4174/docs/starlight/next/en/>
-
-These commands serve the last successful static build on loopback; rebuild after changing inputs.
-See [English preview evidence and limitations](docs/poc/english-previews.md), including the remaining
-VitePress dependency audit findings. These previews are not a production deployment.
+SSG-independent publication processing lives in `src/publishing/`; VitePress orchestration and
+checks live in `src/ssg/vitepress/`; trusted site configuration and Vue theme code live in
+`site/vitepress/`. See [architecture](docs/design/architecture.md) for these boundaries.
 
 Acquisition needs public GitHub access, without credentials. Staging is offline after acquisition.
 The staging command prints a unique `.generated/staging/run-*/` directory containing both editions

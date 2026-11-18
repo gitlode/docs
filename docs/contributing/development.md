@@ -5,7 +5,7 @@
 Use Node.js 22.23.4, npm 11 (verified with 11.11.0), and Git on Windows or Linux. Node runs the
 erasable TypeScript scripts directly; TypeScript 5.9.3 checks types separately. Build and preview
 dependencies are local to this repository; no upstream package installation occurs.
-`package-lock.json` is checked in. The Node patch upgrade supports current Astro dependencies.
+`package-lock.json` is checked in. The runtime remains pinned after removing the comparison-only dependencies.
 With Volta, `volta run --node 22.23.4 npm run check` uses the selected runtime without changing
 the global default; the same prefix works for installation, build, and preview commands.
 
@@ -14,61 +14,62 @@ npm ci --ignore-scripts
 npm run check
 npm run source:acquire
 npm run content:stage
-npm run previews:build
+npm run site:build
 ```
 
 `source:acquire` needs outbound HTTPS to GitHub; `content:stage` is offline after acquisition.
 Each successful stage prints a new directory with a manifest and 12 raw Markdown files (six per
 edition). Inspect that manifest to identify exact inputs. Do not mistake staged Markdown for a built site.
 
-## Comparison previews
+## Site builds and preview
 
-`npm run previews:prepare` creates trusted candidate inputs from a single staging run. The default
-edition for preparation is `next`. `npm run previews:build` defaults to both editions and all three candidates,
-then prints a unique `.generated/previews/combined-*/dist` complete artifact mounted at `/docs/`.
-Six builds share one upstream staging manifest. Each edition retains its own build report. `inputs.json` records identical source
-hashes for all candidates; `build.json` adds output checks and measurements. A failed build does
+`npm run site:prepare` creates trusted VitePress inputs for `next` without building a site.
+`npm run site:build` defaults to both editions, then prints a unique
+`.generated/previews/combined-*/dist` complete artifact mounted at `/docs/`. The two builds share
+one upstream staging manifest. Each edition retains its own report: `inputs.json` records source
+and translation provenance; `build.json` adds output checks and measurements. A failed build does
 not replace the `.generated/preview.json` pointer to the last successful build.
 
-Run in separate terminals:
-
 ```sh
-npm run preview:vitepress
-npm run preview:starlight
-npm run preview:vitepress-v2
+npm run preview
 ```
 
-Open `http://127.0.0.1:4173/docs/vitepress/next/en/` and
-`http://127.0.0.1:4174/docs/starlight/next/en/`, plus
-`http://127.0.0.1:4175/docs/vitepress-v2/next/en/`. Stop with Ctrl+C. The shared preview server serves
-only built static files on loopback; it does not run either SSG's development server or watch files.
-Use the language selector to switch the current page. Japanese `profiling/` is translated;
-`usage/` and the other four documents intentionally demonstrate English fallback.
-Rebuild after changes. Ports are fixed; stop an existing preview before starting another on that port.
-The header version links preserve the current locale and open the target edition home with a full
-reload. They do not retain the current document or fragment. Starlight uses its language selector
-area in the mobile preferences menu on narrow screens. Stable has no owned translations
-in this corpus and uses English fallback; next Profiling Guide has the Japanese example.
-`npm run previews:build -- stable` or `-- next` remains available for a single-edition diagnostic
-build without version controls. Run the default build again to restore the combined preview.
-The complete artifact includes all three candidates, both editions, both locales, a comparison landing,
-404 and `.nojekyll`. It is a Pages-path simulation; nothing is deployed. Preview commands still
-use ports 4173/4174/4175 and existing URLs; all serve the complete artifact in combined mode.
+Open `http://127.0.0.1:4173/docs/next/en/` or `http://127.0.0.1:4173/docs/next/ja/`.
+Stop with Ctrl+C. The preview server serves built static files on loopback; it does not run the
+VitePress development server or watch files. Rebuild after changes. The preview port is fixed;
+stop an existing preview before starting another on port 4173.
 
-The Starlight adapter uses Astro's unified processor explicitly. Imported files remain plain `.md`;
-Starlight's transitive MDX dependency does not grant permission to import `.mdx`. SSG configuration
-is maintained under `candidates/` and copied into each disposable build root.
+The language selector switches the current page. The header version links preserve the current
+locale and open the target edition home with a full reload, without retaining the current document
+or fragment. Stable has no owned translations in this corpus and uses English fallback. The next
+Profiling Guide has the Japanese example; the other five next documents demonstrate fallback.
+
+`npm run site:build -- stable` or `-- next` creates a single-edition diagnostic build without
+version controls. Run the default build again to restore the complete preview. The complete
+artifact includes both editions/locales, an edition/language landing, 404 and `.nojekyll`.
+This is a Pages-path simulation; nothing is deployed. Old candidate-prefixed URLs and `preview:*`
+commands are retired. Rebuild before previewing outputs created by the former comparison pipeline.
+
+## Code organization
+
+Keep SSG-independent acquisition, staging, Markdown processing, translations, static serving, and
+HTML reference validation in `src/publishing/`. `content.ts` returns prepared content and metadata
+without generating framework files. Keep VitePress build assembly and checks that depend on its
+rendered markup or search APIs in `src/ssg/vitepress/`. `src/cli/site.ts` composes that adapter.
+Trusted VitePress config, metadata types, and Vue theme code live in `site/vitepress/` and are
+copied into disposable generated roots. All generated inputs and output stay under `.generated/`.
+Do not import VitePress into the publication domain. See [architecture](../design/architecture.md).
 
 ## Verification process lifecycle
 
-For automated HTTP checks, use `npm run previews:verify` after building. It starts all three static
-servers inside one Node process on OS-assigned ports, checks representative responses with
+For automated HTTP checks, use `npm run site:verify` after building. It starts a static
+server inside one Node process on an OS-assigned port, checks representative responses with
 five-second request timeouts, and closes all owned listeners and connections in `finally`.
-It also cleans up the first server if the second fails to start. It does not compete for the
-developer's fixed 4173/4174/4175 ports. Regression tests confirm ports can be rebound after successful
+It does not compete for the developer's fixed port 4173. The reusable server utility also handles
+partial startup failures. Regression tests confirm ports can be rebound after successful
 checks, failed checks, and partial startup failures; unrelated listeners are left alone.
 
-Manual `preview:*` commands keep serving until interrupted. Their CLI handles SIGINT/SIGTERM and
+The manual `preview` command keeps serving until interrupted. Its CLI handles SIGINT/SIGTERM and
 waits for server closure. A forced termination or a terminated shell wrapper is not proof that its
 children stopped; signal behavior varies across operating systems and launch tools.
 
@@ -96,7 +97,7 @@ run after an uncatchable process kill. Bounded checks minimize the chance of orp
 Prefer TypeScript where the framework provides useful type information, including VitePress
 configuration, theme entry points, and Vue SFC scripts (`script setup lang="ts"`). Do not force
 migration when useful type support is absent. `npm run typecheck` checks the pipeline with `tsc`
-and the VitePress configuration/theme/templates with `vue-tsc`. The candidate uses Bundler module
+and the VitePress configuration/theme/templates with `vue-tsc`. The site uses Bundler module
 resolution to match Vite; the publishing scripts retain NodeNext. Generated site metadata has a
 shared TypeScript interface and reaches Vue through typed theme data. The JSON input is trusted
 pipeline output, not a runtime-validated external API. Vue is a direct pinned development dependency
@@ -150,17 +151,19 @@ Use exact file paths in `config/publication.json`; adding to the sidebar is a se
 
 ## Validation
 
-`npm run search:verify` probes the built native local search indexes after a combined build.
-VitePress uses MiniSearch with the default UI query options; Starlight uses the generated Pagefind
-runtime. The probe runs in Node with a minimal Pagefind language shim, not a browser or simulated
-search UI. It records query results in the generated run's `search.json`, verifies result scope
-and destinations, and closes its ephemeral static server. Missing matches for Japanese substrings
-are observations rather than build failures. See the Japanese [search comparison](../poc/search.md).
+`npm run search:verify` probes the built native local search indexes after a complete two-edition
+build. It executes 32 queries (eight queries across two editions and two locales) using MiniSearch,
+VitePress's tokenizer, and default UI query options. It runs in Node, not a browser or simulated
+search UI. It checks that the served index assets match the built files, records query results in
+the generated run's `search.json`, verifies result scope and destinations/fragments, and closes its
+ephemeral static server. Missing matches for Japanese substrings are observations rather than build
+failures. Historical comparisons and limitations remain in [search evidence](../poc/search.md) and
+[three-candidate evidence](../poc/three-candidates.md).
 
-The probe intentionally depends on pinned candidate index formats. Revisit it when upgrading the
-SSGs. MiniSearch is explicitly pinned to the installed VitePress dependency version because the
-probe imports it directly. No external search service, tokenizer customization, or cross-version
-index aggregation is configured.
+The probe intentionally depends on the pinned VitePress index format and internal tokenizer API.
+Revisit it when upgrading. MiniSearch is explicitly pinned to the installed VitePress dependency
+version because the probe imports it directly. No external search service, tokenizer customization,
+or cross-version index aggregation is configured.
 
 `npm run check` runs formatting validation, linting, type checking, and Node's test runner. Tests create isolated local Git fixtures
 under `.generated/tests/`; they do not use the network. They verify immutable blob reads despite
@@ -169,9 +172,10 @@ symlink blobs, output path containment, Markdown safety, route/link rewriting, a
 validation failures. Generated test fixtures remain ignored for diagnosis.
 
 `.github/workflows/docs.yml` performs these checks plus real upstream acquisition/staging on PRs,
-main pushes, and manual runs, followed by all six edition/candidate builds and combined English/Japanese validation and output validation. Hosted
-execution passed on Ubuntu; see [reproducibility evidence](../poc/reproducibility.md). See [preview evidence](../poc/english-previews.md) for local
-checks and the remaining browser, localization, and deployment acceptance work.
+main pushes, and manual runs, followed by both edition builds, English/Japanese output validation,
+bounded HTTP checks, and search probes. Production deployment remains a separate approval and
+implementation step. Historical clean-clone and hosted results are in
+[reproducibility evidence](../poc/reproducibility.md); they are not proof for a later untested commit.
 
 ## Troubleshooting
 
@@ -197,14 +201,12 @@ before updating that hash. A matching hash does not certify translation quality.
 Profiling Guide is a PoC example awaiting human language review. Stable translation snapshot policy
 remains open; no next-to-stable substitution occurs.
 
-## Parallel VitePress versions
+## VitePress upgrades
 
-VitePress 1.6.4 remains `vitepress`; alpha.21 is exact-pinned through the npm alias
-`vitepress-v2`. Each has its own config/theme/tsconfig under candidates and its own generated
-route prefix. The pipeline invokes explicit package CLI paths rather than the ambiguous npm bin.
-V2 client code imports `vitepress-v2/client`; its SSR config bundles the alias via noExternal.
-These two settings support coexistence, not a general v1-to-v2 migration requirement.
-Both Vue candidates are checked with vue-tsc. Keep equivalent behavior when changing either copy.
-Search verification now performs 96 queries; v2 uses its tokenizer and adds the candidate base to
-index result IDs, matching its UI. The probe depends on pinned internal search APIs.
-See [three-candidate evidence](../poc/three-candidates.md) for acceptance status.
+The sole renderer is exact-pinned as `vitepress@2.0.0-alpha.21`; application code imports the
+canonical package. The old `vitepress-v2` alias and alias-specific SSR bundling are removed.
+Use the retained PoC comparison documents as historical evidence, not current command references.
+When upgrading, rerun type checks, both edition builds, output/localization/version checks,
+search probes, and browser checks of fallback notices, navigation, and search. Alpha status means
+compatibility must be verified against the actual pinned release; the owner's adoption decision
+accepts that maintenance responsibility.

@@ -37,10 +37,10 @@ This does not assert that upstream v1 support has ended.
   content-language markup, with regression coverage through future VitePress updates.
 - Preserve TypeScript/Vue checks, source selection and safety boundaries, translation
   freshness checks, edition isolation, link validation, and search verification.
-- Consolidate the implementation around v2 in the next increment. Remove non-selected
+- The implementation is consolidated around v2. Removed non-selected
   candidates and comparison-only dependencies/configuration while preserving evidence.
-  The npm alias and SSR settings introduced for v1/v2 coexistence should be reassessed
-  when only v2 remains, rather than treated as permanent requirements.
+  The npm alias and coexistence-only SSR settings are removed. SSG-independent processing
+  and the VitePress adapter occupy separate domains; see architecture and consolidation evidence.
 - Recheck the resulting dependency graph and audit after consolidation. Historical
   v1 findings must not be attributed to v2, and an earlier clean audit is not a guarantee.
 - Finalize publication scope, internal references, assets, stable translation policy,
@@ -52,3 +52,5 @@ This does not assert that upstream v1 support has ended.
 - [Owner review and three-candidate validation](../poc/three-candidates.md)
 - [Historical selection proposal and owner outcome](../poc/ssg-proposal.md)
 - [Future outlook and migration experiment](../poc/future-outlook.md)
+
+- [Consolidation validation](../poc/consolidation.md)

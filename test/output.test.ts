@@ -4,10 +4,11 @@ import { dirname, join, resolve } from "node:path";
 import test from "node:test";
 
 import { safeDirectory } from "../src/publishing/pipeline.ts";
-import { validateOutput, validateRendering } from "../src/publishing/validate-output.ts";
+import { validateOutput } from "../src/publishing/validate-output.ts";
+import { validateRendering } from "../src/ssg/vitepress/validate-rendering.ts";
 
 const scratch = safeDirectory(resolve("."), ".generated/tests");
-const base = "/docs/candidate/next/en/";
+const base = "/docs/next/en/";
 
 function fixture(extra = "") {
   const root = mkdtempSync(join(scratch, "output-"));
@@ -77,44 +78,39 @@ test("encoded fragments resolve and executable URL schemes fail", () => {
 test("rendering assertions distinguish sidebar, TOC, code and table regressions", () => {
   const source =
     "# Page\n\n## Example\n\n```ts\nconst x: Array<string> = [];\n```\n\n| A | B |\n| - | - |\n| 1 | 2 |\n";
-  for (const candidate of ["vitepress", "vitepress-v2", "starlight"] as const) {
-    const sidebar =
-      candidate !== "starlight"
-        ? '<aside class="VPSidebar"><a href="/docs/guide/">Guide</a></aside>'
-        : '<nav class="sidebar"><a href="/docs/guide/">Guide</a></nav>';
-    const toc =
-      candidate !== "starlight"
-        ? '<nav class="VPDocAsideOutline"></nav>'
-        : '<nav aria-labelledby="starlight__on-this-page"></nav>';
-    const code = "<pre><code><span>const x: Array&lt;string&gt; = [];</span>\n</code></pre>";
-    const table = "<table><tr><td>1</td><td>2</td></tr></table>";
-    const render = (html: string) => validateRendering(html, candidate, source, ["/docs/guide/"]);
-    assert.deepEqual(render(sidebar + toc + code + table), {
-      sidebarLinks: 1,
-      tocHeadings: 1,
-      codeBlocks: 1,
-      tables: 1,
-    });
-    assert.throws(
-      () => render(toc + code + table + '<a href="/docs/guide/">Outside sidebar</a>'),
-      /missing sidebar/,
-    );
-    assert.throws(() => render(sidebar + code + table), /missing per-page TOC/);
-    assert.throws(
-      () => render(sidebar + toc + code.replace("const x", "const y") + table),
-      /code block missing or changed/,
-    );
-    assert.throws(() => render(sidebar + toc + code), /missing GFM tables/);
-  }
+  const sidebar = '<aside class="VPSidebar"><a href="/docs/guide/">Guide</a></aside>';
+  const toc = '<nav class="VPDocAsideOutline"></nav>';
+  const code = "<pre><code><span>const x: Array&lt;string&gt; = [];</span>\n</code></pre>";
+  const table = "<table><tr><td>1</td><td>2</td></tr></table>";
+  const render = (html: string) => validateRendering(html, source, ["/docs/guide/"]);
+  assert.deepEqual(render(sidebar + toc + code + table), {
+    sidebarLinks: 1,
+    tocHeadings: 1,
+    codeBlocks: 1,
+    tables: 1,
+  });
+  assert.throws(
+    () => render(toc + code + table + '<a href="/docs/guide/">Outside sidebar</a>'),
+    /missing sidebar/,
+  );
+  assert.throws(() => render(sidebar + code + table), /missing per-page TOC/);
+  assert.throws(
+    () => render(sidebar + toc + code.replace("const x", "const y") + table),
+    /code block missing or changed/,
+  );
+  assert.throws(() => render(sidebar + toc + code), /missing GFM tables/);
 });
 
-test("Starlight Expressive Code block lines preserve blank lines and indentation", () => {
+test("VitePress code blocks preserve blank lines and indentation", () => {
   const source = "# Example\n\n```js\n// example.js\n\n  const x = 1;\n```\n";
-  const html =
-    '<pre><code><div class="ec-line"><div class="code">// example.js</div></div><div class="ec-line"><div class="code">\n</div></div><div class="ec-line"><div class="code"><span class="indent">  </span>const x = 1;</div></div></code></pre>';
-  assert.equal(validateRendering(html, "starlight", source, []).codeBlocks, 1);
+  const html = "<pre><code>// example.js\n\n  const x = 1;\n</code></pre>";
+  assert.equal(validateRendering(html, source, []).codeBlocks, 1);
   assert.throws(
-    () => validateRendering(html.replace("// example.js", ""), "starlight", source, []),
+    () => validateRendering(html.replace("// example.js", ""), source, []),
+    /code block missing or changed/,
+  );
+  assert.throws(
+    () => validateRendering(html.replace("\n\n", "\n"), source, []),
     /code block missing or changed/,
   );
 });

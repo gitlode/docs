@@ -12,13 +12,12 @@ export interface VersionNavigationStatistics {
 /** Assert cross-build navigation without treating ordinary body links as version controls. */
 export function validateVersionNavigation(
   html: string,
-  candidate: "vitepress" | "vitepress-v2" | "starlight",
   edition: Edition,
   locale: "en" | "ja",
   route: string,
 ): VersionNavigationStatistics {
   const other = edition === "stable" ? "next" : "stable";
-  const target = `/docs/${candidate}/${other}/${locale}/`;
+  const target = `/docs/${other}/${locale}/`;
   let controls = 0;
   let validControls = 0;
   let headerControls = 0;
@@ -44,11 +43,8 @@ export function validateVersionNavigation(
           const attr = (name: string) => child.attrs.find((a) => a.name === name)?.value;
           if (attr("aria-current") === "page" && text(child).trim() === edition) current = true;
           if (child.tagName === "a" && attr("href") === target && text(child).trim() === other) {
-            // VitePress's router bypasses links with target; Astro's reload marker also
-            // keeps this contract explicit if client routing is introduced later.
-            counterpart =
-              attr("target") === "_self" &&
-              (candidate !== "starlight" || attr("data-astro-reload") !== undefined);
+            // VitePress's router bypasses links with an explicit target attribute.
+            counterpart = attr("target") === "_self";
           }
         }
         if ("childNodes" in child)
@@ -62,7 +58,7 @@ export function validateVersionNavigation(
   inspect(parse(html));
   if (headerControls === 0 || validControls !== controls)
     throw new Error(
-      `${candidate}: ${edition}/${locale}/${route}: invalid version navigation to ${target}`,
+      `VitePress: ${edition}/${locale}/${route}: invalid version navigation to ${target}`,
     );
   return { edition, locale, target };
 }

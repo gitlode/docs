@@ -35,13 +35,14 @@ Do not create empty candidate directories or claim previews before the rendering
 
 ## Next implementation tasks
 
-1. Native search comparison is owner-reviewed: both sufficient, VitePress more feature-rich, but
-   not decisive for selection. Retain query limitations; do not add search customization.
-2. Clean-clone reproducibility and hosted CI passed; see reproducibility.md. Pages deployment remains separate.
-3. Maintenance costs, dependency findings, warnings, and limitations are consolidated in maintenance.md.
-4. Owner reviews the updated v2-versus-Starlight recommendation in ssg-proposal.md. Both passed browser and Ubuntu CI acceptance for the PoC; Starlight is narrowly recommended for native fallback. V1 is retained only as a comparison baseline.
-5. Keep explicit asset selection, production publication scope, and translation snapshot policy
-   visible as follow-up; do not expand publication merely to hide link errors.
+VitePress v2 has been selected and the code is consolidated; see ADR 0001 and
+[consolidation evidence](consolidation.md). Earlier comparison milestones are historical.
+
+1. Review the consolidated site and record PoC exit acceptance separately.
+2. Agree production publication scope and explicit assets; resolve internal references to
+   documents outside the current six-document corpus without automatic publication expansion.
+3. Decide stable translation snapshots and review the Japanese example's language quality.
+4. Review remaining dependency audit findings and deployment preparation before launch.
 
 ## Owner review points
 
@@ -77,3 +78,10 @@ ADR 0001 records the owner's choice of VitePress v2 over the narrow Starlight re
 The owner prefers Vue and accepts the small custom fallback implementation. This supersedes
 earlier pending-selection notes. Next: consolidate on v2, retain validation, and reassess the
 dependency graph; publication and PoC exit remain separate decisions.
+
+## Consolidation completed
+
+The owner authorized removal of non-selected code after choosing v2. The implementation now
+separates publication processing, VitePress-specific assembly/verification, and site templates.
+This supersedes earlier instructions to retain parallel candidates. Historical evidence remains.
+See [consolidation](consolidation.md); production launch and PoC exit are still separate gates.

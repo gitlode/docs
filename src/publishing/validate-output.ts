@@ -3,9 +3,6 @@ import { extname, join, posix, resolve } from "node:path";
 
 import { parse } from "parse5";
 import type { DefaultTreeAdapterMap } from "parse5";
-import { remark } from "remark";
-import remarkGfm from "remark-gfm";
-import { visit } from "unist-util-visit";
 
 interface Reference {
   attribute: "href" | "src";
@@ -23,101 +20,6 @@ export interface OutputStatistics {
   htmlFiles: number;
   localLinks: number;
   expectedPages: number;
-}
-
-export interface RenderingStatistics {
-  sidebarLinks: number;
-  tocHeadings: number;
-  codeBlocks: number;
-  tables: number;
-}
-
-/** Small candidate-specific assertions for the comparison's actual rendering requirements. */
-export function validateRendering(
-  html: string,
-  candidate: "vitepress" | "vitepress-v2" | "starlight",
-  sourceMarkdown: string,
-  expectedSidebarLinks: string[],
-): RenderingStatistics {
-  const source = remark().use(remarkGfm).parse(sourceMarkdown);
-  const sourceCode: string[] = [];
-  let sourceTables = 0;
-  let tocHeadings = 0;
-  visit(source, (node) => {
-    if (node.type === "code") sourceCode.push(node.value);
-    if (node.type === "table") sourceTables++;
-    if (node.type === "heading" && (node.depth === 2 || node.depth === 3)) tocHeadings++;
-  });
-
-  const sidebarLinks = new Set<string>();
-  const renderedCode: string[] = [];
-  let renderedTables = 0;
-  let hasToc = false;
-  function textContent(node: DefaultTreeAdapterMap["node"]): string {
-    if ("value" in node) return node.value;
-    if (
-      candidate === "starlight" &&
-      "tagName" in node &&
-      node.attrs.some(
-        (attr) => attr.name === "class" && attr.value.split(/\s+/).includes("ec-line"),
-      )
-    ) {
-      // Expressive Code renders lines as adjacent block elements, without text-node newlines.
-      const code = node.childNodes.find(
-        (child) =>
-          "tagName" in child &&
-          child.attrs.some(
-            (attr) => attr.name === "class" && attr.value.split(/\s+/).includes("code"),
-          ),
-      );
-      const line = code ? textContent(code) : node.childNodes.map(textContent).join("");
-      return line.replace(/\r?\n$/, "") + "\n";
-    }
-    return "childNodes" in node ? node.childNodes.map(textContent).join("") : "";
-  }
-  function inspect(node: DefaultTreeAdapterMap["node"], inSidebar = false, inPre = false): void {
-    if ("tagName" in node) {
-      const attr = (name: string) => node.attrs.find((item) => item.name === name)?.value ?? "";
-      const classes = attr("class").split(/\s+/);
-      inSidebar ||=
-        candidate !== "starlight"
-          ? node.tagName === "aside" && classes.includes("VPSidebar")
-          : node.tagName === "nav" && classes.includes("sidebar");
-      inPre ||= node.tagName === "pre";
-      if (inSidebar && node.tagName === "a") sidebarLinks.add(attr("href"));
-      if (
-        node.tagName === "nav" &&
-        (candidate !== "starlight"
-          ? classes.includes("VPDocAsideOutline")
-          : attr("aria-labelledby") === "starlight__on-this-page")
-      )
-        hasToc = true;
-      if (node.tagName === "table") renderedTables++;
-      if (inPre && node.tagName === "code") renderedCode.push(textContent(node));
-    }
-    if ("childNodes" in node) for (const child of node.childNodes) inspect(child, inSidebar, inPre);
-  }
-  inspect(parse(html));
-  for (const link of expectedSidebarLinks) {
-    if (!sidebarLinks.has(link)) throw new Error(`${candidate}: missing sidebar link ${link}`);
-  }
-  if (tocHeadings > 0 && !hasToc) throw new Error(`${candidate}: missing per-page TOC navigation`);
-  const normalized = (text: string) => text.replaceAll("\r\n", "\n").trim();
-  const unmatched = renderedCode.map(normalized);
-  for (const code of sourceCode) {
-    const index = unmatched.indexOf(normalized(code));
-    if (index < 0)
-      throw new Error(`${candidate}: source code block missing or changed: ${code.slice(0, 80)}`);
-    unmatched.splice(index, 1);
-  }
-  if (renderedTables < sourceTables)
-    throw new Error(`${candidate}: missing GFM tables (${renderedTables}/${sourceTables})`);
-  return {
-    sidebarLinks: expectedSidebarLinks.length,
-    tocHeadings,
-    codeBlocks: sourceCode.length,
-    tables: sourceTables,
-  };
 }
 
 function inspectHtml(content: string): HtmlInfo {

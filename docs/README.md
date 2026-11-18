@@ -32,6 +32,9 @@ The following homes contain tracked working material with a limited purpose:
 - `proposals/`: [development environment feedback](proposals/development-environment.md)
   and future suggestions from this project to gitlode itself.
 
+The current post-selection implementation is covered by [VitePress consolidation](poc/consolidation.md).
+Earlier candidate comparisons retain their historical commands and measurements.
+
 Temporary does not mean disposable before review. Keep active evidence and proposals in Git.
 Each working document should identify status, owner or decision authority, next action, and its
 closure/review condition. Historical kickoff material is retained verbatim; later owner instructions

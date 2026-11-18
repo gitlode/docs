@@ -12,10 +12,9 @@ export interface LocalizationStatistics {
   contentLanguage: Locale;
 }
 
-/** Check the candidate's actual locale controls and rendered fallback semantics. */
+/** Check the VitePress theme's actual locale controls and rendered fallback semantics. */
 export function validateLocalization(
   html: string,
-  candidate: "vitepress" | "vitepress-v2" | "starlight",
   locale: Locale,
   route: string,
   base: string,
@@ -44,26 +43,17 @@ export function validateLocalization(
       const attr = (name: string) => node.attrs.find((item) => item.name === name)?.value;
       if (node.tagName === "html") documentLanguage = attr("lang") ?? "";
       if (node.tagName === "body") bodyText = text(node);
-      inControl ||=
-        candidate !== "starlight"
-          ? (attr("class") ?? "").split(/\s+/).includes("VPNavBarTranslations")
-          : node.tagName === "starlight-lang-select";
-      if (
-        inControl &&
-        (candidate !== "starlight"
-          ? node.tagName === "a" && attr("href") === languageSwitchTarget
-          : node.tagName === "option" && attr("value") === languageSwitchTarget)
-      )
+      inControl ||= (attr("class") ?? "").split(/\s+/).includes("VPNavBarTranslations");
+      if (inControl && node.tagName === "a" && attr("href") === languageSwitchTarget)
         hasSwitch = true;
-      inEnglishBody ||=
-        node.tagName === (candidate !== "starlight" ? "div" : "main") && attr("lang") === "en";
+      inEnglishBody ||= node.tagName === "div" && attr("lang") === "en";
       if (inEnglishBody && /^h[1-6]$/.test(node.tagName)) hasEnglishBody = true;
     }
     if ("childNodes" in node)
       for (const child of node.childNodes) inspect(child, inControl, inEnglishBody);
   }
   inspect(parse(html));
-  const context = `${candidate}: ${locale}/${route}`;
+  const context = `VitePress: ${locale}/${route}`;
   if (documentLanguage !== locale)
     throw new Error(`${context}: expected html lang=${locale}, found ${documentLanguage}`);
   if (!hasSwitch)
