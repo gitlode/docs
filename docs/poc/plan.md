@@ -1,6 +1,6 @@
 ﻿# Implementation plan
 
-Status: V2 owner review complete; updated v2-versus-Starlight recommendation awaits selection.
+Status: Owner selected VitePress v2 on 2026-11-18; implementation consolidation is next.
 Owner: human project owner. Implementation: Codex working in `gitlode/docs` on `work/poc-evaluation` after PR #1.
 The kickoff increment was committed as `0ef1673`. Commit subsequent work at practical increments;
 the owner plans to squash merge into `main`. The owner approved and squash merged PR #1 as b9c53d5; hosted CI passed. The previous work/initial-poc branch is retained. No deployment has been performed.
@@ -27,8 +27,8 @@ PoC using documented local choices without waiting for commonization approval. S
 | 3. Comparable previews   | Add VitePress and Starlight under `candidates/`; same staged input; titles, README routing, sidebar, TOC, code fences | Implemented; see English preview evidence |
 | 4. Localization          | Owned Japanese example, missing-page behavior, native/custom fallback comparison, file-level freshness tests          | Owner accepted; comparison complete       |
 | 5. Pages simulation      | Both editions/locales under nested `/docs/` paths; complete artifact; links/assets validation; PR build               | Implemented; owner accepted version UX    |
-| 6. Evidence and proposal | Timings, sizes, warnings, screenshots/manual review, reproducible comparison, proposed recommendation                 | Updated recommendation ready for review   |
-| 7. Human selection gate  | Owner reviews both previews and approves an SSG; only then remove a candidate                                         | Human decision pending                    |
+| 6. Evidence and proposal | Timings, sizes, warnings, screenshots/manual review, reproducible comparison, proposed recommendation                 | Review complete; see ADR 0001             |
+| 7. Human selection gate  | Owner reviews both previews and approves an SSG; only then remove a candidate                                         | VitePress v2 selected                     |
 
 Milestones are reviewable working increments, not separate disposable repositories.
 Do not create empty candidate directories or claim previews before the rendering code exists.
@@ -70,3 +70,10 @@ improved, and no unfinished behavior was observed within the reviewed scope. For
 the owner prefers v2 over v1 based on expected development direction. This is an evaluation,
 not an upstream support guarantee. Next: revise the recommendation around v2 versus Starlight.
 Retain v1 as a comparison baseline; final SSG selection and candidate removal remain pending.
+
+## Accepted SSG decision
+
+ADR 0001 records the owner's choice of VitePress v2 over the narrow Starlight recommendation.
+The owner prefers Vue and accepts the small custom fallback implementation. This supersedes
+earlier pending-selection notes. Next: consolidate on v2, retain validation, and reassess the
+dependency graph; publication and PoC exit remain separate decisions.

@@ -94,3 +94,5 @@ not a v1 EOL statement. Next: update the selection recommendation for v2 versus 
 No final SSG choice or candidate removal was authorized. Keep all implementations for now.
 
 2026-11-18 recommendation updated in ssg-proposal.md: compare v2 against Starlight, retain a narrow Starlight preference for native fallback, explicitly credit v2 typechecking and accepted browser/CI results. Do not transfer v1 audit/search drawbacks to v2. Owner final selection is now the next gate; no further feature work, removal or deployment is implied.
+
+2026-11-18 FINAL SSG DECISION: owner selected VitePress v2, preferring Vue and accepting the small custom fallback implementation. See docs/decisions/0001-use-vitepress-v2.md. This supersedes all pending-selection notes. Next: v2-only consolidation, preserving tests and evidence; no production approval. This increment records the decision only; all candidates still exist.

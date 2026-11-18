@@ -13,6 +13,7 @@ The following homes contain maintained knowledge that survives the PoC and produ
 
 - [Architecture](design/architecture.md): ownership, current contracts, boundaries, and constraints.
 - [Development](contributing/development.md): supported workflows, tooling, and maintenance procedures.
+- [ADR 0001: Use VitePress v2](decisions/0001-use-vitepress-v2.md): accepted SSG choice and maintenance responsibilities.
 - Accepted architecture decisions belong in `decisions/` when they exist. Preserve their
   rationale and consequences; mark superseded decisions rather than silently replacing history.
 

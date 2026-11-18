@@ -8,7 +8,7 @@ Its own `docs/` directory is never automatically published as product documentat
 
 Current flow: `config/sources.json` -> Git object acquisition -> explicit allowlist -> byte-preserving
 staging/provenance -> shared Markdown preparation -> candidate adapters -> English/Japanese static builds
-and output validation. Stable/next artifact assembly is implemented locally; the human SSG decision and deployment remain pending.
+and output validation. Stable/next artifact assembly is implemented locally; VitePress v2 is selected (ADR 0001); consolidation and deployment remain pending.
 
 ## Acquisition and pins
 
@@ -138,3 +138,10 @@ semantics but retain version-specific config/theme imports and independently typ
 An exact npm alias allows both releases to coexist. Edition switches stay inside their candidate.
 The shared build, validation, HTTP checks and search probes cover all three. Selection is deferred
 until the expanded comparison is reviewed; prerelease status alone is not a disqualifier.
+
+## Accepted SSG
+
+The owner selected VitePress v2 on 2026-11-18; see [ADR 0001](../decisions/0001-use-vitepress-v2.md).
+The current implementation still retains all three comparison candidates. Consolidation is the
+next increment, not an already completed change. Earlier comparison-selection gates above are
+superseded by this decision; production launch remains pending.
