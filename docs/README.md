@@ -20,6 +20,11 @@ The following homes contain maintained knowledge that survives the PoC and produ
 Durable documents describe the current system and explicitly distinguish unimplemented proposals.
 They are the canonical home for lasting contracts, not session logs or task checklists.
 
+Production preparation includes separating development-oriented documentation from operations
+guides and updating the project's PoC framing. This is work on the documentation system itself,
+not published product content. Update relevant durable documentation within each implementation
+increment; see P6 in [production readiness](handoff/production-readiness.md).
+
 ## Temporary documentation
 
 The following homes contain tracked working material with a limited purpose:

@@ -3,7 +3,7 @@
 Status: active follow-up backlog, 2026-11-19. Production implementation has not started.
 Maintainer: the next human or LLM continuing this repository. Decision authority: project owner.
 Retire this document only after each item is completed or explicitly deferred with an owner decision;
-promote implemented operational contracts to `docs/design/` and `docs/contributing/`.
+promote implemented contracts to durable development and operations documentation, following P6.
 
 The owner accepted VitePress v2 consolidation and approved the PoC closeout sequence. PoC exit,
 merge, and production launch are separate decisions. This document carries the work between a
@@ -46,6 +46,8 @@ Start with P1: inspect the desired production corpus and present a concrete publ
 P2 and P3 can be investigated alongside that proposal. P4 depends on the chosen source and translation
 policies. Prepare P5 only after these decisions have a reviewable implementation. Close each increment
 with its own checks and commit; do not accumulate an unreviewed production-sized change.
+P6 applies throughout P1-P5: update the system's own documentation in each increment, then
+review its completeness before launch. It is not a documentation-only phase postponed until the end.
 
 ### P1. Production publication, links, and assets
 
@@ -167,6 +169,39 @@ complete `dist/`. Upload only static `dist/`, never the whole generated run or r
 Completion evidence: approved go-live, successful deployment and hosted checks, maintained operating
 instructions for updates and failures, and an agreed recovery procedure. This is the production
 acceptance point, separate from PoC completion.
+
+### P6. Documentation for the documentation system
+
+Current limitation: architecture and development material exist, but the repository still presents
+parts of itself as a PoC project. This task concerns this system's internal project documentation,
+not the gitlode product documents selected for publication. Completing the PoC does not complete it.
+
+Entry points: `README.md`, `AGENTS.md`, `docs/README.md`, `docs/design/architecture.md`,
+`docs/contributing/development.md`, and the active `docs/poc/` and `docs/handoff/` material.
+
+1. Organize durable documentation by audience and purpose. Keep architecture, implementation,
+   extension points and contributor setup in development-oriented material. Provide separate
+   operations material for content/translation updates, releases, deployment, verification,
+   troubleshooting and recovery. An operations home such as `docs/operations/` can be introduced
+   when those procedures are implemented; do not create empty runbooks or describe proposals as live behavior.
+2. Update the project entry points, agent instructions, status and navigation to describe the
+   maintained production documentation system. Retain useful historical PoC evidence with explicit
+   historical status, and promote lasting contracts out of temporary reports. Preserve the original
+   kickoff and decision rationale; production users should not need to reconstruct them from session logs.
+3. Treat documentation as part of every P1-P5 completion condition: P1 records selection/assets
+   rules and how to change them; P2 records translation policy and review procedures; P3 records
+   upgrade/verification procedures and risk decisions; P4 records source promotion/update operations;
+   P5 records deployment, hosted verification and incident recovery. Link shared contracts rather
+   than duplicating potentially conflicting instructions between development and operations guides.
+4. Before launch, review the documentation from a new developer's and an operator's perspective.
+   Verify commands and links against the implemented system, distinguish unresolved decisions,
+   and make the correct guide discoverable from the repository entry points.
+
+Completion evidence: separate, discoverable development and operations guides reflecting actual
+behavior; maintained project-facing material no longer assumes an active comparison PoC; P1-P5
+include their documentation changes; a new maintainer can develop and operate the system without
+the original chat or ignored artifacts. Durable documentation remains English. This work may be
+delivered across multiple implementation increments rather than as a standalone task.
 
 ## Work that does not block this sequence
 

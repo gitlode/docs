@@ -15,6 +15,8 @@ Replace this note after integration/exit decisions; preserve the active producti
 3. Use [production readiness](production-readiness.md) as the actionable follow-up backlog. Start with
    production publication scope; it supplies file entrypoints, dependencies, open decisions and evidence
    required to close each gap. Do not infer production readiness from a successful PoC.
+   P6 applies across all follow-up work: maintain this system's own development and operations
+   documentation and replace the active project's PoC framing as production preparation proceeds.
 
 ## Decisions and verification
 

@@ -45,6 +45,9 @@ Current architecture and commands live in the durable documentation.
 
 The owner accepted these as follow-up work, not reasons to keep extending the comparison PoC:
 publication scope and internal links, explicit assets, stable translation policy and language review,
-dependency findings, deployment preparation and launch. The actionable continuation plan is
+dependency findings, deployment preparation and launch. Follow-up work also includes the system's
+own documentation: separate development and operations guides,
+replace active PoC framing, and update documentation as part of every implementation increment.
+The actionable continuation plan is
 [production readiness](../handoff/production-readiness.md), with decisions, file entry points,
 ordering and completion criteria. Cross-project tooling proposals remain a separate nonblocking review.
