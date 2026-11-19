@@ -174,8 +174,8 @@ validation failures. Generated test fixtures remain ignored for diagnosis.
 
 `.github/workflows/docs.yml` performs these checks plus real upstream acquisition/staging on PRs,
 main pushes, and manual runs, followed by both edition builds, English/Japanese output validation,
-bounded HTTP checks, and search probes. Production deployment remains a separate approval and
-implementation step. Historical clean-clone and hosted results are in
+bounded HTTP checks, and search probes. Manual publication and recovery follow the
+[deployment procedure](../operations/deployment.md). Historical clean-clone and hosted results are in
 [reproducibility evidence](../poc/reproducibility.md); they are not proof for a later untested commit.
 
 ## Troubleshooting

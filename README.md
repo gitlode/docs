@@ -5,8 +5,8 @@ Canonical English Markdown remains upstream; this repository owns publication, J
 site implementation, and operations. Project documentation under `docs/` is not product-site content.
 
 **Status:** VitePress v2 is selected and the implementation is consolidated on
-`2.0.0-alpha.21`. The six-document PoC supports English/Japanese, stable/next, local search,
-and complete artifact validation. No production deployment is enabled.
+`2.0.0-alpha.21`. The site builds English and Japanese documentation for each configured
+edition. The [manual Pages workflow](docs/operations/deployment.md) is prepared for owner review and first launch.
 See [the accepted decision](docs/decisions/0001-use-vitepress-v2.md),
 [PoC closeout](docs/poc/closeout.md), and the [production-readiness handoff](docs/handoff/production-readiness.md).
 

@@ -132,12 +132,12 @@ language controls. Fallback body links retain the English locale; Japanese sideb
 Japanese. Translated heading IDs may differ: language switching does not map section fragments.
 See [localization evidence](../poc/localization.md) for current limitations.
 
-## CI and future publishing
+## CI and publishing
 
 PR CI has only `contents: read`, installs locked dependencies, checks types/tests, acquires public
 source, stages both editions, then builds and validates both editions in English and Japanese. It does not
-deploy. Production must assemble one complete artifact (never append a version
-to an existing Pages deployment), then deploy through a trusted job with scoped Pages/OIDC rights.
+deploy. Manual main runs upload a complete verified artifact. Supplying the approved main SHA
+enables a separate deployment job with scoped Pages/OIDC rights. See [deployment operations](../operations/deployment.md).
 
 ## Search and version navigation
 
