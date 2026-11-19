@@ -165,6 +165,30 @@ that a later dependency graph is safe. Maintain the selected alpha version until
 
 ### P4. Source release/update workflow
 
+Technical rehearsal passed on 2026-11-19 in an isolated checkout based on `fa72bc8`.
+The tracked project pins were unchanged. For the manual PR procedure see
+[edition operations](../operations/editions.md#review-a-source-update-pr).
+Update ownership and cadence remain open for owner review.
+
+To reproduce the rehearsal with the two real upstream pins in the table above:
+
+1. Acquire both pins. In the isolated checkout only, start next with the stable 0.12.0 ref,
+   commit, publication list and sidebar. Give next two fixture Japanese translations for
+   `packages/gitlode/docs/usage.md` and `packages/plugin-file-type/README.md`, with their
+   checked hashes computed from the 0.12.0 Git blobs. Use simple translated headings and
+   body text. Commit and build. Both pages were current, with 21 selected documents per edition.
+2. Restore the configured next ref and commit (`90512564`) and its 23-document selection and
+   sidebar, retaining the two fixture records. Commit, build and run the HTTP and search checks.
+   The Usage original changed and its Japanese page displayed the review notice. The plugin
+   README original was identical and its Japanese page stayed current. Stable remained on
+   `76b124e2` with 21 documents. For both successful builds, the recorded docs revision matched
+   the clean fixture commit, and all staged file hashes and attribution URLs matched the pinned blobs.
+3. Save the successful preview pointer and a digest of the combined dist paths and bytes.
+   Append an unpublished path to a next sidebar group and rebuild. The stable sub-build
+   succeeded, then next failed sidebar validation. The failed candidate produced no combined
+   build report. The pointer and the previous dist digest were unchanged. Bounded HTTP and
+   all 32 search probes passed again against that previous artifact, and the listeners closed.
+
 Current limitation: explicit source pins are reproducible, but there is no automatic release promotion
 or upstream synchronization service. The PoC's `next` is a snapshot, not a live mirror.
 

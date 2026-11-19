@@ -25,7 +25,8 @@ launch requires a separate owner decision. Read the [documentation guide](../REA
 and [SSG decision](../decisions/0001-use-vitepress-v2.md) before implementation.
 
 P3 completed on 2026-11-19 with zero npm audit findings and 45 passing tests on a clean
-install. Continue with the P4 source update rehearsal and update ownership/cadence decision.
+install. The P4 source update rehearsal passed for provenance, translation freshness and
+failure isolation. Confirm who initiates stable and next updates and when before closing P4.
 
 ## Restart commands
 

@@ -25,6 +25,25 @@ Individual document routes follow the selected source paths. On an upstream move
 review selection, sidebar references and translation records together. Old document URLs may
 stop resolving after publication. Revisit redirects if a concrete compatibility need arises.
 
+## Review a source update PR
+
+1. Start from a clean docs checkout. Record the edition's current ref and commit, the intended
+   upstream ref and its resolved commit. For an annotated release tag, use its peeled commit.
+   Compare the two upstream trees before editing the pin.
+2. In the target edition, review the selected paths, sidebar and relative links against the
+   new tree. Include any selection or navigation changes in the pin-update PR. For a new
+   release, include the new translation set and the transfer result in the same PR.
+3. Commit the candidate inputs, then acquire, check, build and verify using the commands above.
+   In the staging manifest, check the docs revision and dirty flag, each requested ref and
+   resolved commit, and the canonical file hashes. In the combined build report, inspect the
+   Japanese page statuses and verify both editions. Report any new fallbacks or changed-source
+   notices so the maintainer can follow up through the ordinary translation workflow.
+4. Record the tested docs revision and validation run in the PR. If the candidate fails,
+   correct it and rebuild the complete site. The local preview pointer can still identify an
+   earlier successful build. Successful HTTP or search checks against that preview do not
+   validate the failed revision. Only a successful build from the candidate revision supplies
+   a candidate artifact.
+
 ## Register an edition
 
 Add its ID, unique public path and display label to `config/editions.json`. Set
