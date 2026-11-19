@@ -56,6 +56,17 @@ See [edition operations](../operations/editions.md) for the implemented contract
 Individual document moves follow source paths; defer URL overrides and redirects until there
 is a concrete need.
 
+The owner wants edition names to carry operational meaning only. The architecture should
+identify editions through configuration and allow translation transfer in either direction
+between a specified source and destination. Today's command prepares stable from next;
+the registry validation, combined build and version-switch checks also assume two named
+editions. Generalizing the command alone would leave these assumptions in place.
+
+Before changing transfer behavior, settle whether a transfer also copies translations whose
+checked English hash differs from the destination. If copied, retain the original checked
+hash so the destination can show its normal review notice. Existing destination corrections
+and repeat runs need coverage in both transfer directions.
+
 Discuss the remaining reader-visible behavior with the owner as appropriate:
 
 | Operator action                                | Proposed behavior to review                                                                                                                       |
