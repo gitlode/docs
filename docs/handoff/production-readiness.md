@@ -108,6 +108,12 @@ Current limitation: only next's Profiling Guide has a Japanese example. Stable u
 A matching source hash certifies file identity, not translation quality. The example still needs
 human language review. Missing and source-changed translations already have distinct behavior.
 
+The next example has been compared with the pinned English guide and edited for clarity.
+Its PoC review notice remains until the owner reviews the translation or defers it.
+The current stable English guide differs from next's, so a stable translation would need
+review against its own original. The [translation maintenance procedure](../operations/translations.md)
+covers missing translations, source changes and Japanese-only corrections.
+
 Entry points: `translations/manifest.json`, `translations/ja/<edition>/`,
 `src/publishing/translations.ts`, `src/ssg/vitepress/validate-localization.ts`,
 `site/vitepress/config.ts`, and `test/translations.test.ts` / `test/localization.test.ts`.

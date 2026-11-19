@@ -13,6 +13,7 @@ The following homes contain maintained knowledge that survives the PoC and produ
 
 - [Architecture](design/architecture.md): ownership, current contracts, boundaries, and constraints.
 - [Publication operations](operations/publication.md): select documents and maintain edition-specific sidebars.
+- [Translation operations](operations/translations.md): add a Japanese translation or review it after its English source changes.
 - [Edition operations](operations/editions.md): update edition labels, public paths and pinned inputs.
 - [Development](contributing/development.md): supported workflows, tooling, and maintenance procedures.
 - [ADR 0001: Use VitePress v2](decisions/0001-use-vitepress-v2.md): accepted SSG choice and maintenance responsibilities.
