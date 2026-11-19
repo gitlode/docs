@@ -42,7 +42,7 @@ and submodule entries. No individual-file API calls or privileged source credent
 
 ## Selection and staging contract
 
-`config/publication.json` enumerates six exact Markdown paths, independently of the proposed
+`config/publication.json` enumerates common and edition-specific Markdown paths, independently of the proposed
 sidebar groups in `config/navigation.json`. The renderer consumes the validated navigation subset.
 Missing selected files are errors. Agent/handoff content, arbitrary roots,
 MDX, duplicate/case-colliding paths, traversal, backslashes, and Windows reserved names are rejected.
@@ -138,11 +138,9 @@ current edition and links to the other edition's home in the current locale, reg
 Full-page navigation avoids carrying separately built client state across editions. No document
 mapping or fragment preservation is needed. This simple switch is the owner's required behavior,
 not a compromise for missing features. Combined validation checks locale-home targets and header
-placement across all 28 document/locale-home pages.
+placement across all published document and locale-home pages.
 
-The owner accepted external GitHub links for documents outside the six-document PoC scope.
-Production must address internal documentation references before launch, without automatically
-publishing arbitrary linked files. See the PoC evaluation for the deferred acceptance item.
+Publication changes and package README routes are documented in [publication operations](../operations/publication.md).
 
 ## Accepted SSG
 

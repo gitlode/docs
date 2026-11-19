@@ -24,7 +24,7 @@ interface Manifest {
   editions: Edition[];
 }
 interface Navigation {
-  groups: { label: string; files: string[] }[];
+  groups: { label: string; files: string[]; editions?: string[] }[];
 }
 function json<T>(path: string): T {
   return JSON.parse(readFileSync(path, "utf8")) as T;
@@ -64,7 +64,8 @@ export function prepareContent(
   const routes = new Map(
     edition.documents.map((doc) => [doc.sourcePath, routeFor(doc.sourcePath)]),
   );
-  if (new Set(routes.values()).size !== routes.size) throw new Error("Published route collision.");
+  if (new Set([...routes.values()].map((route) => route.toLowerCase())).size !== routes.size)
+    throw new Error("Published route collision.");
   const navigation = json<Navigation>(join(root, "config/navigation.json"));
   const pages = edition.documents.flatMap((doc) => {
     const content = readFileSync(join(staging, doc.stagedPath));
@@ -99,18 +100,29 @@ export function prepareContent(
       };
     });
   });
-  const groups = navigation.groups.map((group) => ({
-    label: group.label,
-    pages: group.files.map((file) => {
-      const page = pages.find((p) => p.sourcePath === file && p.locale === "en");
-      if (!page) throw new Error(`Sidebar contains unpublished page: ${file}`);
-      return {
-        title: page.title,
-        jaTitle: pages.find((p) => p.sourcePath === file && p.locale === "ja")?.title ?? page.title,
-        route: routeFor(file),
-      };
-    }),
-  }));
+  for (const group of navigation.groups)
+    if (
+      group.editions &&
+      (!Array.isArray(group.editions) ||
+        !group.editions.length ||
+        group.editions.some((id) => !["stable", "next"].includes(id)))
+    )
+      throw new Error("Unknown or empty sidebar editions.");
+  const groups = navigation.groups
+    .filter((group) => !group.editions || group.editions.includes(editionName))
+    .map((group) => ({
+      label: group.label,
+      pages: group.files.map((file) => {
+        const page = pages.find((p) => p.sourcePath === file && p.locale === "en");
+        if (!page) throw new Error(`Sidebar contains unpublished page: ${file}`);
+        return {
+          title: page.title,
+          jaTitle:
+            pages.find((p) => p.sourcePath === file && p.locale === "ja")?.title ?? page.title,
+          route: routeFor(file),
+        };
+      }),
+    }));
 
   for (const group of groups) for (const page of group.pages) parseSafeMarkdown(page.title);
   return {

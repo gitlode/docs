@@ -13,6 +13,7 @@ import test from "node:test";
 
 import {
   git,
+  publicationFiles,
   readDocument,
   resolveCommit,
   safeDirectory,
@@ -94,7 +95,24 @@ test("configured navigation is a subset of explicit publication", () => {
   validatePublication(publication);
   validateSources(JSON.parse(readFileSync("config/sources.json", "utf8")));
   for (const group of navigation.groups)
-    for (const path of group.files) assert.ok(publication.files.includes(path));
+    for (const edition of group.editions ?? ["stable", "next"])
+      for (const path of group.files)
+        assert.ok(publicationFiles(publication, edition).includes(path));
+});
+
+test("edition-only publication is explicit and validates both editions", () => {
+  const nextOnly = "packages/gitlode/docs/design/telemetry.md";
+  const publication = { files: [file], additionalFiles: { next: [nextOnly] } };
+  assert.deepEqual(publicationFiles(publication, "stable"), [file]);
+  assert.deepEqual(publicationFiles(publication, "next"), [file, nextOnly]);
+  assert.throws(
+    () => validatePublication({ files: [file], additionalFiles: { next: [file] } }),
+    /Duplicate/,
+  );
+  assert.throws(
+    () => validatePublication({ files: [file], additionalFiles: { next: ["AGENTS.md"] } }),
+    /policy/,
+  );
 });
 
 test("source pins and edition names are validated before IO", () => {

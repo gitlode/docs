@@ -76,8 +76,8 @@ review its completeness before launch. It is not a documentation-only phase post
 
 ### P1. Production publication, links, and assets
 
-Current limitation: only six Markdown documents are published. Links to other existing upstream
-files/directories intentionally remain pinned GitHub links; the owner accepted this only for the PoC.
+Initial corpus implemented: 21 stable and 23 next documents, including two next-only telemetry guides.
+See [publication operations](../operations/publication.md) for selection, routes and navigation.
 Imported images are currently rejected. Existing generated theme assets do not establish support for
 arbitrary upstream assets, CSS URL references, or `srcset`.
 

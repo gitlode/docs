@@ -238,7 +238,8 @@ function previewConfiguration(port = 4173) {
     root: string;
     base: string;
     entry?: string;
-    editions?: { base: string }[];
+    pages?: { route: string }[];
+    editions?: { base: string; pages: { route: string }[] }[];
   }>(join(output, "build.json"));
   if (!report.root || !report.base)
     throw new Error("Rebuild with npm run site:build before previewing.");
@@ -246,7 +247,7 @@ function previewConfiguration(port = 4173) {
     directory: join(report.root, "dist"),
     base: report.base,
     entry: report.entry ?? "en/",
-    prefixes: report.editions?.map((e) => e.base.slice(report.base.length)) ?? [""],
+    editions: report.editions ?? [{ base: report.base, pages: report.pages ?? [] }],
     port,
   };
 }
@@ -260,23 +261,20 @@ export async function verifySite() {
   const config = previewConfiguration(0);
   await withPreviews([config], async ([server]) => {
     console.log("Owned verification port: " + server.port);
-    for (const prefix of config.prefixes)
+    for (const edition of config.editions)
       for (const [path, expected] of [
         ["en/", 200],
         ["ja/", 200],
-        ["ja/profiling/", 200],
-        ["ja/usage/", 200],
-        ["en/design/plugins/", 200],
+        ...edition.pages.map((page) => [page.route, 200] as const),
         ["not-found/", 404],
       ] as const) {
-        const response = await fetch(server.url + prefix + path, {
+        const url = server.url + edition.base.slice(config.base.length) + path;
+        const response = await fetch(url, {
           signal: AbortSignal.timeout(5000),
         });
         await response.arrayBuffer();
         if (response.status !== expected)
-          throw new Error(
-            `Unexpected HTTP status ${response.status}: ${server.url + prefix + path}`,
-          );
+          throw new Error(`Unexpected HTTP status ${response.status}: ${url}`);
       }
     console.log("Verified: " + server.url);
   });

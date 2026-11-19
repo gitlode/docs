@@ -17,9 +17,14 @@ const root = resolve(import.meta.dirname, "../../..");
 const { output } = JSON.parse(readFileSync(join(root, ".generated/preview.json"), "utf8")) as {
   output: string;
 };
+interface SearchEdition {
+  edition: string;
+  base: string;
+  pages: { route: string; status: string }[];
+}
 const build = JSON.parse(readFileSync(join(output, "build.json"), "utf8")) as {
   edition: string;
-  editions: { edition: string; base: string }[];
+  editions: SearchEdition[];
 };
 if (build.edition !== "all")
   throw new Error("Search verification requires the complete two-edition build.");
@@ -69,12 +74,22 @@ function validateTarget(url: string, prefix: string) {
   }
 }
 
-function record(edition: string, base: string, locale: string, query: string, matches: Match[]) {
+function record(
+  { edition, base, pages }: SearchEdition,
+  locale: string,
+  query: string,
+  matches: Match[],
+) {
   for (const match of matches) validateTarget(match.url, `${base}${locale}/`);
-  if (["profiling", "CLI"].includes(query) && matches.length === 0)
+  const baseline = query === "profiling" ? "profiling/" : query === "CLI" ? "usage/" : undefined;
+  if (
+    baseline &&
+    pages.some((page) => page.route === locale + "/" + baseline) &&
+    matches.length === 0
+  )
     throw new Error(`Missing baseline search results: ${edition}/${locale}/${query}`);
   if (
-    edition === "next" &&
+    pages.some((page) => page.route === "ja/profiling/" && page.status !== "missing") &&
     locale === "ja" &&
     query === "プロファイリング" &&
     !matches.some((match) =>
@@ -90,7 +105,8 @@ function record(edition: string, base: string, locale: string, query: string, ma
 
 await withPreviews([{ directory: dist, base: "/docs/", port: 0 }], async ([preview]) => {
   console.log("Search probe listener: " + preview.url);
-  for (const { edition, base } of build.editions) {
+  for (const selected of build.editions) {
+    const { edition, base } = selected;
     const prefix = base.slice("/docs/".length);
     for (const locale of ["en", "ja"]) {
       const chunkDirectory = join(dist, prefix, "assets/chunks");
@@ -118,8 +134,7 @@ await withPreviews([{ directory: dist, base: "/docs/", port: 0 }], async ([previ
       });
       for (const query of queries) {
         record(
-          edition,
-          base,
+          selected,
           locale,
           query,
           index.search(query).map((result) => ({

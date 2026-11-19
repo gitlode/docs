@@ -10,7 +10,8 @@ The [PoC closeout report](../poc/closeout.md) preserves the pre-merge review evi
 
 Resume with the [production readiness backlog and owner decisions](production-readiness.md).
 The owner approved the initial pins and publication scope for current work. Edition identity and URL behavior are agreed; see [edition operations](../operations/editions.md).
-Continue with edition-specific publication and the approved corpus. Production
+The approved corpus is configured; see [publication operations](../operations/publication.md).
+Next review translation policy and initial language coverage with the owner. Production
 launch requires a separate owner decision. Read the [documentation guide](../README.md),
 [architecture](../design/architecture.md), [development workflow](../contributing/development.md)
 and [SSG decision](../decisions/0001-use-vitepress-v2.md) before implementation.

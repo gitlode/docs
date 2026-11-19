@@ -24,6 +24,8 @@ export interface LinkContext {
 
 export function routeFor(sourcePath: string): string {
   validatePath(sourcePath);
+  const packageReadme = /^packages\/(gitlode|plugin-[a-z0-9-]+)\/README\.md$/.exec(sourcePath);
+  if (packageReadme) return `packages/${packageReadme[1]}/`;
   const prefix = "packages/gitlode/docs/";
   if (!sourcePath.startsWith(prefix) || !sourcePath.endsWith(".md"))
     throw new Error(`Unsupported page: ${sourcePath}`);

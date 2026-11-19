@@ -15,6 +15,12 @@ export interface Sources {
 }
 export interface Publication {
   files: string[];
+  additionalFiles?: Partial<Record<"stable" | "next", string[]>>;
+}
+
+export function publicationFiles(publication: Publication, edition: string): string[] {
+  if (edition !== "stable" && edition !== "next") throw new Error("Unknown publication edition.");
+  return [...publication.files, ...(publication.additionalFiles?.[edition] ?? [])];
 }
 
 export function git(repository: string, args: string[]): Buffer {
@@ -45,21 +51,31 @@ export function validatePath(path: string): string {
 }
 
 export function validatePublication(publication: Publication): void {
-  if (!Array.isArray(publication.files) || !publication.files.length)
+  if (
+    !Array.isArray(publication.files) ||
+    Object.entries(publication.additionalFiles ?? {}).some(
+      ([id, files]) => !["stable", "next"].includes(id) || !Array.isArray(files),
+    )
+  )
     throw new Error("Publication must select files.");
-  const seen = new Set<string>();
-  for (const file of publication.files) {
-    validatePath(file);
-    if (
-      !/^packages\/gitlode\/docs\/(usage\.md|profiling\.md|(?:design|contributing)\/.+\.md)$/.test(
-        file,
-      ) ||
-      /(^|\/)(agents|handoff|AGENTS\.md)(\/|$)/i.test(file)
-    ) {
-      throw new Error(`File outside durable publication policy: ${file}`);
+  for (const edition of ["stable", "next"]) {
+    const files = publicationFiles(publication, edition);
+    if (!files.length) throw new Error("Publication must select files for each edition.");
+    const seen = new Set<string>();
+    for (const file of files) {
+      validatePath(file);
+      if (
+        (!/^packages\/(?:gitlode|plugin-[a-z0-9-]+)\/README\.md$/.test(file) &&
+          !/^packages\/gitlode\/docs\/(usage\.md|profiling\.md|(?:design|contributing)\/.+\.md)$/.test(
+            file,
+          )) ||
+        /(^|\/)(agents|handoff|AGENTS\.md)(\/|$)/i.test(file)
+      ) {
+        throw new Error(`File outside durable publication policy: ${file}`);
+      }
+      if (seen.has(file.toLowerCase())) throw new Error(`Duplicate publication path: ${file}`);
+      seen.add(file.toLowerCase());
     }
-    if (seen.has(file.toLowerCase())) throw new Error(`Duplicate publication path: ${file}`);
-    seen.add(file.toLowerCase());
   }
 }
 
@@ -184,7 +200,7 @@ export function stage(root: string, sources: Sources, publication: Publication):
       name,
       ...source,
       commit,
-      documents: publication.files.map((path) => ({
+      documents: publicationFiles(publication, name).map((path) => ({
         path,
         ...readDocument(repository, commit, path),
       })),
