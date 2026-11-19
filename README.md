@@ -1,6 +1,10 @@
 # gitlode documentation system
 
-This repository builds and publishes the [gitlode documentation](https://gitlode.github.io/docs/) on GitHub Pages in English and Japanese for the stable and next editions. The English source documents live in the [gitlode repository](https://github.com/gitlode/gitlode). This repository maintains the Japanese translations and determines which documents appear on the site.
+This repository builds and publishes the documentation site for gitlode. The English source documents live in the [gitlode repository](https://github.com/gitlode/gitlode). This repository maintains the Japanese translations and determines which documents appear on the site.
+
+## For gitlode users and developers
+
+Read the [gitlode documentation](https://gitlode.github.io/docs/) on GitHub Pages. Choose **stable** for the released version or **next** for the development version. Both editions are available in English and Japanese.
 
 ## For documentation maintainers
 
