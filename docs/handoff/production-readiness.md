@@ -1,6 +1,7 @@
 ﻿# Production readiness handoff
 
-Historical launch record, 2026-11-19. P1–P6 are complete. The sections below preserve the original
+Production readiness status, 2026-11-19. P1–P5 are complete. P6 is awaiting owner review.
+The sections below preserve the original
 plan, owner decisions and verification results. For ongoing work use the [documentation guide](../README.md).
 
 The owner accepted VitePress v2 consolidation and approved the PoC closeout sequence. PoC exit,
@@ -269,7 +270,9 @@ acceptance point, separate from PoC completion.
 
 ### P6. Documentation for the documentation system
 
-Final review followed the first deployment. The repository README now directs maintainers to the
+The documentation changes are ready for owner review. P6 closes when the owner has reviewed
+the documentation, any requested revisions have been addressed, and the owner confirms completion.
+The repository README now directs maintainers to the
 four operating guides and developers to the tested local workflow. The review corrected the former
 staging count and pending-launch status, and identified the PoC material as historical.
 
