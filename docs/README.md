@@ -1,5 +1,8 @@
 ﻿# Documentation guide
 
+Start with the [system overview and local preview](overview.md) for developers and maintainers.
+It traces a document from its upstream source to the published site and shows where to make changes.
+
 This directory documents the documentation system, not the gitlode product. It is not included
 in the product site's publication allowlist. Durable documentation, LLM-oriented working material,
 and code comments are written in English. PoC result summaries primarily reviewed by the human

@@ -8,6 +8,8 @@ Read the [gitlode documentation](https://gitlode.github.io/docs/) on GitHub Page
 
 ## For documentation maintainers
 
+Start with the [system overview and local preview](docs/overview.md) to see where the published content comes from.
+
 - [Update an edition](docs/operations/editions.md) when promoting a release or updating the development version.
 - [Manage publication and navigation](docs/operations/publication.md) to select documents and arrange the sidebar.
 - [Maintain translations](docs/operations/translations.md) to add, review or carry Japanese translations between editions.
@@ -15,6 +17,6 @@ Read the [gitlode documentation](https://gitlode.github.io/docs/) on GitHub Page
 
 ## For documentation system developers
 
-Start with the [architecture](docs/design/architecture.md) to understand how upstream documents become published pages. The [development guide](docs/contributing/development.md) covers local setup, builds, preview and tests.
+The [system overview](docs/overview.md) introduces the publishing flow and repository layout. For implementation details, see the [architecture](docs/design/architecture.md) and [development guide](docs/contributing/development.md).
 
 The [documentation index](docs/README.md) also links to design decisions and project history.
