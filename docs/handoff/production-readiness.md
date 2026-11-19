@@ -25,8 +25,8 @@ Implemented and retained:
   provenance hashes, restricted Markdown, and ignored generated sources/artifacts.
 - Stable/next, English/Japanese, missing-translation notice and English body language, file-level
   translation freshness, same-document language switching, locale-home version switching.
-- Complete two-edition static artifact under `/docs/`, local search, local validation, and
-  read-only PR CI. Existing `.github/workflows/docs.yml` does not upload or deploy a Pages artifact.
+- Complete static artifact under `/docs/`, local search, local validation, and read-only PR CI.
+  Manual Pages preparation and publishing are covered in P5.
 - Canonical English remains in `gitlode/gitlode`; Japanese sources remain in this repository.
   No automatic link-following publication or executable upstream Markdown is permitted.
 
@@ -207,6 +207,23 @@ translations remaining current, changed-file translations flagged, and no partia
 artifact selected after a failed build. Stable promotion follows P2's approved policy.
 
 ### P5. Deployment, verification, and recovery
+
+Implementation and local recovery rehearsal completed on 2026-11-19 at
+`682b4db055dce6051df281ee97fba196ba04175f`. Follow [deployment operations](../operations/deployment.md).
+The workflow passed actionlint 1.7.12 and the project passed 45 tests. Two clean builds
+of the same docs revision passed HTTP and 32 search probes each. The recovery checkout
+reinstalled the lockfile and fetched both upstream pins. In each build the artifact selector
+rejected a different SHA and accepted the tested SHA. A local tar of the selected directory
+contained exactly the 339 static files in that build. Both builds had the same 98 HTML paths
+and page text (excluding scripts and styles). Only 45 of 339 path/hash pairs matched across
+builds, so the tested recovery is a functional rebuild rather than a byte-identical restore.
+
+Read-only GitHub observations on the same date: default branch `main`, Pages enabled, and
+the existing `github-pages` environment allows only the `main` branch. No required reviewer
+was listed. The public API could not confirm the Pages publishing source or Actions allowlist.
+Pending evidence: PR checks and merge, owner confirmation of Pages source, artifact-only
+Actions run on main, explicit first-launch approval, deployment and hosted checks. No
+deployment or remote recovery was exercised during local preparation.
 
 Hosting decision already made: GitHub Pages at `https://gitlode.github.io/docs/`, no custom domain.
 The owner previously reported GitHub settings correct. Recheck only relevant settings when preparing

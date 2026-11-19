@@ -27,8 +27,9 @@ and [SSG decision](../decisions/0001-use-vitepress-v2.md) before implementation.
 P3 completed on 2026-11-19 with zero npm audit findings and 45 passing tests on a clean
 install. The P4 source update rehearsal passed for provenance, translation freshness and
 failure isolation. The owner approved the [manual PR workflow](../operations/editions.md#review-a-source-update-pr),
-completing P4. Continue with P5 deployment preparation and recovery planning. The first
-production deployment requires separate owner approval.
+completing P4. P5 implementation and local recovery evidence are ready. Follow
+[deployment operations](../operations/deployment.md) for PR integration, the artifact-only
+run on main, owner approval, first deployment and hosted checks.
 
 ## Restart commands
 
