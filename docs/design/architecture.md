@@ -10,6 +10,18 @@ Current flow: `config/<edition>/source.json` -> Git object acquisition -> explic
 staging/provenance -> shared content preparation -> VitePress adapter -> English/Japanese static builds
 and output validation. VitePress v2 is selected and consolidated; production deployment remains pending.
 
+## Design for gitlode maintainers
+
+A gitlode developer should be able to publish documentation using familiar release conventions,
+the configuration and the operations guide. When choosing where a rule belongs, consider both
+the work it saves and what a maintainer would have to know to predict the result. Prefer a
+simple, explicit operation when special cases would require knowledge of the publishing internals.
+
+For example, keeping a released edition's navigation fixed is a familiar release practice.
+The [edition procedure](../operations/editions.md#stable-release-policy) records that convention.
+The build processes each configured edition the same way, and the operator chooses the source
+and destination of a translation transfer explicitly.
+
 ## Code domains
 
 - `src/publishing/` owns acquisition, selection/staging, Markdown safety and link rewriting,

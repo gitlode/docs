@@ -3,6 +3,17 @@
 Select the edition and canonical path in its publication list. The pinned English Git blob
 is the reference for that edition. A release can ship with missing translations.
 
+## Decide whether to publish
+
+When incorporating a new or revised translation, a human checks it against the English
+original and decides whether readers should see it. Keep the draft in the proposed change
+until that decision. Record the decision in the change that brings the translation into
+the publication branch, such as its pull request.
+
+An edition transfer can reuse a translation already accepted this way. The checked hash
+determines whether the destination displays the source-difference notice. A human reviews
+subsequent edits when incorporating the revised wording.
+
 ## Transfer between editions
 
 After acquiring the configured pins, run `npm run translations:transfer -- --from next --to stable`.
@@ -45,5 +56,3 @@ edition, use the default directory. Store Markdown alongside or beneath the corr
    with a Japanese notice. A record pointing to a missing file fails validation.
 
 Stable corrections and additions follow the [stable release policy](editions.md#stable-release-policy).
-The file hash establishes which English text was checked. Record language review separately in
-the change that introduces or corrects a translation.

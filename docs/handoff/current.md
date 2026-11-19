@@ -16,7 +16,9 @@ Edition-neutral transfer preserves existing destination translations and the che
 The initial stable 0.12.0 corpus now has one Japanese guide requiring review and 20 fallbacks.
 A local rehearsal added an isolated third edition using configuration, built all three editions,
 checked edition navigation on 136 pages, and passed HTTP and search verification.
-See [translation operations](../operations/translations.md). Initial language review remains open. Production
+Human publication review takes place when incorporating new or revised translations.
+The PoC Profiling Guide still awaits that decision before its first production publication.
+See [translation operations](../operations/translations.md). Production
 launch requires a separate owner decision. Read the [documentation guide](../README.md),
 [architecture](../design/architecture.md), [development workflow](../contributing/development.md)
 and [SSG decision](../decisions/0001-use-vitepress-v2.md) before implementation.
