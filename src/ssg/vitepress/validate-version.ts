@@ -15,9 +15,10 @@ export function validateVersionNavigation(
   edition: Edition,
   locale: "en" | "ja",
   route: string,
+  versions: Record<string, { path: string; label: string }>,
 ): VersionNavigationStatistics {
   const other = edition === "stable" ? "next" : "stable";
-  const target = `/docs/${other}/${locale}/`;
+  const target = `/docs/${versions[other].path}/${locale}/`;
   let controls = 0;
   let validControls = 0;
   let headerControls = 0;
@@ -41,8 +42,13 @@ export function validateVersionNavigation(
       function inspectControl(child: DefaultTreeAdapterMap["node"]): void {
         if ("tagName" in child) {
           const attr = (name: string) => child.attrs.find((a) => a.name === name)?.value;
-          if (attr("aria-current") === "page" && text(child).trim() === edition) current = true;
-          if (child.tagName === "a" && attr("href") === target && text(child).trim() === other) {
+          if (attr("aria-current") === "page" && text(child).trim() === versions[edition].label)
+            current = true;
+          if (
+            child.tagName === "a" &&
+            attr("href") === target &&
+            text(child).trim() === versions[other].label
+          ) {
             // VitePress's router bypasses links with an explicit target attribute.
             counterpart = attr("target") === "_self";
           }

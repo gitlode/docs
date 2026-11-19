@@ -7,8 +7,6 @@ import type { PreviewTheme } from "../site.ts";
 const { page, theme } = useData<PreviewTheme>();
 const site = computed(() => theme.value.versionSite);
 const locale = computed(() => page.value.relativePath.split("/")[0]);
-const editions = ["stable", "next"];
-const documentationBase = computed(() => site.value.base.replace(/(?:stable|next)\/$/, ""));
 const label = computed(() => (locale.value === "ja" ? "バージョン" : "Version"));
 </script>
 
@@ -21,10 +19,10 @@ const label = computed(() => (locale.value === "ja" ? "バージョン" : "Versi
     :lang="locale"
   >
     <span>{{ label }}:</span>
-    <template v-for="edition in editions" :key="edition">
-      <strong v-if="edition === site.edition" aria-current="page">{{ edition }}</strong>
+    <template v-for="(version, edition) in site.versions" :key="edition">
+      <strong v-if="edition === site.edition" aria-current="page">{{ version.label }}</strong>
       <!-- target=_self bypasses VitePress's SPA router for separately built editions. -->
-      <a v-else :href="`${documentationBase}${edition}/${locale}/`" target="_self">{{ edition }}</a>
+      <a v-else :href="`/docs/${version.path}/${locale}/`" target="_self">{{ version.label }}</a>
     </template>
   </nav>
 </template>

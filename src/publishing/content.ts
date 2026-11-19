@@ -15,6 +15,8 @@ interface Document {
 }
 interface Edition {
   name: string;
+  path?: string;
+  label?: string;
   resolvedCommit: string;
   documents: Document[];
 }
@@ -113,6 +115,9 @@ export function prepareContent(
   for (const group of groups) for (const page of group.pages) parseSafeMarkdown(page.title);
   return {
     edition: editionName,
+    versions: Object.fromEntries(
+      manifest.editions.map((e) => [e.name, { path: e.path ?? e.name, label: e.label ?? e.name }]),
+    ),
     commit: edition.resolvedCommit,
     staging,
     pages,

@@ -49,8 +49,8 @@ function fixture() {
   const sources: Sources = {
     repository: repositoryUrl,
     editions: {
-      stable: { ref: "refs/tags/example", commit },
-      next: { ref: "refs/heads/main", commit },
+      stable: { path: "stable", label: "stable", ref: "refs/tags/example", commit },
+      next: { path: "next", label: "next", ref: "refs/heads/main", commit },
     },
   };
   return { root, repository, sources, commit };

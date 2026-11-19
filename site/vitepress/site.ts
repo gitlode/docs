@@ -3,6 +3,7 @@ import type { DefaultTheme } from "vitepress";
 /** Trusted site metadata produced by the publishing pipeline. */
 export interface PreviewSite {
   edition: "stable" | "next";
+  versions: Record<string, { path: string; label: string }>;
   base: string;
   combined: boolean;
   navigation: {
@@ -12,5 +13,5 @@ export interface PreviewSite {
 }
 
 export interface PreviewTheme extends DefaultTheme.Config {
-  versionSite: Pick<PreviewSite, "edition" | "base" | "combined">;
+  versionSite: Pick<PreviewSite, "edition" | "versions" | "combined">;
 }

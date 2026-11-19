@@ -51,19 +51,18 @@ Keep the repository README, package documentation index and internal package mat
 The two telemetry guides currently exist only in next. Enumerate selected paths explicitly.
 
 Treat routine ref/pin updates, display-label changes, and edits to an edition's publication
-scope as operator tasks. Rehearse a subsequent change as well as the initial build. The current
-pipeline already accepts configured pins, but stages one shared file list. The switcher and
-combined landing page render edition keys as labels. These are implementation gaps.
+scope as operator tasks. Rehearse a subsequent change as well as the initial build. Edition path, display label and pinned input can now be set independently.
+See [edition operations](../operations/editions.md) for the implemented contract.
+Individual document moves follow source paths; defer URL overrides and redirects until there
+is a concrete need.
 
-Discuss the following reader-visible behavior with the owner before implementing it:
+Discuss the remaining reader-visible behavior with the owner as appropriate:
 
-| Operator action                                | Proposed behavior to review                                                                                                                                |
-| ---------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Rename an edition for display                  | Change the text throughout the site while keeping bookmarked URLs, translation records and source identity stable.                                         |
-| Add a next-only guide or change its navigation | Select it for next independently. Validate its links, translations, search and navigation against that edition's inventory.                                |
-| Rename, move or withdraw a published guide     | Preserve the public URL across source moves where practical. Decide when a replacement warrants a redirect and what readers see on intentional withdrawal. |
-| Promote a release or correct stable            | Review the pin, selected documents and translations together. Allow next to advance independently and record the exact deployed inputs.                    |
-| Reject or recover a release                    | A failed candidate leaves the last successful site available. Rehearse recovery of both editions together, including the first-launch case in P5.          |
+| Operator action                                | Proposed behavior to review                                                                                                                       |
+| ---------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Add a next-only guide or change its navigation | Select it for next independently. Validate its links, translations, search and navigation against that edition's inventory.                       |
+| Promote a release or correct stable            | Review the pin, selected documents and translations together. Allow next to advance independently and record the exact deployed inputs.           |
+| Reject or recover a release                    | A failed candidate leaves the last successful site available. Rehearse recovery of both editions together, including the first-launch case in P5. |
 
 Use these scenarios to refine P1–P5 with the owner. Record proven operator procedures in
 operations documentation as each increment lands.

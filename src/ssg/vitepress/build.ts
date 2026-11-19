@@ -30,19 +30,26 @@ export function prepareSite(
   const content = prepareContent(root, edition, "/", options);
   const output = mkdtempSync(join(safeDirectory(root, ".generated/previews"), "run-"));
   const siteRoot = safeDirectory(output, "site");
-  const base = `/docs/${edition}/`;
+  const { path, label } = content.versions[edition];
+  const base = `/docs/${path}/`;
   write(
     siteRoot,
     "site.json",
     JSON.stringify(
-      { edition, base, navigation: content.navigation, combined: options.combined ?? false },
+      {
+        edition,
+        base,
+        versions: content.versions,
+        navigation: content.navigation,
+        combined: options.combined ?? false,
+      },
       null,
       2,
     ),
   );
   for (const page of content.pages) {
     write(siteRoot, page.snapshot, page.source);
-    const attribution = `\n\n---\n\n[Canonical English source](${page.sourceUrl}) · ${edition} · commit \`${content.commit}\`\n`;
+    const attribution = `\n\n---\n\n[Canonical English source](${page.sourceUrl}) · ${label} · commit \`${content.commit}\`\n`;
     const notice =
       page.status === "source-changed"
         ? "> 翻訳元の英語が更新されています。この翻訳は確認が必要です。\n\n"
@@ -55,7 +62,7 @@ export function prepareSite(
   }
   for (const locale of ["en", "ja"] as const) {
     const title =
-      locale === "en" ? `gitlode ${edition} documentation` : `gitlode ${edition} ドキュメント`;
+      locale === "en" ? `gitlode ${label} documentation` : `gitlode ${label} ドキュメント`;
     const landing =
       content.pages
         .filter((p) => p.locale === locale)
@@ -72,6 +79,9 @@ export function prepareSite(
     });
   const report = {
     edition,
+    versions: content.versions,
+    path,
+    label,
     commit: content.commit,
     staging: content.staging,
     root: siteRoot,
@@ -150,14 +160,14 @@ export function buildSite(edition = "all") {
   for (const { report } of editions) {
     if (report.edition !== "stable" && report.edition !== "next")
       throw new Error("Invalid built edition.");
-    cpSync(join(report.root, "dist"), join(dist, report.edition), {
+    cpSync(join(report.root, "dist"), join(dist, report.path), {
       recursive: true,
       errorOnExist: true,
       force: false,
     });
     expected.push(
       ...["en/", "ja/", ...report.pages.map((p) => p.route)].map(
-        (route) => `${report.edition}/${route}`,
+        (route) => `${report.path}/${route}`,
       ),
     );
     for (const locale of ["en", "ja"] as const) {
@@ -168,10 +178,11 @@ export function buildSite(edition = "all") {
       for (const route of routes)
         versionNavigation.push(
           validateVersionNavigation(
-            readFileSync(join(dist, report.edition, locale, route, "index.html"), "utf8"),
+            readFileSync(join(dist, report.path, locale, route, "index.html"), "utf8"),
             report.edition,
             locale,
             route,
+            report.versions,
           ),
         );
     }
@@ -180,10 +191,11 @@ export function buildSite(edition = "all") {
     dist,
     "index.html",
     '<!doctype html><html lang="en"><meta charset="utf-8"><title>gitlode documentation</title><h1>gitlode documentation</h1>' +
-      ["stable", "next"]
-        .flatMap((name) =>
+      editions
+        .flatMap(({ report }) =>
           ["en", "ja"].map(
-            (locale) => `<p><a href="/docs/${name}/${locale}/">${name} / ${locale}</a></p>`,
+            (locale) =>
+              `<p><a href="/docs/${report.path}/${locale}/">${report.label} / ${locale}</a></p>`,
           ),
         )
         .join("") +
@@ -204,7 +216,7 @@ export function buildSite(edition = "all") {
         edition: "all",
         root: output,
         base: "/docs/",
-        entry: "next/en/",
+        entry: editions[1].report.path + "/en/",
         staging,
         editions: editions.map(({ output, report }) => ({ output, ...report })),
         validation,
@@ -221,16 +233,20 @@ export function buildSite(edition = "all") {
 
 function previewConfiguration(port = 4173) {
   const { output } = json<{ output: string }>(join(root, ".generated/preview.json"));
-  const report = json<{ edition: string; root: string; base: string; entry?: string }>(
-    join(output, "build.json"),
-  );
+  const report = json<{
+    edition: string;
+    root: string;
+    base: string;
+    entry?: string;
+    editions?: { base: string }[];
+  }>(join(output, "build.json"));
   if (!report.root || !report.base)
     throw new Error("Rebuild with npm run site:build before previewing.");
   return {
     directory: join(report.root, "dist"),
     base: report.base,
     entry: report.entry ?? "en/",
-    prefixes: report.edition === "all" ? ["stable/", "next/"] : [""],
+    prefixes: report.editions?.map((e) => e.base.slice(report.base.length)) ?? [""],
     port,
   };
 }

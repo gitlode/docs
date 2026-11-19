@@ -4,6 +4,8 @@ import { lstatSync, mkdirSync, mkdtempSync, writeFileSync } from "node:fs";
 import { basename, isAbsolute, join, relative, resolve, sep } from "node:path";
 
 export interface Source {
+  path: string;
+  label: string;
   ref: string;
   commit: string;
 }
@@ -66,7 +68,20 @@ export function validateSources(sources: Sources): void {
     throw new Error("Unexpected upstream repository.");
   if (Object.keys(sources.editions).sort().join(",") !== "next,stable")
     throw new Error("Expected stable and next editions.");
+  const paths = new Set<string>();
   for (const source of Object.values(sources.editions)) {
+    if (typeof source.path !== "string" || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(source.path))
+      throw new Error("Edition path must be a lowercase URL segment.");
+    validatePath(source.path);
+    if (["agents", "handoff"].includes(source.path) || paths.has(source.path))
+      throw new Error("Reserved or duplicate edition path.");
+    paths.add(source.path);
+    if (
+      typeof source.label !== "string" ||
+      !/^[\p{L}\p{N}][\p{L}\p{M}\p{N} .()-]*$/u.test(source.label) ||
+      source.label.trim() !== source.label
+    )
+      throw new Error("Invalid edition display label.");
     if (!/^[a-f0-9]{40}$/.test(source.commit))
       throw new Error("Source must be pinned to a full commit SHA.");
     if (!/^refs\/(heads|tags)\/[A-Za-z0-9_@./-]+$/.test(source.ref) || source.ref.includes("..")) {
@@ -198,6 +213,8 @@ export function stage(root: string, sources: Sources, publication: Publication):
       .digest("hex"),
     editions: editions.map((edition) => ({
       name: edition.name,
+      path: edition.path,
+      label: edition.label,
       requestedRef: edition.ref,
       resolvedCommit: edition.commit,
       documents: edition.documents.map((document) => {
