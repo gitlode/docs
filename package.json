@@ -20,6 +20,7 @@
     "check": "npm run format:check && npm run lint && npm run typecheck && npm test",
     "source:acquire": "node --experimental-strip-types src/publishing/cli.ts acquire",
     "content:stage": "node --experimental-strip-types src/publishing/cli.ts stage",
+    "translations:transfer": "node --experimental-strip-types src/publishing/cli.ts transfer",
     "search:verify": "node --experimental-strip-types src/ssg/vitepress/search.ts",
     "site:prepare": "node --experimental-strip-types src/cli/site.ts prepare",
     "site:build": "node --experimental-strip-types src/cli/site.ts build",

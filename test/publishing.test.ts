@@ -11,8 +11,10 @@ import {
 import { join, resolve } from "node:path";
 import test from "node:test";
 
+import { prepareContent } from "../src/publishing/content.ts";
 import {
   git,
+  loadSources,
   readDocument,
   resolveCommit,
   safeDirectory,
@@ -22,6 +24,8 @@ import {
   validateSources,
 } from "../src/publishing/pipeline.ts";
 import type { Sources } from "../src/publishing/pipeline.ts";
+import { transferTranslations, editionManifest } from "../src/publishing/translation-transfer.ts";
+import { loadTranslation } from "../src/publishing/translations.ts";
 
 const scratch = safeDirectory(resolve("."), ".generated/tests");
 const file = "packages/gitlode/docs/usage.md";
@@ -49,10 +53,18 @@ function fixture() {
   const sources: Sources = {
     repository: repositoryUrl,
     editions: {
-      stable: { ref: "refs/tags/example", commit },
-      next: { ref: "refs/heads/main", commit },
+      stable: { path: "stable", label: "stable", ref: "refs/tags/example", commit },
+      next: { path: "next", label: "next", ref: "refs/heads/main", commit },
     },
   };
+  for (const edition of ["stable", "next"]) {
+    const directory = safeDirectory(root, "config/" + edition);
+    writeFileSync(join(directory, "publication.json"), JSON.stringify({ files: [file] }));
+    writeFileSync(
+      join(directory, "navigation.json"),
+      JSON.stringify({ groups: [{ label: "Guides", files: [file] }] }),
+    );
+  }
   return { root, repository, sources, commit };
 }
 
@@ -89,12 +101,108 @@ test("publication excludes agent, handoff, executable MDX and duplicate paths", 
 });
 
 test("configured navigation is a subset of explicit publication", () => {
-  const publication = JSON.parse(readFileSync("config/publication.json", "utf8"));
-  const navigation = JSON.parse(readFileSync("config/navigation.json", "utf8"));
-  validatePublication(publication);
-  validateSources(JSON.parse(readFileSync("config/sources.json", "utf8")));
-  for (const group of navigation.groups)
-    for (const path of group.files) assert.ok(publication.files.includes(path));
+  const sources = loadSources(".");
+  for (const id of Object.keys(sources.editions)) {
+    const publication = JSON.parse(readFileSync(join("config", id, "publication.json"), "utf8"));
+    validatePublication(publication);
+    const navigation = JSON.parse(readFileSync(join("config", id, "navigation.json"), "utf8"));
+    for (const group of navigation.groups)
+      for (const path of group.files) assert.ok(publication.files.includes(path));
+  }
+});
+
+test("next selection and navigation edits leave stable documents, links and sidebar intact", () => {
+  const { root, repository, sources } = fixture();
+  const guide = "packages/gitlode/docs/profiling.md";
+  writeFileSync(join(repository, guide), "# Profiling");
+  writeFileSync(join(repository, file), "# Usage\\n\\n[Profiling](profiling.md)");
+  git(repository, ["add", "."]);
+  git(repository, [
+    "-c",
+    "user.name=Test",
+    "-c",
+    "user.email=test@example.invalid",
+    "-c",
+    "commit.gpgsign=false",
+    "commit",
+    "-m",
+    "Add guide",
+  ]);
+  const commit = resolveCommit(repository, "HEAD");
+  for (const source of Object.values(sources.editions)) source.commit = commit;
+  writeFileSync(
+    join(safeDirectory(root, "translations/ja/next"), "manifest.json"),
+    JSON.stringify({ translations: [] }),
+  );
+  function content(id: string) {
+    const { pages, navigation } = prepareContent(root, id, "/", { staging: stage(root, sources) });
+    return { pages, navigation };
+  }
+  transferTranslations(root, "next", "stable", sources);
+  const stable = content("stable");
+  writeFileSync(
+    join(root, "config/next/publication.json"),
+    JSON.stringify({ files: [file, guide] }),
+  );
+  writeFileSync(
+    join(root, "config/next/navigation.json"),
+    JSON.stringify({ groups: [{ label: "Next only", files: [guide, file] }] }),
+  );
+  const next = content("next");
+  assert.equal(next.navigation[0].pages[0].route, "profiling/");
+  assert.ok(next.pages[0].markdown.includes("/en/profiling/"));
+  assert.ok(stable.pages[0].markdown.includes("github.com/gitlode/gitlode/blob/"));
+  assert.deepEqual(content("stable"), stable);
+});
+
+test("transfer preserves checked hashes and destination corrections across directions and edition names", () => {
+  const { root, sources, repository, commit } = fixture();
+  const hash = readDocument(repository, commit, file).sha256;
+  const path = "translations/ja/next/usage.md";
+  safeDirectory(root, "translations/ja/next");
+  const nextManifest = join(root, "translations/ja/next/manifest.json");
+  const candidate = {
+    edition: "next",
+    locale: "ja",
+    sourcePath: file,
+    translationPath: path,
+    sourceSha256: "a".repeat(64),
+  };
+  writeFileSync(nextManifest, JSON.stringify({ translations: [candidate] }));
+  assert.throws(
+    () => transferTranslations(root, "next", "stable", sources),
+    /unreadable translation/,
+  );
+  writeFileSync(join(root, path), "# Japanese");
+  assert.equal(transferTranslations(root, "next", "stable", sources).review, 1);
+  const manifest = editionManifest(root, "stable", sources.editions.stable);
+  const received = loadTranslation(root, "stable", file, hash, manifest);
+  assert.equal(received.status, "source-changed");
+  assert.equal(received.sourceSha256, candidate.sourceSha256);
+  writeFileSync(join(root, received.translationPath), "# Stable correction");
+  assert.equal(transferTranslations(root, "next", "stable", sources).copied, 0);
+  assert.equal(transferTranslations(root, "stable", "next", sources).copied, 0);
+  assert.equal(readFileSync(join(root, path), "utf8"), "# Japanese");
+  writeFileSync(nextManifest, JSON.stringify({ translations: [] }));
+  assert.equal(transferTranslations(root, "stable", "next", sources).copied, 1);
+  const reverse = loadTranslation(root, "next", file, hash, "translations/ja/next/manifest.json");
+  assert.equal(reverse.status, "source-changed");
+  assert.equal(reverse.content, "# Stable correction");
+  sources.editions.lts = { ...sources.editions.next, path: "lts" };
+  writeFileSync(
+    join(safeDirectory(root, "config/lts"), "publication.json"),
+    JSON.stringify({ files: [file] }),
+  );
+  writeFileSync(
+    nextManifest,
+    JSON.stringify({ translations: [{ ...candidate, sourceSha256: hash }] }),
+  );
+  assert.equal(transferTranslations(root, "next", "lts", sources).review, 0);
+  assert.equal(
+    loadTranslation(root, "lts", file, hash, editionManifest(root, "lts", sources.editions.lts))
+      .status,
+    "current",
+  );
 });
 
 test("source pins and edition names are validated before IO", () => {
@@ -114,7 +222,7 @@ test("source pins and edition names are validated before IO", () => {
 test("staging preserves exact Git bytes, excludes unselected files, records per-file identity and is repeatable", () => {
   const { root, repository, sources, commit } = fixture();
   writeFileSync(join(repository, file), "UNCOMMITTED CONTENT MUST NOT APPEAR");
-  const output = stage(root, sources, { files: [file] });
+  const output = stage(root, sources);
   const manifest = JSON.parse(readFileSync(join(output, "manifest.json"), "utf8"));
   assert.equal(manifest.editions.length, 2);
   for (const edition of manifest.editions) {
@@ -132,7 +240,7 @@ test("staging preserves exact Git bytes, excludes unselected files, records per-
     );
     assert.ok(document.sourceUrl.includes(commit));
   }
-  const repeated = stage(root, sources, { files: [file] });
+  const repeated = stage(root, sources);
   assert.notEqual(repeated, output);
   assert.deepEqual(
     readFileSync(join(repeated, "manifest.json")),
@@ -147,10 +255,11 @@ test("missing selected files and invalid revisions fail with actionable errors",
     () => readDocument(repository, commit, "packages/gitlode/docs/profiling.md"),
     /Missing or non-regular/,
   );
-  assert.throws(
-    () => stage(root, sources, { files: [file, "packages/gitlode/docs/profiling.md"] }),
-    /Missing/,
+  writeFileSync(
+    join(root, "config/next/publication.json"),
+    JSON.stringify({ files: [file, "packages/gitlode/docs/profiling.md"] }),
   );
+  assert.throws(() => stage(root, sources), /Missing/);
   assert.deepEqual(readdirSync(join(root, ".generated")), ["source"]);
 });
 

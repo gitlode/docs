@@ -6,9 +6,21 @@
 staging, the VitePress adapter, Japanese translation sources, validation, and publishing.
 Its own `docs/` directory is never automatically published as product documentation.
 
-Current flow: `config/sources.json` -> Git object acquisition -> explicit allowlist -> byte-preserving
+Current flow: `config/<edition>/source.json` -> Git object acquisition -> explicit allowlist -> byte-preserving
 staging/provenance -> shared content preparation -> VitePress adapter -> English/Japanese static builds
 and output validation. VitePress v2 is selected and consolidated; production deployment remains pending.
+
+## Design for gitlode maintainers
+
+A gitlode developer should be able to publish documentation using familiar release conventions,
+the configuration and the operations guide. When choosing where a rule belongs, consider both
+the work it saves and what a maintainer would have to know to predict the result. Prefer a
+simple, explicit operation when special cases would require knowledge of the publishing internals.
+
+For example, keeping a released edition's navigation fixed is a familiar release practice.
+The [edition procedure](../operations/editions.md#stable-release-policy) records that convention.
+The build processes each configured edition the same way, and the operator chooses the source
+and destination of a translation transfer explicitly.
 
 ## Code domains
 
@@ -42,8 +54,8 @@ and submodule entries. No individual-file API calls or privileged source credent
 
 ## Selection and staging contract
 
-`config/publication.json` enumerates six exact Markdown paths, independently of the proposed
-sidebar groups in `config/navigation.json`. The renderer consumes the validated navigation subset.
+`config/<edition>/publication.json` enumerates the complete selection for one edition, independently of the proposed
+sidebar groups in `config/<edition>/navigation.json`. The renderer consumes the validated navigation subset.
 Missing selected files are errors. Agent/handoff content, arbitrary roots,
 MDX, duplicate/case-colliding paths, traversal, backslashes, and Windows reserved names are rejected.
 Broader publication requires explicit configuration and, if outside the durable document policy,
@@ -101,11 +113,13 @@ assets, CSS URLs, and srcset validation require a later increment. Dependency ch
 
 Japanese translation sources belong to this repository. Missing translations and source changes
 are distinct conditions; freshness must use file-level identity rather than a repository-wide commit.
-`translations/manifest.json` records edition, locale, canonical source path, checked source SHA-256,
+The next manifest and each stable release's own manifest record edition, locale, canonical source path, checked source SHA-256,
 and repository-owned translation path. A matching file hash means `current`, not human approval;
 a changed hash means `source-changed` and renders a review warning while retaining the translation.
 No record means `missing`; a declared but absent file is an error. Invalid paths, duplicate records,
-and symlink/junction paths fail closed. Stable never silently uses next translations.
+and symlink/junction paths fail closed. Stable builds read the release's independent snapshot.
+The [release preparation command](../operations/translations.md#transfer-between-editions)
+copies missing destination translations while preserving their checked English hashes. Every edition uses the same freshness check.
 
 Translations use the same restricted Markdown preparation as English, with relative links resolved
 against the canonical source path. Each generated edition stores render-input snapshots and hashes,
@@ -118,12 +132,12 @@ language controls. Fallback body links retain the English locale; Japanese sideb
 Japanese. Translated heading IDs may differ: language switching does not map section fragments.
 See [localization evidence](../poc/localization.md) for current limitations.
 
-## CI and future publishing
+## CI and publishing
 
 PR CI has only `contents: read`, installs locked dependencies, checks types/tests, acquires public
 source, stages both editions, then builds and validates both editions in English and Japanese. It does not
-deploy. Production must assemble one complete artifact (never append a version
-to an existing Pages deployment), then deploy through a trusted job with scoped Pages/OIDC rights.
+deploy. Manual main runs upload a complete verified artifact. Supplying the approved main SHA
+enables a separate deployment job with scoped Pages/OIDC rights. See [deployment operations](../operations/deployment.md).
 
 ## Search and version navigation
 
@@ -134,15 +148,13 @@ in [search evidence](../poc/search.md). This does not establish comprehensive Ja
 
 VitePress extends the default theme's nav-bar-content-before slot with a small Vue control.
 The control remains in the upper navigation area on desktop and narrow screens. It shows the
-current edition and links to the other edition's home in the current locale, regardless of the current document.
+current edition and links to each other edition's home in the current locale, regardless of the current document.
 Full-page navigation avoids carrying separately built client state across editions. No document
 mapping or fragment preservation is needed. This simple switch is the owner's required behavior,
 not a compromise for missing features. Combined validation checks locale-home targets and header
-placement across all 28 document/locale-home pages.
+placement across all published document and locale-home pages.
 
-The owner accepted external GitHub links for documents outside the six-document PoC scope.
-Production must address internal documentation references before launch, without automatically
-publishing arbitrary linked files. See the PoC evaluation for the deferred acceptance item.
+Publication changes and package README routes are documented in [publication operations](../operations/publication.md).
 
 ## Accepted SSG
 

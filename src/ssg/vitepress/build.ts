@@ -5,8 +5,7 @@ import { performance } from "node:perf_hooks";
 
 import { prepareContent } from "../../publishing/content.ts";
 import { parseSafeMarkdown } from "../../publishing/markdown.ts";
-import { safeDirectory, stage } from "../../publishing/pipeline.ts";
-import type { Sources, Publication } from "../../publishing/pipeline.ts";
+import { loadSources, safeDirectory, stage } from "../../publishing/pipeline.ts";
 import { startPreview, withPreviews } from "../../publishing/preview-server.ts";
 import { validateOutput } from "../../publishing/validate-output.ts";
 import { validateLocalization } from "./validate-localization.ts";
@@ -23,29 +22,40 @@ function write(directory: string, path: string, content: string) {
 }
 
 export function prepareSite(
-  edition = "next",
+  edition?: string,
   options: { staging?: string; combined?: boolean } = {},
 ) {
   // VitePress adds the deployment base to site-root Markdown links.
+  if (edition === undefined) {
+    const sources = loadSources(root);
+    edition = sources.defaultEdition ?? Object.keys(sources.editions)[0];
+  }
   const content = prepareContent(root, edition, "/", options);
   const output = mkdtempSync(join(safeDirectory(root, ".generated/previews"), "run-"));
   const siteRoot = safeDirectory(output, "site");
-  const base = `/docs/${edition}/`;
+  const { path, label } = content.versions[edition];
+  const base = `/docs/${path}/`;
   write(
     siteRoot,
     "site.json",
     JSON.stringify(
-      { edition, base, navigation: content.navigation, combined: options.combined ?? false },
+      {
+        edition,
+        base,
+        versions: content.versions,
+        navigation: content.navigation,
+        combined: options.combined ?? false,
+      },
       null,
       2,
     ),
   );
   for (const page of content.pages) {
     write(siteRoot, page.snapshot, page.source);
-    const attribution = `\n\n---\n\n[Canonical English source](${page.sourceUrl}) · ${edition} · commit \`${content.commit}\`\n`;
+    const attribution = `\n\n---\n\n[Canonical English source](${page.sourceUrl}) · ${label} · commit \`${content.commit}\`\n`;
     const notice =
       page.status === "source-changed"
-        ? "> 翻訳元の英語が更新されています。この翻訳は確認が必要です。\n\n"
+        ? "> この翻訳が参照した英語原文は、この版の原文と異なります。内容の確認が必要です。\n\n"
         : "";
     write(
       siteRoot,
@@ -55,7 +65,7 @@ export function prepareSite(
   }
   for (const locale of ["en", "ja"] as const) {
     const title =
-      locale === "en" ? `gitlode ${edition} documentation` : `gitlode ${edition} ドキュメント`;
+      locale === "en" ? `gitlode ${label} documentation` : `gitlode ${label} ドキュメント`;
     const landing =
       content.pages
         .filter((p) => p.locale === locale)
@@ -72,6 +82,9 @@ export function prepareSite(
     });
   const report = {
     edition,
+    versions: content.versions,
+    path,
+    label,
     commit: content.commit,
     staging: content.staging,
     root: siteRoot,
@@ -135,29 +148,24 @@ export function buildSite(edition = "all") {
     console.log(`Built documentation: ${result.output}`);
     return result.output;
   }
-  const staging = stage(
-    root,
-    json<Sources>(join(root, "config/sources.json")),
-    json<Publication>(join(root, "config/publication.json")),
-  );
+  const sources = loadSources(root);
+  const staging = stage(root, sources);
   const output = mkdtempSync(join(safeDirectory(root, ".generated/previews"), "combined-"));
   const dist = safeDirectory(output, "dist");
-  const editions = (["stable", "next"] as const).map((name) =>
+  const editions = Object.keys(sources.editions).map((name) =>
     buildEdition(name, { staging, combined: true }),
   );
   const expected: string[] = [];
   const versionNavigation: ReturnType<typeof validateVersionNavigation>[] = [];
   for (const { report } of editions) {
-    if (report.edition !== "stable" && report.edition !== "next")
-      throw new Error("Invalid built edition.");
-    cpSync(join(report.root, "dist"), join(dist, report.edition), {
+    cpSync(join(report.root, "dist"), join(dist, report.path), {
       recursive: true,
       errorOnExist: true,
       force: false,
     });
     expected.push(
       ...["en/", "ja/", ...report.pages.map((p) => p.route)].map(
-        (route) => `${report.edition}/${route}`,
+        (route) => `${report.path}/${route}`,
       ),
     );
     for (const locale of ["en", "ja"] as const) {
@@ -168,10 +176,11 @@ export function buildSite(edition = "all") {
       for (const route of routes)
         versionNavigation.push(
           validateVersionNavigation(
-            readFileSync(join(dist, report.edition, locale, route, "index.html"), "utf8"),
+            readFileSync(join(dist, report.path, locale, route, "index.html"), "utf8"),
             report.edition,
             locale,
             route,
+            report.versions,
           ),
         );
     }
@@ -180,10 +189,11 @@ export function buildSite(edition = "all") {
     dist,
     "index.html",
     '<!doctype html><html lang="en"><meta charset="utf-8"><title>gitlode documentation</title><h1>gitlode documentation</h1>' +
-      ["stable", "next"]
-        .flatMap((name) =>
+      editions
+        .flatMap(({ report }) =>
           ["en", "ja"].map(
-            (locale) => `<p><a href="/docs/${name}/${locale}/">${name} / ${locale}</a></p>`,
+            (locale) =>
+              `<p><a href="/docs/${report.path}/${locale}/">${report.label} / ${locale}</a></p>`,
           ),
         )
         .join("") +
@@ -204,7 +214,7 @@ export function buildSite(edition = "all") {
         edition: "all",
         root: output,
         base: "/docs/",
-        entry: "next/en/",
+        entry: sources.editions[sources.defaultEdition ?? editions[0].report.edition].path + "/en/",
         staging,
         editions: editions.map(({ output, report }) => ({ output, ...report })),
         validation,
@@ -221,16 +231,21 @@ export function buildSite(edition = "all") {
 
 function previewConfiguration(port = 4173) {
   const { output } = json<{ output: string }>(join(root, ".generated/preview.json"));
-  const report = json<{ edition: string; root: string; base: string; entry?: string }>(
-    join(output, "build.json"),
-  );
+  const report = json<{
+    edition: string;
+    root: string;
+    base: string;
+    entry?: string;
+    pages?: { route: string }[];
+    editions?: { base: string; pages: { route: string }[] }[];
+  }>(join(output, "build.json"));
   if (!report.root || !report.base)
     throw new Error("Rebuild with npm run site:build before previewing.");
   return {
     directory: join(report.root, "dist"),
     base: report.base,
     entry: report.entry ?? "en/",
-    prefixes: report.edition === "all" ? ["stable/", "next/"] : [""],
+    editions: report.editions ?? [{ base: report.base, pages: report.pages ?? [] }],
     port,
   };
 }
@@ -244,23 +259,20 @@ export async function verifySite() {
   const config = previewConfiguration(0);
   await withPreviews([config], async ([server]) => {
     console.log("Owned verification port: " + server.port);
-    for (const prefix of config.prefixes)
+    for (const edition of config.editions)
       for (const [path, expected] of [
         ["en/", 200],
         ["ja/", 200],
-        ["ja/profiling/", 200],
-        ["ja/usage/", 200],
-        ["en/design/plugins/", 200],
+        ...edition.pages.map((page) => [page.route, 200] as const),
         ["not-found/", 404],
       ] as const) {
-        const response = await fetch(server.url + prefix + path, {
+        const url = server.url + edition.base.slice(config.base.length) + path;
+        const response = await fetch(url, {
           signal: AbortSignal.timeout(5000),
         });
         await response.arrayBuffer();
         if (response.status !== expected)
-          throw new Error(
-            `Unexpected HTTP status ${response.status}: ${server.url + prefix + path}`,
-          );
+          throw new Error(`Unexpected HTTP status ${response.status}: ${url}`);
       }
     console.log("Verified: " + server.url);
   });

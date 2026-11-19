@@ -22,7 +22,8 @@ export function validateLocalization(
 ): LocalizationStatistics {
   const languageSwitchTarget = `${base}${locale === "en" ? "ja" : "en"}/${route}`;
   const notice = "このコンテンツはまだ日本語訳がありません。";
-  const changedNotice = "翻訳元の英語が更新されています。この翻訳は確認が必要です。";
+  const changedNotice =
+    "この翻訳が参照した英語原文は、この版の原文と異なります。内容の確認が必要です。";
   let documentLanguage = "";
   let hasSwitch = false;
   let hasEnglishBody = false;

@@ -4,15 +4,35 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
+    inputs:
+      publish_sha:
+        description: "Leave blank to prepare only. To publish, enter the approved full main commit SHA."
+        required: false
+        type: string
 
 permissions:
   contents: read
+
+concurrency:
+  group: ${{ github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main' && 'pages-main' || github.run_id }}
+  cancel-in-progress: false
 
 jobs:
   validate:
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    outputs:
+      artifact_name: ${{ steps.candidate.outputs.artifact_name }}
     steps:
+      - name: Check manual release selection
+        if: github.event_name == 'workflow_dispatch'
+        env:
+          REQUESTED_SHA: ${{ inputs.publish_sha }}
+        run: |
+          if [[ "$GITHUB_REF" != refs/heads/main || ( -n "$REQUESTED_SHA" && "$REQUESTED_SHA" != "$GITHUB_SHA" ) ]]; then
+            echo "::error::Choose main and enter its exact reviewed SHA, or leave the SHA blank to prepare only."
+            exit 1
+          fi
       - uses: actions/checkout@v4
         with:
           persist-credentials: false
@@ -28,3 +48,32 @@ jobs:
       - run: npm run site:build
       - run: npm run site:verify
       - run: npm run search:verify
+      - name: Identify the verified Pages candidate
+        id: candidate
+        if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main'
+        run: node --experimental-strip-types src/cli/pages-candidate.ts
+      - name: Upload complete static site
+        if: steps.candidate.outcome == 'success'
+        uses: actions/upload-pages-artifact@v3
+        with:
+          name: ${{ steps.candidate.outputs.artifact_name }}
+          path: ${{ steps.candidate.outputs.dist }}
+          retention-days: 7
+
+  deploy:
+    if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main' && inputs.publish_sha == github.sha
+    needs: validate
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.pages.outputs.page_url }}
+    steps:
+      - name: Deploy approved Pages artifact
+        id: pages
+        uses: actions/deploy-pages@v4
+        with:
+          artifact_name: ${{ needs.validate.outputs.artifact_name }}

@@ -17,9 +17,17 @@ const root = resolve(import.meta.dirname, "../../..");
 const { output } = JSON.parse(readFileSync(join(root, ".generated/preview.json"), "utf8")) as {
   output: string;
 };
-const build = JSON.parse(readFileSync(join(output, "build.json"), "utf8")) as { edition: string };
+interface SearchEdition {
+  edition: string;
+  base: string;
+  pages: { route: string; status: string }[];
+}
+const build = JSON.parse(readFileSync(join(output, "build.json"), "utf8")) as {
+  edition: string;
+  editions: SearchEdition[];
+};
 if (build.edition !== "all")
-  throw new Error("Search verification requires the complete two-edition build.");
+  throw new Error("Search verification requires the complete site build.");
 const dist = join(output, "dist");
 const queries = [
   "profiling",
@@ -66,12 +74,22 @@ function validateTarget(url: string, prefix: string) {
   }
 }
 
-function record(edition: string, locale: string, query: string, matches: Match[]) {
-  for (const match of matches) validateTarget(match.url, `/docs/${edition}/${locale}/`);
-  if (["profiling", "CLI"].includes(query) && matches.length === 0)
+function record(
+  { edition, base, pages }: SearchEdition,
+  locale: string,
+  query: string,
+  matches: Match[],
+) {
+  for (const match of matches) validateTarget(match.url, `${base}${locale}/`);
+  const baseline = query === "profiling" ? "profiling/" : query === "CLI" ? "usage/" : undefined;
+  if (
+    baseline &&
+    pages.some((page) => page.route === locale + "/" + baseline) &&
+    matches.length === 0
+  )
     throw new Error(`Missing baseline search results: ${edition}/${locale}/${query}`);
   if (
-    edition === "next" &&
+    pages.some((page) => page.route === "ja/profiling/" && page.status !== "missing") &&
     locale === "ja" &&
     query === "プロファイリング" &&
     !matches.some((match) =>
@@ -87,9 +105,11 @@ function record(edition: string, locale: string, query: string, matches: Match[]
 
 await withPreviews([{ directory: dist, base: "/docs/", port: 0 }], async ([preview]) => {
   console.log("Search probe listener: " + preview.url);
-  for (const edition of ["stable", "next"]) {
+  for (const selected of build.editions) {
+    const { edition, base } = selected;
+    const prefix = base.slice("/docs/".length);
     for (const locale of ["en", "ja"]) {
-      const chunkDirectory = join(dist, edition, "assets/chunks");
+      const chunkDirectory = join(dist, prefix, "assets/chunks");
       if (!existsSync(chunkDirectory))
         throw new Error("Missing edition search assets; rebuild the VitePress-only site first.");
       const chunk = readdirSync(chunkDirectory).find((name) =>
@@ -97,7 +117,7 @@ await withPreviews([{ directory: dist, base: "/docs/", port: 0 }], async ([previ
       );
       if (!chunk) throw new Error(`Missing search chunk: ${edition}/${locale}`);
       // Verify that the browser-facing index asset is served at the expected deployment URL.
-      const response = await fetch(`${preview.url}${edition}/assets/chunks/${chunk}`, {
+      const response = await fetch(`${preview.url}${prefix}assets/chunks/${chunk}`, {
         signal: AbortSignal.timeout(5000),
       });
       const served = await response.text();
@@ -114,11 +134,11 @@ await withPreviews([{ directory: dist, base: "/docs/", port: 0 }], async ([previ
       });
       for (const query of queries) {
         record(
-          edition,
+          selected,
           locale,
           query,
           index.search(query).map((result) => ({
-            url: `/docs/${edition}${String(result.id)}`,
+            url: `${base.slice(0, -1)}${String(result.id)}`,
             title: String(result.title),
           })),
         );

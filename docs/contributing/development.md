@@ -41,8 +41,8 @@ stop an existing preview before starting another on port 4173.
 
 The language selector switches the current page. The header version links preserve the current
 locale and open the target edition home with a full reload, without retaining the current document
-or fragment. Stable has no owned translations in this corpus and uses English fallback. The next
-Profiling Guide has the Japanese example; the other five next documents demonstrate fallback.
+or fragment. The Japanese Profiling Guide matches the pinned next source. Its stable 0.12.0
+copy displays a source-difference notice. Other untranslated pages use English fallback.
 
 `npm run site:build -- stable` or `-- next` creates a single-edition diagnostic build without
 version controls. Run the default build again to restore the complete preview. The complete
@@ -143,11 +143,12 @@ integration instructions. Commit at practical work increments; do not merge auto
 
 1. Resolve an explicitly chosen tag/branch using `git ls-remote --heads --tags https://github.com/gitlode/gitlode.git`.
 2. For annotated tags, use the peeled `^{}` commit, not the tag object's SHA.
-3. Update the requested ref and full commit in `config/sources.json` together.
-4. Acquire, stage, inspect the diff and manifest, and run checks.
+3. Update the requested ref and full commit in `config/<edition>/source.json` together.
+4. Acquire the pin. For a new stable release run `npm run translations:transfer -- --from next --to stable`.
+   Stage, inspect the diff and manifest, and run checks.
 
-Use exact file paths in `config/publication.json`; adding to the sidebar is a separate edit in
-`config/navigation.json`. Never follow all links or publish a whole repository to avoid failures.
+Use exact file paths in `config/<edition>/publication.json`; adding to the sidebar is a separate edit in
+`config/<edition>/navigation.json`. Never follow all links or publish a whole repository to avoid failures.
 
 ## Validation
 
@@ -173,8 +174,8 @@ validation failures. Generated test fixtures remain ignored for diagnosis.
 
 `.github/workflows/docs.yml` performs these checks plus real upstream acquisition/staging on PRs,
 main pushes, and manual runs, followed by both edition builds, English/Japanese output validation,
-bounded HTTP checks, and search probes. Production deployment remains a separate approval and
-implementation step. Historical clean-clone and hosted results are in
+bounded HTTP checks, and search probes. Manual publication and recovery follow the
+[deployment procedure](../operations/deployment.md). Historical clean-clone and hosted results are in
 [reproducibility evidence](../poc/reproducibility.md); they are not proof for a later untested commit.
 
 ## Troubleshooting
@@ -194,14 +195,21 @@ No environment secrets, deployment keys, or privileged GitHub credentials are ne
 
 ## Translation maintenance
 
-Add owned plain Markdown under `translations/ja/<edition>/` and a record in
-`translations/manifest.json`. Record the canonical file SHA-256 from staging, not the repository
+Add owned plain Markdown and its record using the [edition-specific translation workflow](../operations/translations.md).
+Record the canonical file SHA-256 from staging, not the repository
 commit. Relative links use the canonical document directory. Review translation and source changes
-before updating that hash. A matching hash does not certify translation quality. The current
-Profiling Guide is a PoC example awaiting human language review. Stable translation snapshot policy
-remains open; no next-to-stable substitution occurs.
+before updating that hash. A human decides whether to publish the wording when incorporating
+a translation change. Stable translations may be added and improved after release. Follow the
+[stable release policy](../operations/editions.md#stable-release-policy).
 
 ## VitePress upgrades
+
+To review the locked dependencies, start in a clean checkout with the project Node/npm
+versions. Run `npm ci --ignore-scripts --no-audit`, `npm ls --all`, then `npm audit --json`
+with development dependencies included. Build and type-check tools are development dependencies.
+For a finding, use `npm explain <package>` to trace it to a caller and check the advisory
+status before choosing an update. Record the revision, date, registry, package versions,
+findings and any remaining release decision. Run `npm run check` against the clean install.
 
 The sole renderer is exact-pinned as `vitepress@2.0.0-alpha.21`; application code imports the
 canonical package. The old `vitepress-v2` alias and alias-specific SSR bundling are removed.

@@ -2,10 +2,9 @@ import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
-import { parseSafeMarkdown, prepareMarkdown, routeFor } from "./markdown.ts";
-import type { SourceTree } from "./markdown.ts";
-import { git, stage } from "./pipeline.ts";
-import type { Sources, Publication } from "./pipeline.ts";
+import { parseSafeMarkdown, prepareMarkdown, routeFor, sourceTree } from "./markdown.ts";
+import { stage } from "./pipeline.ts";
+import { editionManifest } from "./translation-transfer.ts";
 import { loadTranslation } from "./translations.ts";
 interface Document {
   sourcePath: string;
@@ -15,6 +14,10 @@ interface Document {
 }
 interface Edition {
   name: string;
+  translationSet?: string;
+  requestedRef: string;
+  path?: string;
+  label?: string;
   resolvedCommit: string;
   documents: Document[];
 }
@@ -27,19 +30,6 @@ interface Navigation {
 function json<T>(path: string): T {
   return JSON.parse(readFileSync(path, "utf8")) as T;
 }
-function sourceTree(root: string, commit: string): SourceTree {
-  const tree: SourceTree = new Map();
-  for (const line of git(join(root, ".generated/source"), ["ls-tree", "-r", "-t", "-z", commit])
-    .toString()
-    .split("\0")) {
-    if (!line) continue;
-    const match = /^(\d+) (blob|tree|commit) [a-f0-9]+\t(.+)$/.exec(line);
-    if (!match) throw new Error("Unexpected Git tree entry.");
-    tree.set(match[3], { mode: match[1], type: match[2] });
-  }
-  return tree;
-}
-
 /** Prepare selected content without importing a renderer or writing renderer-specific files. */
 export function prepareContent(
   root: string,
@@ -47,28 +37,33 @@ export function prepareContent(
   linkBase: string,
   options: { staging?: string } = {},
 ) {
-  if (!["stable", "next"].includes(editionName)) throw new Error("Edition must be stable or next.");
-  const staging =
-    options.staging ??
-    stage(
-      root,
-      json<Sources>(join(root, "config/sources.json")),
-      json<Publication>(join(root, "config/publication.json")),
-    );
+  const staging = options.staging ?? stage(root);
   const manifest = json<Manifest>(join(staging, "manifest.json"));
   const edition = manifest.editions.find((e) => e.name === editionName);
   if (!edition) throw new Error("Missing edition in staging manifest.");
+  const translationManifest = editionManifest(root, editionName, {
+    ref: edition.requestedRef,
+    commit: edition.resolvedCommit,
+    translationSet: edition.translationSet,
+  });
   const tree = sourceTree(root, edition.resolvedCommit);
   const routes = new Map(
     edition.documents.map((doc) => [doc.sourcePath, routeFor(doc.sourcePath)]),
   );
-  if (new Set(routes.values()).size !== routes.size) throw new Error("Published route collision.");
-  const navigation = json<Navigation>(join(root, "config/navigation.json"));
+  if (new Set([...routes.values()].map((route) => route.toLowerCase())).size !== routes.size)
+    throw new Error("Published route collision.");
+  const navigation = json<Navigation>(join(root, "config", editionName, "navigation.json"));
   const pages = edition.documents.flatMap((doc) => {
     const content = readFileSync(join(staging, doc.stagedPath));
     if (createHash("sha256").update(content).digest("hex") !== doc.sha256)
       throw new Error(`Staged content changed: ${doc.sourcePath}`);
-    const translation = loadTranslation(root, editionName, doc.sourcePath, doc.sha256);
+    const translation = loadTranslation(
+      root,
+      editionName,
+      doc.sourcePath,
+      doc.sha256,
+      translationManifest,
+    );
     return (["en", "ja"] as const).map((locale) => {
       const translated = locale === "ja" && translation.status !== "missing";
       const source = translated ? translation.content : content.toString("utf8");
@@ -113,6 +108,9 @@ export function prepareContent(
   for (const group of groups) for (const page of group.pages) parseSafeMarkdown(page.title);
   return {
     edition: editionName,
+    versions: Object.fromEntries(
+      manifest.editions.map((e) => [e.name, { path: e.path ?? e.name, label: e.label ?? e.name }]),
+    ),
     commit: edition.resolvedCommit,
     staging,
     pages,

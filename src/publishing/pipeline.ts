@@ -1,18 +1,56 @@
 import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
-import { lstatSync, mkdirSync, mkdtempSync, writeFileSync } from "node:fs";
+import { lstatSync, mkdirSync, readFileSync, mkdtempSync, writeFileSync } from "node:fs";
 import { basename, isAbsolute, join, relative, resolve, sep } from "node:path";
 
 export interface Source {
+  translationSet?: string;
+  path: string;
+  label: string;
   ref: string;
   commit: string;
 }
 export interface Sources {
   repository: string;
+  defaultEdition?: string;
   editions: Record<string, Source>;
 }
 export interface Publication {
   files: string[];
+}
+
+export function validateEdition(id: string) {
+  if (
+    typeof id !== "string" ||
+    !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(id) ||
+    ["all", "constructor", "prototype"].includes(id)
+  )
+    throw new Error("Invalid editions registry identifier.");
+  validatePath(id);
+}
+
+export function loadSources(root: string): Sources {
+  const registry = JSON.parse(readFileSync(join(root, "config/editions.json"), "utf8")) as {
+    repository: string;
+    defaultEdition?: string;
+    editions: Record<string, Pick<Source, "path" | "label">>;
+  };
+  const editions = Object.fromEntries(
+    Object.entries(registry.editions).map(([id, display]) => {
+      validateEdition(id);
+      const { ref, commit, translationSet } = JSON.parse(
+        readFileSync(join(root, "config", id, "source.json"), "utf8"),
+      ) as Source;
+      return [id, { path: display.path, label: display.label, ref, commit, translationSet }];
+    }),
+  );
+  const sources = {
+    repository: registry.repository,
+    defaultEdition: registry.defaultEdition,
+    editions,
+  };
+  validateSources(sources);
+  return sources;
 }
 
 export function git(repository: string, args: string[]): Buffer {
@@ -43,15 +81,16 @@ export function validatePath(path: string): string {
 }
 
 export function validatePublication(publication: Publication): void {
-  if (!Array.isArray(publication.files) || !publication.files.length)
-    throw new Error("Publication must select files.");
+  const files = publication.files;
+  if (!Array.isArray(files) || !files.length) throw new Error("Publication must select files.");
   const seen = new Set<string>();
-  for (const file of publication.files) {
+  for (const file of files) {
     validatePath(file);
     if (
-      !/^packages\/gitlode\/docs\/(usage\.md|profiling\.md|(?:design|contributing)\/.+\.md)$/.test(
-        file,
-      ) ||
+      (!/^packages\/(?:gitlode|plugin-[a-z0-9-]+)\/README\.md$/.test(file) &&
+        !/^packages\/gitlode\/docs\/(usage\.md|profiling\.md|(?:design|contributing)\/.+\.md)$/.test(
+          file,
+        )) ||
       /(^|\/)(agents|handoff|AGENTS\.md)(\/|$)/i.test(file)
     ) {
       throw new Error(`File outside durable publication policy: ${file}`);
@@ -64,9 +103,35 @@ export function validatePublication(publication: Publication): void {
 export function validateSources(sources: Sources): void {
   if (sources.repository !== "https://github.com/gitlode/gitlode.git")
     throw new Error("Unexpected upstream repository.");
-  if (Object.keys(sources.editions).sort().join(",") !== "next,stable")
-    throw new Error("Expected stable and next editions.");
-  for (const source of Object.values(sources.editions)) {
+  if (!Object.keys(sources.editions).length) throw new Error("Empty editions registry.");
+  if (
+    sources.defaultEdition !== undefined &&
+    !Object.hasOwn(sources.editions, sources.defaultEdition)
+  )
+    throw new Error("Unknown default edition.");
+  const paths = new Set<string>();
+  for (const [id, source] of Object.entries(sources.editions)) {
+    validateEdition(id);
+    if (source.translationSet !== undefined) {
+      validatePath(source.translationSet);
+      if (
+        !/^[a-zA-Z0-9][a-zA-Z0-9.-]*$/.test(source.translationSet) ||
+        source.translationSet.endsWith(".")
+      )
+        throw new Error("Invalid translation set.");
+    }
+    if (typeof source.path !== "string" || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(source.path))
+      throw new Error("Edition path must be a lowercase URL segment.");
+    validatePath(source.path);
+    if (["agents", "handoff"].includes(source.path) || paths.has(source.path))
+      throw new Error("Reserved or duplicate edition path.");
+    paths.add(source.path);
+    if (
+      typeof source.label !== "string" ||
+      !/^[\p{L}\p{N}][\p{L}\p{M}\p{N} .()-]*$/u.test(source.label) ||
+      source.label.trim() !== source.label
+    )
+      throw new Error("Invalid edition display label.");
     if (!/^[a-f0-9]{40}$/.test(source.commit))
       throw new Error("Source must be pinned to a full commit SHA.");
     if (!/^refs\/(heads|tags)\/[A-Za-z0-9_@./-]+$/.test(source.ref) || source.ref.includes("..")) {
@@ -111,7 +176,7 @@ export function resolveCommit(repository: string, revision: string): string {
       .trim();
   } catch {
     throw new Error(
-      `Cannot resolve commit ${revision}. Run npm run source:acquire and check config/sources.json.`,
+      `Cannot resolve commit ${revision}. Run npm run source:acquire and check the edition source configuration.`,
     );
   }
 }
@@ -158,12 +223,16 @@ export function readDocument(repository: string, commit: string, file: string) {
   return { content, blob: match[2], sha256: createHash("sha256").update(content).digest("hex") };
 }
 
-export function stage(root: string, sources: Sources, publication: Publication): string {
+export function stage(root: string, sources: Sources = loadSources(root)): string {
   validateSources(sources);
-  validatePublication(publication);
+
   const repository = join(root, ".generated", "source");
   // Validate all inputs before creating a run; previous runs remain intact.
   const editions = Object.entries(sources.editions).map(([name, source]) => {
+    const publication: Publication = JSON.parse(
+      readFileSync(join(root, "config", name, "publication.json"), "utf8"),
+    );
+    validatePublication(publication);
     const commit = resolveCommit(repository, source.commit);
     return {
       name,
@@ -194,10 +263,18 @@ export function stage(root: string, sources: Sources, publication: Publication):
     docsRevision,
     docsDirty,
     configSha256: createHash("sha256")
-      .update(JSON.stringify({ sources, publication }))
+      .update(
+        JSON.stringify({
+          sources,
+          selections: editions.map((e) => e.documents.map((d) => d.path)),
+        }),
+      )
       .digest("hex"),
     editions: editions.map((edition) => ({
       name: edition.name,
+      path: edition.path,
+      label: edition.label,
+      translationSet: edition.translationSet,
       requestedRef: edition.ref,
       resolvedCommit: edition.commit,
       documents: edition.documents.map((document) => {

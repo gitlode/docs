@@ -1,0 +1,52 @@
+{
+  "groups": [
+    {
+      "label": "Using gitlode",
+      "files": [
+        "packages/gitlode/README.md",
+        "packages/gitlode/docs/usage.md",
+        "packages/gitlode/docs/profiling.md"
+      ]
+    },
+    {
+      "label": "Official plugins",
+      "files": [
+        "packages/plugin-assay-metrics/README.md",
+        "packages/plugin-conventional-commits/README.md",
+        "packages/plugin-custom-field/README.md",
+        "packages/plugin-file-type/README.md",
+        "packages/plugin-identity-profile/README.md"
+      ]
+    },
+    {
+      "label": "Design",
+      "files": [
+        "packages/gitlode/docs/design/README.md",
+        "packages/gitlode/docs/design/architecture.md",
+        "packages/gitlode/docs/design/cli.md",
+        "packages/gitlode/docs/design/configuration.md",
+        "packages/gitlode/docs/design/schema.md",
+        "packages/gitlode/docs/design/plugins.md",
+        "packages/gitlode/docs/design/domain-design.md",
+        "packages/gitlode/docs/design/git-adapters.md",
+        "packages/gitlode/docs/design/git-traversal.md",
+        "packages/gitlode/docs/design/commit-traversal-internals.md"
+      ]
+    },
+    {
+      "label": "Contributing",
+      "files": [
+        "packages/gitlode/docs/contributing/README.md",
+        "packages/gitlode/docs/contributing/build-test-release.md",
+        "packages/gitlode/docs/contributing/lint-policy.md"
+      ]
+    },
+    {
+      "label": "Telemetry",
+      "files": [
+        "packages/gitlode/docs/design/telemetry.md",
+        "packages/gitlode/docs/design/telemetry-verification.md"
+      ]
+    }
+  ]
+}

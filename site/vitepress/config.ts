@@ -9,11 +9,11 @@ const root = resolve(import.meta.dirname, "..");
 const site = JSON.parse(readFileSync(resolve(root, "site.json"), "utf8")) as PreviewSite;
 export default defineConfigWithTheme<PreviewTheme>({
   themeConfig: {
-    versionSite: { edition: site.edition, base: site.base, combined: site.combined },
+    versionSite: { edition: site.edition, versions: site.versions, combined: site.combined },
     search: { provider: "local" },
   },
   title: "gitlode",
-  description: `Documentation — ${site.edition}`,
+  description: `Documentation — ${site.versions[site.edition].label}`,
   base: site.base,
   srcDir: "content",
   outDir: resolve(root, "dist"),
@@ -49,7 +49,7 @@ export default defineConfigWithTheme<PreviewTheme>({
         label: locale === "en" ? "English" : "日本語",
         lang: locale,
         themeConfig: {
-          versionSite: { edition: site.edition, base: site.base, combined: site.combined },
+          versionSite: { edition: site.edition, versions: site.versions, combined: site.combined },
           outline: [2, 3],
           sidebar: site.navigation.map((group) => ({
             text: group.label,
@@ -58,7 +58,9 @@ export default defineConfigWithTheme<PreviewTheme>({
               link: `/${locale}/${page.route}`,
             })),
           })),
-          nav: site.combined ? [] : [{ text: site.edition, link: `/${locale}/` }],
+          nav: site.combined
+            ? []
+            : [{ text: site.versions[site.edition].label, link: `/${locale}/` }],
         },
       },
     ]),

@@ -1,21 +1,26 @@
-import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
+import { parseArgs } from "node:util";
 
-import { acquire, stage } from "./pipeline.ts";
-import type { Publication, Sources } from "./pipeline.ts";
+import { acquire, loadSources, stage } from "./pipeline.ts";
+import { transferTranslations } from "./translation-transfer.ts";
 
 try {
   const root = resolve(import.meta.dirname, "../..");
-  const sources: Sources = JSON.parse(readFileSync(resolve(root, "config/sources.json"), "utf8"));
   switch (process.argv[2]) {
+    case "transfer": {
+      const { values } = parseArgs({
+        args: process.argv.slice(3),
+        options: { from: { type: "string" }, to: { type: "string" } },
+      });
+      if (!values.from || !values.to) throw new Error("Specify --from and --to edition IDs.");
+      console.log(transferTranslations(root, values.from, values.to));
+      break;
+    }
     case "acquire":
-      acquire(root, sources);
+      acquire(root, loadSources(root));
       break;
     case "stage": {
-      const publication: Publication = JSON.parse(
-        readFileSync(resolve(root, "config/publication.json"), "utf8"),
-      );
-      console.log(stage(root, sources, publication));
+      console.log(stage(root));
       break;
     }
     default:
