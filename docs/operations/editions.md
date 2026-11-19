@@ -27,6 +27,18 @@ stop resolving after publication. Revisit redirects if a concrete compatibility 
 
 ## Review a source update PR
 
+Use a regular pull request in `gitlode/docs` for each source update.
+
+- **Stable:** The gitlode release maintainer opens the PR when publishing the upstream
+  package. The docs update can proceed with English fallback while translations are pending.
+- **Next:** The developer who integrated upstream documentation changes opens the PR when
+  those changes are ready for readers. One PR can include several related changes.
+
+The maintainer selects the pin and opens the PR manually. The existing read-only
+[validation workflow](../../.github/workflows/docs.yml) checks the proposed revision,
+builds the site and verifies HTTP responses and search. Revisit automated PR creation or
+cross-repository triggers if experience with this workflow shows a need.
+
 1. Start from a clean docs checkout. Record the edition's current ref and commit, the intended
    upstream ref and its resolved commit. For an annotated release tag, use its peeled commit.
    Compare the two upstream trees before editing the pin.

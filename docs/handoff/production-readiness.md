@@ -168,7 +168,8 @@ that a later dependency graph is safe. Maintain the selected alpha version until
 Technical rehearsal passed on 2026-11-19 in an isolated checkout based on `fa72bc8`.
 The tracked project pins were unchanged. For the manual PR procedure see
 [edition operations](../operations/editions.md#review-a-source-update-pr).
-Update ownership and cadence remain open for owner review.
+P4 is complete. The owner approved manual PRs initiated by the release maintainer at package
+publication for stable, and by the integrating developer when changes are ready for next readers.
 
 To reproduce the rehearsal with the two real upstream pins in the table above:
 
@@ -199,8 +200,7 @@ Entry points: `config/<edition>/source.json`, `src/publishing/pipeline.ts`, tran
    branch by name sorting or silently replace the tested revisions.
 2. Document a manual pin-update PR procedure first: resolve the intended ref, inspect changed source,
    publication paths and translation freshness, rebuild both editions, and review generated behavior.
-3. Decide update ownership and cadence. Scheduled checks or cross-repository dispatch can follow a
-   concrete need; they are not necessary to begin with reviewed manual updates.
+3. Follow the agreed ownership and timing in the edition operations guide. Further automation is deferred.
 
 Completion evidence: one reproducible update rehearsal with correct provenance, unchanged-file
 translations remaining current, changed-file translations flagged, and no partial/stale deployment
