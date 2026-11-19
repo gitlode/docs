@@ -101,11 +101,13 @@ assets, CSS URLs, and srcset validation require a later increment. Dependency ch
 
 Japanese translation sources belong to this repository. Missing translations and source changes
 are distinct conditions; freshness must use file-level identity rather than a repository-wide commit.
-`translations/manifest.json` records edition, locale, canonical source path, checked source SHA-256,
+The next manifest and each stable release's own manifest record edition, locale, canonical source path, checked source SHA-256,
 and repository-owned translation path. A matching file hash means `current`, not human approval;
 a changed hash means `source-changed` and renders a review warning while retaining the translation.
 No record means `missing`; a declared but absent file is an error. Invalid paths, duplicate records,
-and symlink/junction paths fail closed. Stable never silently uses next translations.
+and symlink/junction paths fail closed. Stable builds read the release's independent snapshot.
+The [release preparation command](../operations/translations.md#prepare-a-new-stable-release)
+initializes it from exact file-hash matches before publication.
 
 Translations use the same restricted Markdown preparation as English, with relative links resolved
 against the canonical source path. Each generated edition stores render-input snapshots and hashes,

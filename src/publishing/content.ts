@@ -5,6 +5,7 @@ import { join } from "node:path";
 import { parseSafeMarkdown, prepareMarkdown, routeFor } from "./markdown.ts";
 import type { SourceTree } from "./markdown.ts";
 import { git, stage } from "./pipeline.ts";
+import { stableTranslationManifest } from "./stable-translations.ts";
 import { loadTranslation } from "./translations.ts";
 interface Document {
   sourcePath: string;
@@ -14,6 +15,7 @@ interface Document {
 }
 interface Edition {
   name: string;
+  requestedRef: string;
   path?: string;
   label?: string;
   resolvedCommit: string;
@@ -53,6 +55,13 @@ export function prepareContent(
   const manifest = json<Manifest>(join(staging, "manifest.json"));
   const edition = manifest.editions.find((e) => e.name === editionName);
   if (!edition) throw new Error("Missing edition in staging manifest.");
+  const translationManifest =
+    editionName === "stable"
+      ? stableTranslationManifest(root, {
+          ref: edition.requestedRef,
+          commit: edition.resolvedCommit,
+        })
+      : undefined;
   const tree = sourceTree(root, edition.resolvedCommit);
   const routes = new Map(
     edition.documents.map((doc) => [doc.sourcePath, routeFor(doc.sourcePath)]),
@@ -64,7 +73,13 @@ export function prepareContent(
     const content = readFileSync(join(staging, doc.stagedPath));
     if (createHash("sha256").update(content).digest("hex") !== doc.sha256)
       throw new Error(`Staged content changed: ${doc.sourcePath}`);
-    const translation = loadTranslation(root, editionName, doc.sourcePath, doc.sha256);
+    const translation = loadTranslation(
+      root,
+      editionName,
+      doc.sourcePath,
+      doc.sha256,
+      translationManifest,
+    );
     return (["en", "ja"] as const).map((locale) => {
       const translated = locale === "ja" && translation.status !== "missing";
       const source = translated ? translation.content : content.toString("utf8");

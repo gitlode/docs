@@ -83,7 +83,7 @@ export function validateTranslationManifest(value: unknown): TranslationRecord[]
   });
 }
 
-function readOwnedFile(root: string, relativePath: string): string {
+export function readOwnedFile(root: string, relativePath: string): string {
   validatePath(relativePath);
   let cursor = resolve(root);
   // Refuse a symlink/junction in the selected root or its ancestors as well as below it.
@@ -123,17 +123,18 @@ export function loadTranslation(
   edition: string,
   sourcePath: string,
   currentSha256: string,
+  manifestPath = "translations/manifest.json",
 ): TranslationResult {
   if (edition !== "stable" && edition !== "next")
     throw new Error("Translation edition must be stable or next.");
   validatePublication({ files: [sourcePath] });
   validateHash(currentSha256);
-  const raw = readOwnedFile(root, "translations/manifest.json");
+  const raw = readOwnedFile(root, manifestPath);
   let manifest: unknown;
   try {
     manifest = JSON.parse(raw);
   } catch (error) {
-    throw new Error("Invalid JSON in translations/manifest.json.", { cause: error });
+    throw new Error(`Invalid JSON in ${manifestPath}.`, { cause: error });
   }
   const record = validateTranslationManifest(manifest).find(
     (entry) => entry.edition === edition && entry.sourcePath === sourcePath,

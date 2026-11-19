@@ -1,10 +1,14 @@
 import { resolve } from "node:path";
 
 import { acquire, loadSources, stage } from "./pipeline.ts";
+import { prepareStableTranslations } from "./stable-translations.ts";
 
 try {
   const root = resolve(import.meta.dirname, "../..");
   switch (process.argv[2]) {
+    case "prepare-stable-translations":
+      console.log(prepareStableTranslations(root));
+      break;
     case "acquire":
       acquire(root, loadSources(root));
       break;

@@ -24,6 +24,11 @@ import {
   validateSources,
 } from "../src/publishing/pipeline.ts";
 import type { Sources } from "../src/publishing/pipeline.ts";
+import {
+  prepareStableTranslations,
+  stableTranslationManifest,
+} from "../src/publishing/stable-translations.ts";
+import { loadTranslation } from "../src/publishing/translations.ts";
 
 const scratch = safeDirectory(resolve("."), ".generated/tests");
 const file = "packages/gitlode/docs/usage.md";
@@ -136,6 +141,7 @@ test("next selection and navigation edits leave stable documents, links and side
     const { pages, navigation } = prepareContent(root, id, "/", { staging: stage(root, sources) });
     return { pages, navigation };
   }
+  prepareStableTranslations(root, sources.editions.stable);
   const stable = content("stable");
   writeFileSync(
     join(root, "config/next/publication.json"),
@@ -150,6 +156,54 @@ test("next selection and navigation edits leave stable documents, links and side
   assert.ok(next.pages[0].markdown.includes("/en/profiling/"));
   assert.ok(stable.pages[0].markdown.includes("github.com/gitlode/gitlode/blob/"));
   assert.deepEqual(content("stable"), stable);
+});
+
+test("release preparation snapshots only matching next translations and preserves stable corrections on retry", () => {
+  const { root, repository, sources, commit } = fixture();
+  const release = sources.editions.stable;
+  const sha256 = readDocument(repository, commit, file).sha256;
+  const translationPath = "translations/ja/next/usage.md";
+  safeDirectory(root, "translations/ja/next");
+  const manifest = join(root, "translations/manifest.json");
+  const candidate = {
+    edition: "next",
+    locale: "ja",
+    sourcePath: file,
+    sourceSha256: sha256,
+    translationPath,
+  };
+  writeFileSync(manifest, JSON.stringify({ translations: [candidate] }));
+  assert.throws(() => prepareStableTranslations(root, release), /unreadable translation/);
+  assert.throws(() => stableTranslationManifest(root, release), /not prepared/);
+  writeFileSync(join(root, translationPath), "# Japanese draft");
+  assert.equal(prepareStableTranslations(root, release).inherited, 1);
+  const stable = stableTranslationManifest(root, release);
+  const promoted = loadTranslation(root, "stable", file, sha256, stable);
+  assert.equal(promoted.status, "current");
+  assert.equal(promoted.content, "# Japanese draft");
+  writeFileSync(join(root, promoted.translationPath), "# Stable correction");
+  writeFileSync(join(root, translationPath), "# Next change");
+  assert.equal(prepareStableTranslations(root, release).prepared, false);
+  assert.deepEqual(loadTranslation(root, "stable", file, sha256, stable), {
+    ...promoted,
+    content: "# Stable correction",
+  });
+  for (const [index, translations] of [
+    [{ ...candidate, sourceSha256: "b".repeat(64) }],
+    [],
+  ].entries()) {
+    const later = { ...release, ref: "refs/tags/later-" + index };
+    writeFileSync(manifest, JSON.stringify({ translations }));
+    assert.equal(prepareStableTranslations(root, later).fallback, 1);
+    assert.equal(
+      loadTranslation(root, "stable", file, sha256, stableTranslationManifest(root, later)).status,
+      "missing",
+    );
+  }
+  assert.throws(
+    () => stableTranslationManifest(root, { ...release, commit: "0".repeat(40) }),
+    /pinned release/,
+  );
 });
 
 test("source pins and edition names are validated before IO", () => {

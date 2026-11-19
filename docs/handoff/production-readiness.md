@@ -118,9 +118,8 @@ Entry points: `translations/manifest.json`, `translations/ja/<edition>/`,
 `src/publishing/translations.ts`, `src/ssg/vitepress/validate-localization.ts`,
 `site/vitepress/config.ts`, and `test/translations.test.ts` / `test/localization.test.ts`.
 
-1. Follow the agreed [stable release policy](../operations/editions.md#stable-release-policy). Decide
-   when a reviewed next translation can be promoted, how the matching source hash is recorded, and
-   how stable corrections are maintained. Until decided, never substitute next translations for stable.
+1. Stable release preparation implements the [exact-match inheritance policy](../operations/translations.md#prepare-a-new-stable-release).
+   For 0.12.0 it selected zero translations and 21 fallbacks. Later additions and corrections use the ordinary translation workflow.
 2. Have the owner review the Japanese example and decide initial production translation coverage.
    Full translation coverage and automated generation are not implied prerequisites.
 3. Document a small maintainer workflow for source changes: review the English diff, edit the

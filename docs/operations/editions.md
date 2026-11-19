@@ -16,6 +16,8 @@ editions are assembled into a fresh artifact. Changing paths creates no redirect
 1. Edit only the fields needed. For a source update follow the [pin procedure](../contributing/development.md#updating-inputs)
    and review selected files, changed links and translation hashes.
 2. Run `npm run check`. Acquire the pins with `npm run source:acquire` if needed.
+   For a new stable release, run `npm run translations:prepare-stable` and commit the
+   [release translation snapshot](translations.md#prepare-a-new-stable-release) with the pin.
 3. Run `npm run site:build`, `npm run site:verify` and `npm run search:verify`.
    Review the landing page and version switch in both locales before release.
 
