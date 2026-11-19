@@ -29,14 +29,13 @@ The following rules apply while stable points to one particular gitlode release.
 
 - The upstream release tag and commit fix the canonical English text. Every upstream correction,
   including a typo, arrives through a new gitlode release. Keep the original commit pin.
-- Keep the release's navigation structure and ordering. Correct configuration defects in an
-  explicit stable change and record the defect. Apply editorial reorganization to next.
+- Keep the release's approved document list, navigation structure and ordering. Correct a
+  configuration defect in an explicit stable change and record the reason. For example, restore
+  a guide accidentally omitted from the approved list. Schedule newly proposed additions,
+  removals and navigation improvements for a future release.
 - Publish stable near the package release even when translations are missing. Translators may
   subsequently add a translation or improve its fidelity to the pinned original. Review each
   translation against the stable source and store it under stable. A next translation cannot
   implicitly change a stable translation. A translated page title can change with its translation.
 - Rebuild the complete site on republication. Shared renderer, theme and search implementation
   updates may change the generated site for a released edition.
-
-Publication membership is configured independently for each edition. The allowed changes to
-membership during an existing stable release remain an owner decision.

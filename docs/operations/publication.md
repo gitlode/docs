@@ -12,7 +12,7 @@ directory resolve to the same route. Other selected guides use their source-rela
 
 Edit `config/<edition>/navigation.json` to change group labels, group order and page order
 within that edition. Each listed document must belong to the same edition's publication list.
-Follow the [stable release policy](editions.md#stable-release-policy) for released navigation.
+For changes to a released edition's selection or sidebar, follow the [stable release policy](editions.md#stable-release-policy).
 
 Check the file at each applicable pin and review incoming links and translation records.
 Relative links to published documents become site links; other existing files and directories

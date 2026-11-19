@@ -11,7 +11,7 @@ The [PoC closeout report](../poc/closeout.md) preserves the pre-merge review evi
 Resume with the [production readiness backlog and owner decisions](production-readiness.md).
 The owner approved the initial pins and publication scope for current work. Edition identity and URL behavior are agreed; see [edition operations](../operations/editions.md).
 The approved corpus is configured; see [publication operations](../operations/publication.md).
-Next confirm whether the stable publication list follows the navigation defect-only correction rule.
+The owner confirmed that the stable publication list and navigation share the same defect-only correction rule for each release.
 Translation additions and fidelity corrections after release are approved; initial language review and promotion procedures remain open. Production
 launch requires a separate owner decision. Read the [documentation guide](../README.md),
 [architecture](../design/architecture.md), [development workflow](../contributing/development.md)
