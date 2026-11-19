@@ -4,6 +4,7 @@ import { lstatSync, mkdirSync, readFileSync, mkdtempSync, writeFileSync } from "
 import { basename, isAbsolute, join, relative, resolve, sep } from "node:path";
 
 export interface Source {
+  translationSet?: string;
   path: string;
   label: string;
   ref: string;
@@ -11,27 +12,43 @@ export interface Source {
 }
 export interface Sources {
   repository: string;
+  defaultEdition?: string;
   editions: Record<string, Source>;
 }
 export interface Publication {
   files: string[];
 }
 
+export function validateEdition(id: string) {
+  if (
+    typeof id !== "string" ||
+    !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(id) ||
+    ["all", "constructor", "prototype"].includes(id)
+  )
+    throw new Error("Invalid editions registry identifier.");
+  validatePath(id);
+}
+
 export function loadSources(root: string): Sources {
   const registry = JSON.parse(readFileSync(join(root, "config/editions.json"), "utf8")) as {
     repository: string;
+    defaultEdition?: string;
     editions: Record<string, Pick<Source, "path" | "label">>;
   };
   const editions = Object.fromEntries(
     Object.entries(registry.editions).map(([id, display]) => {
-      if (id !== "stable" && id !== "next") throw new Error("Unexpected edition in registry.");
-      const { ref, commit } = JSON.parse(
+      validateEdition(id);
+      const { ref, commit, translationSet } = JSON.parse(
         readFileSync(join(root, "config", id, "source.json"), "utf8"),
       ) as Source;
-      return [id, { path: display.path, label: display.label, ref, commit }];
+      return [id, { path: display.path, label: display.label, ref, commit, translationSet }];
     }),
   );
-  const sources = { repository: registry.repository, editions };
+  const sources = {
+    repository: registry.repository,
+    defaultEdition: registry.defaultEdition,
+    editions,
+  };
   validateSources(sources);
   return sources;
 }
@@ -86,10 +103,23 @@ export function validatePublication(publication: Publication): void {
 export function validateSources(sources: Sources): void {
   if (sources.repository !== "https://github.com/gitlode/gitlode.git")
     throw new Error("Unexpected upstream repository.");
-  if (Object.keys(sources.editions).sort().join(",") !== "next,stable")
-    throw new Error("Expected stable and next editions.");
+  if (!Object.keys(sources.editions).length) throw new Error("Empty editions registry.");
+  if (
+    sources.defaultEdition !== undefined &&
+    !Object.hasOwn(sources.editions, sources.defaultEdition)
+  )
+    throw new Error("Unknown default edition.");
   const paths = new Set<string>();
-  for (const source of Object.values(sources.editions)) {
+  for (const [id, source] of Object.entries(sources.editions)) {
+    validateEdition(id);
+    if (source.translationSet !== undefined) {
+      validatePath(source.translationSet);
+      if (
+        !/^[a-zA-Z0-9][a-zA-Z0-9.-]*$/.test(source.translationSet) ||
+        source.translationSet.endsWith(".")
+      )
+        throw new Error("Invalid translation set.");
+    }
     if (typeof source.path !== "string" || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(source.path))
       throw new Error("Edition path must be a lowercase URL segment.");
     validatePath(source.path);
@@ -244,6 +274,7 @@ export function stage(root: string, sources: Sources = loadSources(root)): strin
       name: edition.name,
       path: edition.path,
       label: edition.label,
+      translationSet: edition.translationSet,
       requestedRef: edition.ref,
       resolvedCommit: edition.commit,
       documents: edition.documents.map((document) => {

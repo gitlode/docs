@@ -1,24 +1,25 @@
 import { parse } from "parse5";
 import type { DefaultTreeAdapterMap } from "parse5";
 
-type Edition = "stable" | "next";
-
 export interface VersionNavigationStatistics {
-  edition: Edition;
+  edition: string;
   locale: "en" | "ja";
-  target: string;
+  targets: string[];
 }
 
 /** Assert cross-build navigation without treating ordinary body links as version controls. */
 export function validateVersionNavigation(
   html: string,
-  edition: Edition,
+  edition: string,
   locale: "en" | "ja",
   route: string,
   versions: Record<string, { path: string; label: string }>,
 ): VersionNavigationStatistics {
-  const other = edition === "stable" ? "next" : "stable";
-  const target = `/docs/${versions[other].path}/${locale}/`;
+  const targets = new Map(
+    Object.entries(versions)
+      .filter(([id]) => id !== edition)
+      .map(([, version]) => [`/docs/${version.path}/${locale}/`, version.label]),
+  );
   let controls = 0;
   let validControls = 0;
   let headerControls = 0;
@@ -38,33 +39,31 @@ export function validateVersionNavigation(
       controls++;
       if (inHeader) headerControls++;
       let current = false;
-      let counterpart = false;
+      const found = new Set<string>();
       function inspectControl(child: DefaultTreeAdapterMap["node"]): void {
         if ("tagName" in child) {
           const attr = (name: string) => child.attrs.find((a) => a.name === name)?.value;
           if (attr("aria-current") === "page" && text(child).trim() === versions[edition].label)
             current = true;
+          const href = attr("href");
           if (
             child.tagName === "a" &&
-            attr("href") === target &&
-            text(child).trim() === versions[other].label
-          ) {
-            // VitePress's router bypasses links with an explicit target attribute.
-            counterpart = attr("target") === "_self";
-          }
+            href &&
+            attr("target") === "_self" &&
+            targets.get(href) === text(child).trim()
+          )
+            found.add(href);
         }
         if ("childNodes" in child)
           for (const descendant of child.childNodes) inspectControl(descendant);
       }
       inspectControl(node);
-      if (current && counterpart) validControls++;
+      if (current && found.size === targets.size) validControls++;
     }
     if ("childNodes" in node) for (const child of node.childNodes) inspect(child, inHeader);
   }
   inspect(parse(html));
   if (headerControls === 0 || validControls !== controls)
-    throw new Error(
-      `VitePress: ${edition}/${locale}/${route}: invalid version navigation to ${target}`,
-    );
-  return { edition, locale, target };
+    throw new Error(`VitePress: ${edition}/${locale}/${route}: invalid version navigation`);
+  return { edition, locale, targets: [...targets.keys()] };
 }

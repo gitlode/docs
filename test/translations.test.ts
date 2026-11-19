@@ -25,11 +25,16 @@ function fixture(entries: unknown[] = [record], createTranslation = true) {
   const root = mkdtempSync(join(scratch, "translations-"));
   safeDirectory(root, "translations/ja/next");
   writeFileSync(
-    join(root, "translations/manifest.json"),
+    join(root, "translations/ja/next/manifest.json"),
     JSON.stringify({ translations: entries }),
   );
   if (createTranslation)
     writeFileSync(join(root, record.translationPath), "# プロファイリング\n\n日本語の例です。\n");
+  safeDirectory(root, "translations/ja/stable");
+  writeFileSync(
+    join(root, "translations/ja/stable/manifest.json"),
+    JSON.stringify({ translations: [] }),
+  );
   return root;
 }
 
@@ -42,7 +47,7 @@ test("translation freshness uses only canonical file identity and allows review 
   // Unrelated repository changes cannot affect this comparison: there is no commit identity input.
   assert.equal(translationFreshness(hash, hash), "current");
   writeFileSync(
-    join(root, "translations/manifest.json"),
+    join(root, "translations/ja/next/manifest.json"),
     JSON.stringify({ translations: [{ ...record, sourceSha256: "b".repeat(64) }] }),
   );
   const reviewed = loadTranslation(root, "next", sourcePath, "b".repeat(64));
@@ -62,7 +67,7 @@ test("missing records fall back but declared absent files and absent manifest fa
 
 test("next translations are never substituted for stable even when source hashes match", () => {
   assert.deepEqual(loadTranslation(fixture(), "stable", sourcePath, hash), { status: "missing" });
-  assert.throws(() => loadTranslation(fixture(), "development", sourcePath, hash), /edition/);
+  assert.throws(() => loadTranslation(fixture(), "../development", sourcePath, hash), /edition/);
 });
 
 test("manifest validates schema, hashes, publication policy, duplicates, and edition-specific paths", () => {

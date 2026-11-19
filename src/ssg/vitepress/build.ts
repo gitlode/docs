@@ -5,7 +5,7 @@ import { performance } from "node:perf_hooks";
 
 import { prepareContent } from "../../publishing/content.ts";
 import { parseSafeMarkdown } from "../../publishing/markdown.ts";
-import { safeDirectory, stage } from "../../publishing/pipeline.ts";
+import { loadSources, safeDirectory, stage } from "../../publishing/pipeline.ts";
 import { startPreview, withPreviews } from "../../publishing/preview-server.ts";
 import { validateOutput } from "../../publishing/validate-output.ts";
 import { validateLocalization } from "./validate-localization.ts";
@@ -22,10 +22,14 @@ function write(directory: string, path: string, content: string) {
 }
 
 export function prepareSite(
-  edition = "next",
+  edition?: string,
   options: { staging?: string; combined?: boolean } = {},
 ) {
   // VitePress adds the deployment base to site-root Markdown links.
+  if (edition === undefined) {
+    const sources = loadSources(root);
+    edition = sources.defaultEdition ?? Object.keys(sources.editions)[0];
+  }
   const content = prepareContent(root, edition, "/", options);
   const output = mkdtempSync(join(safeDirectory(root, ".generated/previews"), "run-"));
   const siteRoot = safeDirectory(output, "site");
@@ -51,7 +55,7 @@ export function prepareSite(
     const attribution = `\n\n---\n\n[Canonical English source](${page.sourceUrl}) · ${label} · commit \`${content.commit}\`\n`;
     const notice =
       page.status === "source-changed"
-        ? "> 翻訳元の英語が更新されています。この翻訳は確認が必要です。\n\n"
+        ? "> この翻訳が参照した英語原文は、この版の原文と異なります。内容の確認が必要です。\n\n"
         : "";
     write(
       siteRoot,
@@ -144,17 +148,16 @@ export function buildSite(edition = "all") {
     console.log(`Built documentation: ${result.output}`);
     return result.output;
   }
-  const staging = stage(root);
+  const sources = loadSources(root);
+  const staging = stage(root, sources);
   const output = mkdtempSync(join(safeDirectory(root, ".generated/previews"), "combined-"));
   const dist = safeDirectory(output, "dist");
-  const editions = (["stable", "next"] as const).map((name) =>
+  const editions = Object.keys(sources.editions).map((name) =>
     buildEdition(name, { staging, combined: true }),
   );
   const expected: string[] = [];
   const versionNavigation: ReturnType<typeof validateVersionNavigation>[] = [];
   for (const { report } of editions) {
-    if (report.edition !== "stable" && report.edition !== "next")
-      throw new Error("Invalid built edition.");
     cpSync(join(report.root, "dist"), join(dist, report.path), {
       recursive: true,
       errorOnExist: true,
@@ -211,7 +214,7 @@ export function buildSite(edition = "all") {
         edition: "all",
         root: output,
         base: "/docs/",
-        entry: editions[1].report.path + "/en/",
+        entry: sources.editions[sources.defaultEdition ?? editions[0].report.edition].path + "/en/",
         staging,
         editions: editions.map(({ output, report }) => ({ output, ...report })),
         validation,

@@ -1,5 +1,6 @@
 {
   "repository": "https://github.com/gitlode/gitlode.git",
+  "defaultEdition": "next",
   "editions": {
     "stable": {
       "path": "stable",

@@ -23,7 +23,10 @@ test(`VitePress: links to the locale home from every document when changing eith
           route,
           versions,
         );
-        assert.equal(result.target, `/docs/${edition === "stable" ? "dev" : "latest"}/${locale}/`);
+        assert.equal(
+          result.targets[0],
+          `/docs/${edition === "stable" ? "dev" : "latest"}/${locale}/`,
+        );
         assert.equal(result.edition, edition);
       }
 });

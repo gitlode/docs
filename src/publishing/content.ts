@@ -2,10 +2,9 @@ import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
-import { parseSafeMarkdown, prepareMarkdown, routeFor } from "./markdown.ts";
-import type { SourceTree } from "./markdown.ts";
-import { git, stage } from "./pipeline.ts";
-import { stableTranslationManifest } from "./stable-translations.ts";
+import { parseSafeMarkdown, prepareMarkdown, routeFor, sourceTree } from "./markdown.ts";
+import { stage } from "./pipeline.ts";
+import { editionManifest } from "./translation-transfer.ts";
 import { loadTranslation } from "./translations.ts";
 interface Document {
   sourcePath: string;
@@ -15,6 +14,7 @@ interface Document {
 }
 interface Edition {
   name: string;
+  translationSet?: string;
   requestedRef: string;
   path?: string;
   label?: string;
@@ -30,19 +30,6 @@ interface Navigation {
 function json<T>(path: string): T {
   return JSON.parse(readFileSync(path, "utf8")) as T;
 }
-function sourceTree(root: string, commit: string): SourceTree {
-  const tree: SourceTree = new Map();
-  for (const line of git(join(root, ".generated/source"), ["ls-tree", "-r", "-t", "-z", commit])
-    .toString()
-    .split("\0")) {
-    if (!line) continue;
-    const match = /^(\d+) (blob|tree|commit) [a-f0-9]+\t(.+)$/.exec(line);
-    if (!match) throw new Error("Unexpected Git tree entry.");
-    tree.set(match[3], { mode: match[1], type: match[2] });
-  }
-  return tree;
-}
-
 /** Prepare selected content without importing a renderer or writing renderer-specific files. */
 export function prepareContent(
   root: string,
@@ -50,18 +37,15 @@ export function prepareContent(
   linkBase: string,
   options: { staging?: string } = {},
 ) {
-  if (!["stable", "next"].includes(editionName)) throw new Error("Edition must be stable or next.");
   const staging = options.staging ?? stage(root);
   const manifest = json<Manifest>(join(staging, "manifest.json"));
   const edition = manifest.editions.find((e) => e.name === editionName);
   if (!edition) throw new Error("Missing edition in staging manifest.");
-  const translationManifest =
-    editionName === "stable"
-      ? stableTranslationManifest(root, {
-          ref: edition.requestedRef,
-          commit: edition.resolvedCommit,
-        })
-      : undefined;
+  const translationManifest = editionManifest(root, editionName, {
+    ref: edition.requestedRef,
+    commit: edition.resolvedCommit,
+    translationSet: edition.translationSet,
+  });
   const tree = sourceTree(root, edition.resolvedCommit);
   const routes = new Map(
     edition.documents.map((doc) => [doc.sourcePath, routeFor(doc.sourcePath)]),

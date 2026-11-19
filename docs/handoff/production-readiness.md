@@ -56,16 +56,10 @@ See [edition operations](../operations/editions.md) for the implemented contract
 Individual document moves follow source paths; defer URL overrides and redirects until there
 is a concrete need.
 
-The owner wants edition names to carry operational meaning only. The architecture should
-identify editions through configuration and allow translation transfer in either direction
-between a specified source and destination. Today's command prepares stable from next;
-the registry validation, combined build and version-switch checks also assume two named
-editions. Generalizing the command alone would leave these assumptions in place.
-
-Before changing transfer behavior, settle whether a transfer also copies translations whose
-checked English hash differs from the destination. If copied, retain the original checked
-hash so the destination can show its normal review notice. Existing destination corrections
-and repeat runs need coverage in both transfer directions.
+Edition names carry operational meaning only. Configuration drives acquisition, combined
+assembly and all edition switches. Translation transfer accepts explicit source and destination
+editions. Existing destination translations are preserved. Copied translations retain the hash
+of the checked English original and show a review notice when the destination differs.
 
 Discuss the remaining reader-visible behavior with the owner as appropriate:
 
@@ -115,7 +109,7 @@ checks cover every form. Do not change canonical English just to satisfy VitePre
 
 ### P2. Translation policy and quality
 
-Current limitation: only next's Profiling Guide has a Japanese example. Stable uses fallback.
+Current limitation: only the Profiling Guide has a Japanese example. Its stable copy requires review.
 A matching source hash certifies file identity, not translation quality. The example still needs
 human language review. Missing and source-changed translations already have distinct behavior.
 
@@ -125,12 +119,12 @@ The current stable English guide differs from next's, so a stable translation wo
 review against its own original. The [translation maintenance procedure](../operations/translations.md)
 covers missing translations, source changes and Japanese-only corrections.
 
-Entry points: `translations/manifest.json`, `translations/ja/<edition>/`,
+Entry points: the edition translation manifests, `translations/ja/<edition>/`,
 `src/publishing/translations.ts`, `src/ssg/vitepress/validate-localization.ts`,
 `site/vitepress/config.ts`, and `test/translations.test.ts` / `test/localization.test.ts`.
 
-1. Stable release preparation implements the [exact-match inheritance policy](../operations/translations.md#prepare-a-new-stable-release).
-   For 0.12.0 it selected zero translations and 21 fallbacks. Later additions and corrections use the ordinary translation workflow.
+1. The [transfer procedure](../operations/translations.md#transfer-between-editions) applies in both directions.
+   For stable 0.12.0 it produced one copy with a review notice and 20 English fallbacks.
 2. Have the owner review the Japanese example and decide initial production translation coverage.
    Full translation coverage and automated generation are not implied prerequisites.
 3. Document a small maintainer workflow for source changes: review the English diff, edit the

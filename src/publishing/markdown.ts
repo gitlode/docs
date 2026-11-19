@@ -1,4 +1,4 @@
-import { posix } from "node:path";
+import { join, posix } from "node:path";
 
 import type { Root } from "mdast";
 import { toString } from "mdast-util-to-string";
@@ -6,7 +6,7 @@ import { remark } from "remark";
 import remarkGfm from "remark-gfm";
 import { visit } from "unist-util-visit";
 
-import { validatePath } from "./pipeline.ts";
+import { git, validatePath } from "./pipeline.ts";
 
 const processor = remark().use(remarkGfm);
 export interface TreeEntry {
@@ -20,6 +20,45 @@ export interface LinkContext {
   routes: Map<string, string>;
   tree: SourceTree;
   base: string;
+}
+
+export function sourceTree(root: string, commit: string): SourceTree {
+  const tree: SourceTree = new Map();
+  for (const line of git(join(root, ".generated/source"), ["ls-tree", "-r", "-t", "-z", commit])
+    .toString()
+    .split("\0")) {
+    if (!line) continue;
+    const match = /^(\d+) (blob|tree|commit) [a-f0-9]+\t(.+)$/.exec(line);
+    if (!match) throw new Error("Unexpected Git tree entry.");
+    tree.set(match[3], { mode: match[1], type: match[2] });
+  }
+  return tree;
+}
+
+/** Pin references that exist only in the sending edition before copying a translation. */
+export function prepareTransferLinks(
+  source: string,
+  context: LinkContext,
+  destination: SourceTree,
+) {
+  const tree = parseSafeMarkdown(source);
+  let changed = false;
+  visit(tree, (node) => {
+    if (node.type !== "link" && node.type !== "definition") return;
+    if (/^(https?:|mailto:|#)/i.test(node.url)) return;
+    const path = posix
+      .normalize(
+        posix.join(
+          posix.dirname(context.sourcePath),
+          decodeURIComponent(node.url.split(/[?#]/)[0]),
+        ),
+      )
+      .replace(/\/$/, "");
+    if (destination.has(path)) return;
+    node.url = rewriteLink(node.url, context);
+    changed = true;
+  });
+  return changed ? processor.stringify(tree) : source;
 }
 
 export function routeFor(sourcePath: string): string {

@@ -106,8 +106,8 @@ and repository-owned translation path. A matching file hash means `current`, not
 a changed hash means `source-changed` and renders a review warning while retaining the translation.
 No record means `missing`; a declared but absent file is an error. Invalid paths, duplicate records,
 and symlink/junction paths fail closed. Stable builds read the release's independent snapshot.
-The [release preparation command](../operations/translations.md#prepare-a-new-stable-release)
-initializes it from exact file-hash matches before publication.
+The [release preparation command](../operations/translations.md#transfer-between-editions)
+copies missing destination translations while preserving their checked English hashes. Every edition uses the same freshness check.
 
 Translations use the same restricted Markdown preparation as English, with relative links resolved
 against the canonical source path. Each generated edition stores render-input snapshots and hashes,
@@ -136,7 +136,7 @@ in [search evidence](../poc/search.md). This does not establish comprehensive Ja
 
 VitePress extends the default theme's nav-bar-content-before slot with a small Vue control.
 The control remains in the upper navigation area on desktop and narrow screens. It shows the
-current edition and links to the other edition's home in the current locale, regardless of the current document.
+current edition and links to each other edition's home in the current locale, regardless of the current document.
 Full-page navigation avoids carrying separately built client state across editions. No document
 mapping or fragment preservation is needed. This simple switch is the owner's required behavior,
 not a compromise for missing features. Combined validation checks locale-home targets and header

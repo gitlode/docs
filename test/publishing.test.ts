@@ -24,10 +24,7 @@ import {
   validateSources,
 } from "../src/publishing/pipeline.ts";
 import type { Sources } from "../src/publishing/pipeline.ts";
-import {
-  prepareStableTranslations,
-  stableTranslationManifest,
-} from "../src/publishing/stable-translations.ts";
+import { transferTranslations, editionManifest } from "../src/publishing/translation-transfer.ts";
 import { loadTranslation } from "../src/publishing/translations.ts";
 
 const scratch = safeDirectory(resolve("."), ".generated/tests");
@@ -134,14 +131,14 @@ test("next selection and navigation edits leave stable documents, links and side
   const commit = resolveCommit(repository, "HEAD");
   for (const source of Object.values(sources.editions)) source.commit = commit;
   writeFileSync(
-    join(safeDirectory(root, "translations"), "manifest.json"),
+    join(safeDirectory(root, "translations/ja/next"), "manifest.json"),
     JSON.stringify({ translations: [] }),
   );
   function content(id: string) {
     const { pages, navigation } = prepareContent(root, id, "/", { staging: stage(root, sources) });
     return { pages, navigation };
   }
-  prepareStableTranslations(root, sources.editions.stable);
+  transferTranslations(root, "next", "stable", sources);
   const stable = content("stable");
   writeFileSync(
     join(root, "config/next/publication.json"),
@@ -158,51 +155,53 @@ test("next selection and navigation edits leave stable documents, links and side
   assert.deepEqual(content("stable"), stable);
 });
 
-test("release preparation snapshots only matching next translations and preserves stable corrections on retry", () => {
-  const { root, repository, sources, commit } = fixture();
-  const release = sources.editions.stable;
-  const sha256 = readDocument(repository, commit, file).sha256;
-  const translationPath = "translations/ja/next/usage.md";
+test("transfer preserves checked hashes and destination corrections across directions and edition names", () => {
+  const { root, sources, repository, commit } = fixture();
+  const hash = readDocument(repository, commit, file).sha256;
+  const path = "translations/ja/next/usage.md";
   safeDirectory(root, "translations/ja/next");
-  const manifest = join(root, "translations/manifest.json");
+  const nextManifest = join(root, "translations/ja/next/manifest.json");
   const candidate = {
     edition: "next",
     locale: "ja",
     sourcePath: file,
-    sourceSha256: sha256,
-    translationPath,
+    translationPath: path,
+    sourceSha256: "a".repeat(64),
   };
-  writeFileSync(manifest, JSON.stringify({ translations: [candidate] }));
-  assert.throws(() => prepareStableTranslations(root, release), /unreadable translation/);
-  assert.throws(() => stableTranslationManifest(root, release), /not prepared/);
-  writeFileSync(join(root, translationPath), "# Japanese draft");
-  assert.equal(prepareStableTranslations(root, release).inherited, 1);
-  const stable = stableTranslationManifest(root, release);
-  const promoted = loadTranslation(root, "stable", file, sha256, stable);
-  assert.equal(promoted.status, "current");
-  assert.equal(promoted.content, "# Japanese draft");
-  writeFileSync(join(root, promoted.translationPath), "# Stable correction");
-  writeFileSync(join(root, translationPath), "# Next change");
-  assert.equal(prepareStableTranslations(root, release).prepared, false);
-  assert.deepEqual(loadTranslation(root, "stable", file, sha256, stable), {
-    ...promoted,
-    content: "# Stable correction",
-  });
-  for (const [index, translations] of [
-    [{ ...candidate, sourceSha256: "b".repeat(64) }],
-    [],
-  ].entries()) {
-    const later = { ...release, ref: "refs/tags/later-" + index };
-    writeFileSync(manifest, JSON.stringify({ translations }));
-    assert.equal(prepareStableTranslations(root, later).fallback, 1);
-    assert.equal(
-      loadTranslation(root, "stable", file, sha256, stableTranslationManifest(root, later)).status,
-      "missing",
-    );
-  }
+  writeFileSync(nextManifest, JSON.stringify({ translations: [candidate] }));
   assert.throws(
-    () => stableTranslationManifest(root, { ...release, commit: "0".repeat(40) }),
-    /pinned release/,
+    () => transferTranslations(root, "next", "stable", sources),
+    /unreadable translation/,
+  );
+  writeFileSync(join(root, path), "# Japanese");
+  assert.equal(transferTranslations(root, "next", "stable", sources).review, 1);
+  const manifest = editionManifest(root, "stable", sources.editions.stable);
+  const received = loadTranslation(root, "stable", file, hash, manifest);
+  assert.equal(received.status, "source-changed");
+  assert.equal(received.sourceSha256, candidate.sourceSha256);
+  writeFileSync(join(root, received.translationPath), "# Stable correction");
+  assert.equal(transferTranslations(root, "next", "stable", sources).copied, 0);
+  assert.equal(transferTranslations(root, "stable", "next", sources).copied, 0);
+  assert.equal(readFileSync(join(root, path), "utf8"), "# Japanese");
+  writeFileSync(nextManifest, JSON.stringify({ translations: [] }));
+  assert.equal(transferTranslations(root, "stable", "next", sources).copied, 1);
+  const reverse = loadTranslation(root, "next", file, hash, "translations/ja/next/manifest.json");
+  assert.equal(reverse.status, "source-changed");
+  assert.equal(reverse.content, "# Stable correction");
+  sources.editions.lts = { ...sources.editions.next, path: "lts" };
+  writeFileSync(
+    join(safeDirectory(root, "config/lts"), "publication.json"),
+    JSON.stringify({ files: [file] }),
+  );
+  writeFileSync(
+    nextManifest,
+    JSON.stringify({ translations: [{ ...candidate, sourceSha256: hash }] }),
+  );
+  assert.equal(transferTranslations(root, "next", "lts", sources).review, 0);
+  assert.equal(
+    loadTranslation(root, "lts", file, hash, editionManifest(root, "lts", sources.editions.lts))
+      .status,
+    "current",
   );
 });
 

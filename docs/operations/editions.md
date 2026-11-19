@@ -16,14 +16,23 @@ editions are assembled into a fresh artifact. Changing paths creates no redirect
 1. Edit only the fields needed. For a source update follow the [pin procedure](../contributing/development.md#updating-inputs)
    and review selected files, changed links and translation hashes.
 2. Run `npm run check`. Acquire the pins with `npm run source:acquire` if needed.
-   For a new stable release, run `npm run translations:prepare-stable` and commit the
-   [release translation snapshot](translations.md#prepare-a-new-stable-release) with the pin.
+   For a new stable release, set `translationSet` to its version in the source configuration, run `npm run translations:transfer -- --from next --to stable` and commit the
+   [release translation snapshot](translations.md#transfer-between-editions) with the pin.
 3. Run `npm run site:build`, `npm run site:verify` and `npm run search:verify`.
    Review the landing page and version switch in both locales before release.
 
 Individual document routes follow the selected source paths. On an upstream move or rename,
 review selection, sidebar references and translation records together. Old document URLs may
 stop resolving after publication. Revisit redirects if a concrete compatibility need arises.
+
+## Register an edition
+
+Add its ID, unique public path and display label to `config/editions.json`. Set
+`defaultEdition` to choose the default preview. Provide the same source, publication and
+navigation files under `config/<id>/` as for the other editions. Acquire the pins, then
+transfer translations into the new edition or initialize its manifest with an empty
+`translations` array. The combined build, language-specific edition links and search
+checks cover every registered edition.
 
 ## Stable release policy
 

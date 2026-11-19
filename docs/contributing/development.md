@@ -144,7 +144,7 @@ integration instructions. Commit at practical work increments; do not merge auto
 1. Resolve an explicitly chosen tag/branch using `git ls-remote --heads --tags https://github.com/gitlode/gitlode.git`.
 2. For annotated tags, use the peeled `^{}` commit, not the tag object's SHA.
 3. Update the requested ref and full commit in `config/<edition>/source.json` together.
-4. Acquire the pin. For a new stable release run `npm run translations:prepare-stable`.
+4. Acquire the pin. For a new stable release run `npm run translations:transfer -- --from next --to stable`.
    Stage, inspect the diff and manifest, and run checks.
 
 Use exact file paths in `config/<edition>/publication.json`; adding to the sidebar is a separate edit in

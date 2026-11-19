@@ -27,7 +27,7 @@ const build = JSON.parse(readFileSync(join(output, "build.json"), "utf8")) as {
   editions: SearchEdition[];
 };
 if (build.edition !== "all")
-  throw new Error("Search verification requires the complete two-edition build.");
+  throw new Error("Search verification requires the complete site build.");
 const dist = join(output, "dist");
 const queries = [
   "profiling",

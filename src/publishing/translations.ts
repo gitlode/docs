@@ -1,10 +1,10 @@
 import { lstatSync, readFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 
-import { validatePath, validatePublication } from "./pipeline.ts";
+import { validateEdition, validatePath, validatePublication } from "./pipeline.ts";
 
 export interface TranslationRecord {
-  edition: "stable" | "next";
+  edition: string;
   locale: "ja";
   sourcePath: string;
   sourceSha256: string;
@@ -39,14 +39,14 @@ export function translationFreshness(checkedHash: string, currentHash: string) {
 
 export function validateTranslationManifest(value: unknown): TranslationRecord[] {
   if (!object(value) || !Array.isArray(value.translations)) {
-    throw new Error("translations/manifest.json must contain a translations array.");
+    throw new Error("Translation manifest must contain a translations array.");
   }
   const keys = new Set<string>();
   const paths = new Set<string>();
   return value.translations.map((entry: unknown) => {
     if (
       !object(entry) ||
-      (entry.edition !== "stable" && entry.edition !== "next") ||
+      typeof entry.edition !== "string" ||
       entry.locale !== "ja" ||
       typeof entry.sourcePath !== "string" ||
       typeof entry.translationPath !== "string"
@@ -55,6 +55,7 @@ export function validateTranslationManifest(value: unknown): TranslationRecord[]
         "Invalid translation record: expected edition, ja locale, sourcePath, sourceSha256, and translationPath.",
       );
     }
+    validateEdition(entry.edition);
     validatePublication({ files: [entry.sourcePath] });
     validateHash(entry.sourceSha256);
     validatePath(entry.translationPath);
@@ -101,10 +102,7 @@ export function readOwnedFile(root: string, relativePath: string): string {
     try {
       stat = lstatSync(cursor);
     } catch (error) {
-      throw new Error(
-        `Missing or unreadable translation file: ${relativePath}. Check translations/manifest.json.`,
-        { cause: error },
-      );
+      throw new Error(`Missing or unreadable translation file: ${relativePath}.`, { cause: error });
     }
     if (
       stat.isSymbolicLink() ||
@@ -123,10 +121,9 @@ export function loadTranslation(
   edition: string,
   sourcePath: string,
   currentSha256: string,
-  manifestPath = "translations/manifest.json",
+  manifestPath = `translations/ja/${edition}/manifest.json`,
 ): TranslationResult {
-  if (edition !== "stable" && edition !== "next")
-    throw new Error("Translation edition must be stable or next.");
+  validateEdition(edition);
   validatePublication({ files: [sourcePath] });
   validateHash(currentSha256);
   const raw = readOwnedFile(root, manifestPath);

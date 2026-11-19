@@ -3,26 +3,29 @@
 Select the edition and canonical path in its publication list. The pinned English Git blob
 is the reference for that edition. A release can ship with missing translations.
 
-## Prepare a new stable release
+## Transfer between editions
 
-After setting the stable tag, commit and publication list and acquiring the pin, run
-`npm run translations:prepare-stable`. Commit the reported release directory together with
-the stable configuration. The command reads the selected English blobs at the release pin.
-For each document it copies the next translation only when the canonical path and its checked
-English SHA-256 match. Any difference, or no translation record, produces English fallback
-with the Japanese notice. This step requires no side-by-side language review.
+After acquiring the configured pins, run `npm run translations:transfer -- --from next --to stable`.
+Either argument accepts any registered edition ID. Swap the arguments for the reverse direction.
+The destination publication list determines the candidate paths. An existing destination record
+always wins, including a translation corrected after an earlier transfer.
 
-Each release has its own manifest and editable Markdown copies. Running preparation again
-for that release preserves subsequent stable corrections. Builds require the manifest for
-the configured tag and commit. A failed preparation can be retried after correcting its
-input. Build and verify the site through the usual release procedure.
+For each missing destination record with a matching source path, copy the translation and retain
+its checked English SHA-256. Readers see the copy with a review notice if the destination's
+English blob differs. A missing source translation uses English fallback. Relative links whose
+targets exist only at the origin are pinned to that upstream revision in the copied Markdown.
+Commit the destination manifest and new Markdown files together. Re-running the command fills
+any newly eligible gaps. An interrupted command can leave an unreferenced copy; only manifest
+entries are published. If a process was killed and left `.transfer.lock`, confirm that it has
+exited before removing that lock and retrying.
 
 ## Add or correct a translation
 
-For next, use `translations/manifest.json`. For stable, use `manifest.json` in the release
-directory reported by preparation, and keep its Markdown files inside that same directory.
-Use this workflow for every fallback, regardless of how much the original changed or whether
-a previous translation exists.
+Use `translations/ja/<edition>/manifest.json`. When the edition source config selects a
+`translationSet`, use the manifest in that subdirectory instead. This lets operators keep
+separate release snapshots for any edition. On a new release choose a fresh set and transfer
+into it. A newly created set records its configured ref and commit. For a continuously moving
+edition, use the default directory. Store Markdown alongside or beneath the corresponding manifest.
 
 1. Run `npm run content:stage` after acquiring the configured pins. Open the resulting
    `manifest.json` and locate the document by edition name and `sourcePath`. Use its

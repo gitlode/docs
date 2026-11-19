@@ -2,7 +2,7 @@ import type { DefaultTheme } from "vitepress";
 
 /** Trusted site metadata produced by the publishing pipeline. */
 export interface PreviewSite {
-  edition: "stable" | "next";
+  edition: string;
   versions: Record<string, { path: string; label: string }>;
   base: string;
   combined: boolean;

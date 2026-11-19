@@ -12,7 +12,10 @@ Resume with the [production readiness backlog and owner decisions](production-re
 The owner approved the initial pins and publication scope for current work. Edition identity and URL behavior are agreed; see [edition operations](../operations/editions.md).
 The approved corpus is configured; see [publication operations](../operations/publication.md).
 The owner confirmed that the stable publication list and navigation share the same defect-only correction rule for each release.
-Stable translation preparation now snapshots exact next matches and falls back for all other documents.
+Edition-neutral transfer preserves existing destination translations and the checked hash on each copy. A mismatch displays a review notice.
+The initial stable 0.12.0 corpus now has one Japanese guide requiring review and 20 fallbacks.
+A local rehearsal added an isolated third edition using configuration, built all three editions,
+checked edition navigation on 136 pages, and passed HTTP and search verification.
 See [translation operations](../operations/translations.md). Initial language review remains open. Production
 launch requires a separate owner decision. Read the [documentation guide](../README.md),
 [architecture](../design/architecture.md), [development workflow](../contributing/development.md)
