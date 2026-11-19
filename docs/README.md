@@ -13,11 +13,17 @@ The following homes contain maintained knowledge that survives the PoC and produ
 
 - [Architecture](design/architecture.md): ownership, current contracts, boundaries, and constraints.
 - [Development](contributing/development.md): supported workflows, tooling, and maintenance procedures.
+- [ADR 0001: Use VitePress v2](decisions/0001-use-vitepress-v2.md): accepted SSG choice and maintenance responsibilities.
 - Accepted architecture decisions belong in `decisions/` when they exist. Preserve their
   rationale and consequences; mark superseded decisions rather than silently replacing history.
 
 Durable documents describe the current system and explicitly distinguish unimplemented proposals.
 They are the canonical home for lasting contracts, not session logs or task checklists.
+
+Production preparation includes separating development-oriented documentation from operations
+guides and updating the project's PoC framing. This is work on the documentation system itself,
+not published product content. Update relevant durable documentation within each implementation
+increment; see P6 in [production readiness](handoff/production-readiness.md).
 
 ## Temporary documentation
 
@@ -30,6 +36,12 @@ The following homes contain tracked working material with a limited purpose:
   session-to-session transfer. Link to canonical docs instead of restating their contracts.
 - `proposals/`: [development environment feedback](proposals/development-environment.md)
   and future suggestions from this project to gitlode itself.
+
+Start the closeout review with [PoC closeout](poc/closeout.md); continue implementation with
+[production readiness](handoff/production-readiness.md). PoC exit and production launch are separate decisions.
+
+The current post-selection implementation is covered by [VitePress consolidation](poc/consolidation.md).
+Earlier candidate comparisons retain their historical commands and measurements.
 
 Temporary does not mean disposable before review. Keep active evidence and proposals in Git.
 Each working document should identify status, owner or decision authority, next action, and its

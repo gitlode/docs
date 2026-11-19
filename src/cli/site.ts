@@ -1,19 +1,18 @@
-import { handlePreviewSignals } from "./preview-server.ts";
-import { buildPreviews, preparePreviews, preview, verifyPreviews } from "./previews.ts";
-
+import { handlePreviewSignals } from "../publishing/preview-server.ts";
+import { buildSite, prepareSite, preview, verifySite } from "../ssg/vitepress/build.ts";
 try {
   switch (process.argv[2]) {
     case "prepare":
-      console.log(preparePreviews(process.argv[3]).output);
+      console.log(prepareSite(process.argv[3]).output);
       break;
     case "build":
-      buildPreviews(process.argv[3]);
+      buildSite(process.argv[3]);
       break;
     case "preview":
-      handlePreviewSignals(await preview(process.argv[3]));
+      handlePreviewSignals(await preview());
       break;
     case "verify":
-      await verifyPreviews();
+      await verifySite();
       break;
     default:
       throw new Error("Expected prepare, build, preview, or verify command.");

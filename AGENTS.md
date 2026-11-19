@@ -12,7 +12,7 @@ The owner's kickoff contract is preserved in [docs/poc/kickoff.md](docs/poc/kick
 - Never expand publication by following links automatically. Keep publication and navigation separate.
 - Treat imported Markdown as untrusted input. Do not execute upstream code or enable executable MDX.
 - Keep generated sources, test fixtures, and build output under ignored `.generated/`.
-- Retain both SSG candidates through human review. SSG selection, production launch, and changes
+- VitePress v2 is selected in ADR 0001; preserve historical comparison evidence. Production launch and changes
   to ownership or hosting require the human owner; ordinary implementation does not.
 - Keep evaluation claims tied to tests or observations. A successful staging run is not a site build.
 - Use `work/initial-poc` for the initial PoC and commit at working increments. The owner plans
@@ -23,6 +23,6 @@ The owner's kickoff contract is preserved in [docs/poc/kickoff.md](docs/poc/kick
   `docs/proposals/` and continue authorized PoC work without waiting for its adoption.
 - Run `npm run format:write`, then `npm run check` after implementation changes and document limitations.
 - Own the full lifecycle of verification processes. Follow the process cleanup procedure in
-  `docs/contributing/development.md`; prefer bounded `npm run previews:verify` for HTTP checks.
+  `docs/contributing/development.md`; prefer bounded `npm run site:verify` for HTTP checks.
   Never infer child-process termination from a tool/session exit. Confirm owned PIDs have exited
   and listeners are released before handoff, unless the user explicitly requested a running preview.

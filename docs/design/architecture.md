@@ -3,12 +3,30 @@
 ## Ownership and flow
 
 `gitlode/gitlode` owns canonical English documents. This repository owns selection, acquisition,
-staging, candidate adapters, Japanese translation sources, validation, and publishing.
+staging, the VitePress adapter, Japanese translation sources, validation, and publishing.
 Its own `docs/` directory is never automatically published as product documentation.
 
 Current flow: `config/sources.json` -> Git object acquisition -> explicit allowlist -> byte-preserving
-staging/provenance -> shared Markdown preparation -> candidate adapters -> English/Japanese static builds
-and output validation. Stable/next artifact assembly is implemented locally; the human SSG decision and deployment remain pending.
+staging/provenance -> shared content preparation -> VitePress adapter -> English/Japanese static builds
+and output validation. VitePress v2 is selected and consolidated; production deployment remains pending.
+
+## Code domains
+
+- `src/publishing/` owns acquisition, selection/staging, Markdown safety and link rewriting,
+  translation metadata, and renderer-independent content preparation. It also provides generic
+  static HTTP serving/lifecycle and local HTML reference validation. It imports no SSG package.
+- `src/ssg/vitepress/` consumes prepared content, generates VitePress inputs, invokes the pinned
+  CLI, assembles editions, and verifies VitePress rendering, localization, version navigation,
+  and search indexes. Checks coupled to theme markup and search internals belong here.
+- `site/vitepress/` contains trusted configuration, metadata types, and the Vue theme. These
+  templates are copied into generated build roots; generated content is never stored here.
+- `src/cli/site.ts` is the command entry point for the selected adapter. Source acquisition and
+  staging remain independently callable through `src/publishing/cli.ts`.
+
+Dependencies point from the adapter to publication services. Content preparation returns pages,
+provenance, translation status, and navigation; it does not write SSG frontmatter or theme markup.
+A strict shared Markdown policy can reject syntax meaningful to a renderer without coupling the
+publication layer to that renderer's runtime or theme API.
 
 ## Acquisition and pins
 
@@ -25,7 +43,7 @@ and submodule entries. No individual-file API calls or privileged source credent
 ## Selection and staging contract
 
 `config/publication.json` enumerates six exact Markdown paths, independently of the proposed
-sidebar groups in `config/navigation.json`. Both renderers consume the validated navigation subset.
+sidebar groups in `config/navigation.json`. The renderer consumes the validated navigation subset.
 Missing selected files are errors. Agent/handoff content, arbitrary roots,
 MDX, duplicate/case-colliding paths, traversal, backslashes, and Windows reserved names are rejected.
 Broader publication requires explicit configuration and, if outside the durable document policy,
@@ -56,29 +74,28 @@ it does not define a universal adapter AST. Serialization normalizes Markdown fo
 copies. Fenced code values and Markdown structure are preserved and checked; source bytes remain
 unchanged in staging. Unsupported syntax fails with an actionable error instead of being executed.
 
-Both adapters use directory routes (`usage.md` -> `usage/`, `design/README.md` -> `design/`).
-Starlight receives generated title frontmatter and the body without its original H1; VitePress
-keeps that H1. Git tree entries resolve links before any rewriting. Selected pages become internal
-links; unselected regular files/directories link to their fixed upstream SHA. Missing targets and
-symlinks fail. VitePress receives site-root Markdown paths because it adds the configured base;
-Starlight receives paths including its base. External HTTP(S) links are not fetched.
+Prepared content uses directory routes (`usage.md` -> `usage/`, `design/README.md` -> `design/`).
+VitePress keeps the original H1. Git tree entries resolve links before rewriting. Selected pages
+become internal links; unselected regular files/directories link to their fixed upstream SHA.
+Missing targets and symlinks fail. The adapter requests site-root Markdown paths because VitePress
+adds its configured deployment base. External HTTP(S) links are not fetched.
 
-`previews.ts` owns candidate staging and build orchestration. Each run copies trusted configurations
-from `candidates/` into unique generated roots and emits matching source hashes in `inputs.json`.
-Sites use `/docs/<candidate>/{stable,next}/{en,ja}/`. The default build assembles all six
-edition/candidate builds into a fresh `combined-*/dist` artifact using one upstream staging manifest.
-Only static dist files enter it; source snapshots and provenance reports remain outside deployment.
-Combined href/src and fragment validation runs after assembly, so version links can resolve across
-builds. No existing deployment or previous artifact is appended to. Local translations/configs
-should not be edited during a build; their generated snapshots record the actual render input.
-This is a local Pages-path simulation, not an executed deployment. `build.json` records validation and timings. Only successful runs
-update the local preview pointer. The loopback preview server exposes static output, without SSG
-development middleware. See the [development workflow](../contributing/development.md).
+`src/ssg/vitepress/build.ts` copies trusted configuration from `site/vitepress/` into unique
+`.generated/previews/run-*` roots and emits source hashes in `inputs.json`. Sites use
+`/docs/{stable,next}/{en,ja}/`; comparison candidate names are no longer part of URLs.
+The default build runs two edition builds using one upstream staging manifest and assembles a
+fresh `combined-*/dist` artifact. Only static dist files enter it; source snapshots and provenance
+reports remain outside deployment. Combined href/src and fragment validation runs after assembly,
+so version links resolve across builds. No existing deployment or previous artifact is appended to.
+Local translations/configs should not be edited during a build; generated snapshots record the
+actual render input. This is a local Pages-path simulation, not an executed deployment.
+`build.json` records validation and timings. Only successful runs update the local preview pointer.
+The loopback preview server exposes static output without development middleware.
+See the [development workflow](../contributing/development.md).
 
 HTML validation checks expected pages, a single H1, local href/src targets, fragment IDs, nested
 base containment, and absence of excluded output. Imported images remain unsupported: selected
-assets, CSS URLs, and srcset validation require a later increment. The small favicon is a trusted
-site-owned asset. Known dependency findings are tracked in [PoC evidence](../poc/english-previews.md).
+assets, CSS URLs, and srcset validation require a later increment. Dependency changes and their verification should be recorded with the associated PoC increment.
 
 ## Translation boundary
 
@@ -91,13 +108,12 @@ No record means `missing`; a declared but absent file is an error. Invalid paths
 and symlink/junction paths fail closed. Stable never silently uses next translations.
 
 Translations use the same restricted Markdown preparation as English, with relative links resolved
-against the canonical source path. Each generated candidate stores render-input snapshots and hashes,
+against the canonical source path. Each generated edition stores render-input snapshots and hashes,
 translation paths, and checked source hashes in its inputs report. Do not automatically update the
 checked hash when upstream changes; review the actual file difference first.
 
-Starlight generates missing Japanese routes, notice, and English content-language markup natively.
 VitePress receives generated English fallback pages and a small trusted renderer wrapper for the
-Japanese notice and `lang="en"` body. Imported HTML remains disabled. Both use native same-page
+Japanese notice and `lang="en"` body. Imported HTML remains disabled. VitePress uses native same-page
 language controls. Fallback body links retain the English locale; Japanese sidebar links remain
 Japanese. Translated heading IDs may differ: language switching does not map section fragments.
 See [localization evidence](../poc/localization.md) for current limitations.
@@ -105,36 +121,33 @@ See [localization evidence](../poc/localization.md) for current limitations.
 ## CI and future publishing
 
 PR CI has only `contents: read`, installs locked dependencies, checks types/tests, acquires public
-source, stages both editions, then builds and validates all three candidates and both editions in English and Japanese. It does not
+source, stages both editions, then builds and validates both editions in English and Japanese. It does not
 deploy. Production must assemble one complete artifact (never append a version
 to an existing Pages deployment), then deploy through a trusted job with scoped Pages/OIDC rights.
 
-## Version navigation
+## Search and version navigation
 
-Native local search is enabled per edition: VitePress's local provider builds locale indexes;
-Starlight builds Pagefind indexes from each edition's static HTML. Combined assembly preserves
-these separate search assets rather than merging editions. Japanese fallback pages are indexed
+Native local search is enabled per edition: VitePress's local provider builds locale indexes.
+Combined assembly preserves these separate search assets rather than merging editions. Japanese fallback pages are indexed
 at their Japanese routes, including their English bodies. Query probes and limitations are recorded
 in [search evidence](../poc/search.md). This does not establish comprehensive Japanese search quality.
 
 VitePress extends the default theme's nav-bar-content-before slot with a small Vue control.
-Starlight wraps LanguageSelect with an Astro control, placing it beside the language selector in
-both the desktop header and the theme's mobile preferences menu. Both show the current edition
-and link to the other edition's home in the current locale, regardless of the current document.
+The control remains in the upper navigation area on desktop and narrow screens. It shows the
+current edition and links to the other edition's home in the current locale, regardless of the current document.
 Full-page navigation avoids carrying separately built client state across editions. No document
 mapping or fragment preservation is needed. This simple switch is the owner's required behavior,
 not a compromise for missing features. Combined validation checks locale-home targets and header
-placement across all 84 document/locale-home pages.
+placement across all 28 document/locale-home pages.
 
 The owner accepted external GitHub links for documents outside the six-document PoC scope.
 Production must address internal documentation references before launch, without automatically
 publishing arbitrary linked files. See the PoC evaluation for the deferred acceptance item.
 
-## Three-candidate comparison
+## Accepted SSG
 
-The owner admitted VitePress v2 alpha.21 as an equal candidate alongside v1.6.4 and Starlight.
-Candidate IDs are vitepress, vitepress-v2, and starlight. Both VitePress adapters share preparation
-semantics but retain version-specific config/theme imports and independently typechecked files.
-An exact npm alias allows both releases to coexist. Edition switches stay inside their candidate.
-The shared build, validation, HTTP checks and search probes cover all three. Selection is deferred
-until the expanded comparison is reviewed; prerelease status alone is not a disqualifier.
+The owner selected VitePress v2 on 2026-11-18; see [ADR 0001](../decisions/0001-use-vitepress-v2.md).
+The implementation uses the exact `vitepress` package version `2.0.0-alpha.21`; the v1 coexistence
+alias and Starlight implementation are removed. Historical comparison evidence remains under
+`docs/poc/`. Upgrades require renewed checks of custom fallback rendering, Vue navigation, and
+search-internal APIs. Selection does not grant production-launch approval.

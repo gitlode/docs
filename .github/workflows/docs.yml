@@ -25,6 +25,6 @@ jobs:
       - run: npm run check
       - run: npm run source:acquire
       - run: npm run content:stage
-      - run: npm run previews:build
-      - run: npm run previews:verify
+      - run: npm run site:build
+      - run: npm run site:verify
       - run: npm run search:verify

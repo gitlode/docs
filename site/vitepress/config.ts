@@ -1,21 +1,19 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
-import { defineConfigWithTheme } from "vitepress-v2";
+import { defineConfigWithTheme } from "vitepress";
 
 import type { PreviewSite, PreviewTheme } from "./site.ts";
 
 const root = resolve(import.meta.dirname, "..");
 const site = JSON.parse(readFileSync(resolve(root, "site.json"), "utf8")) as PreviewSite;
 export default defineConfigWithTheme<PreviewTheme>({
-  // Bundle the npm alias during SSR just as VitePress bundles its canonical package name.
-  vite: { ssr: { noExternal: ["vitepress-v2"] } },
   themeConfig: {
     versionSite: { edition: site.edition, base: site.base, combined: site.combined },
     search: { provider: "local" },
   },
   title: "gitlode",
-  description: `Documentation — ${site.edition} comparison preview`,
+  description: `Documentation — ${site.edition}`,
   base: site.base,
   srcDir: "content",
   outDir: resolve(root, "dist"),
