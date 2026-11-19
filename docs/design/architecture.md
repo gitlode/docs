@@ -8,7 +8,7 @@ Its own `docs/` directory is never automatically published as product documentat
 
 Current flow: `config/<edition>/source.json` -> Git object acquisition -> explicit allowlist -> byte-preserving
 staging/provenance -> shared content preparation -> VitePress adapter -> English/Japanese static builds
-and output validation. VitePress v2 is selected and consolidated; production deployment remains pending.
+and output validation. The [Pages workflow](../operations/deployment.md) publishes the combined static site.
 
 ## Design for gitlode maintainers
 
@@ -65,12 +65,12 @@ Each staging command creates a new run below `.generated/staging/`. It validates
 writing, never overwrites a previous run, preserves source paths, and writes `manifest.json` last.
 Only runs with a manifest are complete. An interrupted run may remain for inspection. Generated
 directories reject symlink/junction components; writes use exclusive creation. Concurrent hostile
-local filesystem mutation is outside this PoC's threat model.
+local filesystem mutation is outside the pipeline's threat model.
 
 The manifest records requested ref, resolved commit, upstream URL, source/staged paths, Git blob ID,
 SHA-256, docs repository revision and dirty state, and a hash of acquisition/publication config.
 A dirty flag makes uncommitted implementation explicit; it does not make uncommitted builds fully
-reproducible. Release artifacts must eventually come from a clean committed docs revision.
+reproducible. The Pages workflow selects release artifacts from a clean committed docs revision.
 
 ## Renderer boundary and security
 
@@ -94,8 +94,8 @@ adds its configured deployment base. External HTTP(S) links are not fetched.
 
 `src/ssg/vitepress/build.ts` copies trusted configuration from `site/vitepress/` into unique
 `.generated/previews/run-*` roots and emits source hashes in `inputs.json`. Sites use
-`/docs/{stable,next}/{en,ja}/`; comparison candidate names are no longer part of URLs.
-The default build runs two edition builds using one upstream staging manifest and assembles a
+`/docs/<configured-edition-path>/<locale>/`.
+The default build processes all configured editions using one upstream staging manifest and assembles a
 fresh `combined-*/dist` artifact. Only static dist files enter it; source snapshots and provenance
 reports remain outside deployment. Combined href/src and fragment validation runs after assembly,
 so version links resolve across builds. No existing deployment or previous artifact is appended to.
@@ -107,7 +107,7 @@ See the [development workflow](../contributing/development.md).
 
 HTML validation checks expected pages, a single H1, local href/src targets, fragment IDs, nested
 base containment, and absence of excluded output. Imported images remain unsupported: selected
-assets, CSS URLs, and srcset validation require a later increment. Dependency changes and their verification should be recorded with the associated PoC increment.
+assets, CSS URLs, and srcset validation require a later increment. Record dependency changes and their verification in the corresponding PR.
 
 ## Translation boundary
 

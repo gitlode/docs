@@ -24,10 +24,7 @@ The following homes contain maintained knowledge that survives the PoC and produ
 Durable documents describe the current system and explicitly distinguish unimplemented proposals.
 They are the canonical home for lasting contracts, not session logs or task checklists.
 
-Production preparation includes separating development-oriented documentation from operations
-guides and updating the project's PoC framing. This is work on the documentation system itself,
-not published product content. Update relevant durable documentation within each implementation
-increment; see P6 in [production readiness](handoff/production-readiness.md).
+Update the corresponding operating or development guide when changing a maintained procedure.
 
 ## Temporary documentation
 
@@ -41,10 +38,9 @@ The following homes contain tracked working material with a limited purpose:
 - `proposals/`: [development environment feedback](proposals/development-environment.md)
   and future suggestions from this project to gitlode itself.
 
-Start the closeout review with [PoC closeout](poc/closeout.md); continue implementation with
-[production readiness](handoff/production-readiness.md). PoC exit and production launch are separate decisions.
+The [PoC closeout](poc/closeout.md) and [production launch record](handoff/production-readiness.md) preserve the evidence for those milestones.
 
-The current post-selection implementation is covered by [VitePress consolidation](poc/consolidation.md).
+The [VitePress consolidation report](poc/consolidation.md) records the implementation at PoC closeout.
 Earlier candidate comparisons retain their historical commands and measurements.
 
 Temporary does not mean disposable before review. Keep active evidence and proposals in Git.
@@ -59,12 +55,12 @@ Improvements can flow in either direction between gitlode itself and this docume
 
 1. Record a feedback proposal with the problem, evidence, alternatives, current local choice,
    upstream suggestion, trade-offs, and a deferred review point.
-2. Continue PoC work using a documented local choice within existing authorization. **Do not wait
+2. Continue authorized work using a documented local choice. **Do not wait
    for cross-project adoption or commonization approval.** Recording a proposal neither changes
    gitlode itself nor implies acceptance by either project.
 3. Review proposals separately, at the owner's chosen time. Record the outcome for each project
    independently: accepted, rejected, deferred, or superseded. Do not reopen the approval question
-   on every PoC task.
+   on every task.
 4. When a proposal becomes an implemented contract, update the relevant durable documentation
    and link the outcome from the proposal. Promote approved SSG rationale to a durable ADR.
 5. When a plan or handoff is complete, migrate lasting knowledge and then remove or archive the

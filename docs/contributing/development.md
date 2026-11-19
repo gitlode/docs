@@ -18,8 +18,8 @@ npm run site:build
 ```
 
 `source:acquire` needs outbound HTTPS to GitHub; `content:stage` is offline after acquisition.
-Each successful stage prints a new directory with a manifest and 12 raw Markdown files (six per
-edition). Inspect that manifest to identify exact inputs. Do not mistake staged Markdown for a built site.
+Each successful stage prints a new directory. Its manifest lists the raw Markdown files selected
+by each edition's publication configuration, with their source revisions and hashes.
 
 ## Site builds and preview
 
@@ -73,8 +73,7 @@ The manual `preview` command keeps serving until interrupted. Its CLI handles SI
 waits for server closure. A forced termination or a terminated shell wrapper is not proof that its
 children stopped; signal behavior varies across operating systems and launch tools.
 
-For every agent-owned long-running verification process, including browsers and other future PoC
-tools, follow this procedure:
+For every agent-owned long-running verification process, including browsers, follow this procedure:
 
 1. Prefer a finite command with timeouts and `try/finally` cleanup. For custom checks, use
    `withPreviews` from `src/publishing/preview-server.ts` and await all work inside its callback.
@@ -104,7 +103,7 @@ pipeline output, not a runtime-validated external API. Vue is a direct pinned de
 because the theme imports it; vue-tsc supplies SFC/template type checking.
 
 Tooling alignment is bidirectional: both projects can benefit from each other's choices. Record
-cross-project suggestions in `../proposals/` and continue authorized PoC work using the
+cross-project suggestions in `../proposals/` and continue authorized work using the
 current local configuration. See the [documentation lifecycle](../README.md) and the open
 [environment feedback](../proposals/development-environment.md). Pending upstream
 adoption is not a prerequisite for local development.
@@ -136,8 +135,8 @@ and the contributor lint policy. Use it as a baseline when evolving this project
 - Dependencies remain exact-pinned with a committed lockfile. `npm run lockfile:sync` follows
   the upstream lockfile-refresh convention. CI runs the same `npm run check` used locally.
 
-Follow the [current handoff](../handoff/current.md) for the working branch and
-integration instructions. Commit at practical work increments; do not merge automatically.
+Use a topic branch and submit changes through a PR. The [deployment procedure](../operations/deployment.md)
+covers publication after integration.
 
 ## Updating inputs
 

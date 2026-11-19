@@ -1,6 +1,6 @@
 # Current production handoff
 
-Status: PoC complete. Production preparation started on 2026-11-19.
+Status: production launched and reviewed by the owner on 2026-11-19. Use the [documentation guide](../README.md) for ongoing work.
 Decision authority: project owner. The trunk session coordinates work and owner decisions.
 
 [PR #3](https://github.com/gitlode/docs/pull/3) was squash merged into main at
@@ -8,7 +8,7 @@ Decision authority: project owner. The trunk session coordinates work and owner 
 [main validation run](https://github.com/gitlode/docs/actions/runs/44439421213) succeeded.
 The [PoC closeout report](../poc/closeout.md) preserves the pre-merge review evidence.
 
-Resume with the [production readiness backlog and owner decisions](production-readiness.md).
+The [production readiness record](production-readiness.md) preserves the launch decisions and verification evidence.
 The owner approved the initial pins and publication scope for current work. Edition identity and URL behavior are agreed; see [edition operations](../operations/editions.md).
 The approved corpus is configured; see [publication operations](../operations/publication.md).
 The owner confirmed that the stable publication list and navigation share the same defect-only correction rule for each release.
@@ -19,8 +19,7 @@ checked edition navigation on 136 pages, and passed HTTP and search verification
 Human publication review takes place when incorporating new or revised translations.
 On 2026-11-19 the owner approved the Japanese Profiling Guide for production use. The stable
 copy keeps its source-difference notice because its checked English hash belongs to next.
-See [translation operations](../operations/translations.md). Production
-launch requires a separate owner decision. Read the [documentation guide](../README.md),
+See [translation operations](../operations/translations.md). Read the [documentation guide](../README.md),
 [architecture](../design/architecture.md), [development workflow](../contributing/development.md)
 and [SSG decision](../decisions/0001-use-vitepress-v2.md) before implementation.
 

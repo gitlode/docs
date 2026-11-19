@@ -4,11 +4,15 @@ The long-lived documentation publishing repository for [gitlode](https://github.
 Canonical English Markdown remains upstream; this repository owns publication, Japanese translations,
 site implementation, and operations. Project documentation under `docs/` is not product-site content.
 
-**Status:** VitePress v2 is selected and the implementation is consolidated on
-`2.0.0-alpha.21`. The site builds English and Japanese documentation for each configured
-edition. The [manual Pages workflow](docs/operations/deployment.md) is prepared for owner review and first launch.
-See [the accepted decision](docs/decisions/0001-use-vitepress-v2.md),
-[PoC closeout](docs/poc/closeout.md), and the [production-readiness handoff](docs/handoff/production-readiness.md).
+The [production site](https://gitlode.github.io/docs/) serves English and Japanese documentation for stable and next.
+
+| Maintainer task                          | Guide                                                                                                    |
+| ---------------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| Update a source pin or promote a release | [Edition operations](docs/operations/editions.md)                                                        |
+| Select documents or reorder the sidebar  | [Publication operations](docs/operations/publication.md)                                                 |
+| Add, review or transfer a translation    | [Translation operations](docs/operations/translations.md)                                                |
+| Publish, verify or recover the site      | [Deployment and recovery](docs/operations/deployment.md)                                                 |
+| Change the publishing system             | [Development workflow](docs/contributing/development.md) and [architecture](docs/design/architecture.md) |
 
 ## Quick start
 
@@ -40,9 +44,6 @@ The staging command prints a unique `.generated/staging/run-*/` directory contai
 and `manifest.json`. These are **raw selected inputs**, not safe-to-render website content.
 All generated content is ignored by Git. No upstream scripts or Markdown are executed.
 
-Sources approved by the owner: stable `gitlode@0.12.0`, next `integration/v0.13.0`.
-Both are pinned in `config/<edition>/source.json`; changing a branch upstream does not change a build.
+Each edition's source ref and pinned commit are in `config/<edition>/source.json`.
 
-Start with the [documentation guide](docs/README.md) for durable knowledge, PoC work, handoffs,
-and feedback proposals. See [development](docs/contributing/development.md), [architecture](docs/design/architecture.md),
-[milestones and review gates](docs/poc/plan.md), and [evaluation evidence](docs/poc/evaluation.md).
+The [documentation guide](docs/README.md) indexes operating procedures, design decisions and historical evidence.

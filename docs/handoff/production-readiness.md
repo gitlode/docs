@@ -1,9 +1,7 @@
 ﻿# Production readiness handoff
 
-Status: production preparation in progress, 2026-11-19. The initial inputs and audience are agreed.
-Maintainer: the next human or LLM continuing this repository. Decision authority: project owner.
-Retire this document only after each item is completed or explicitly deferred with an owner decision;
-promote implemented contracts to durable development and operations documentation, following P6.
+Historical launch record, 2026-11-19. P1–P6 are complete. The sections below preserve the original
+plan, owner decisions and verification results. For ongoing work use the [documentation guide](../README.md).
 
 The owner accepted VitePress v2 consolidation and approved the PoC closeout sequence. PoC exit,
 merge, and production launch are separate decisions. This document carries the work between a
@@ -239,7 +237,7 @@ The Japanese plugins pages displayed the English fallback. The Japanese Profilin
 displayed the source-change notice on stable only. The browser observed no failed same-site
 asset loads or uncaught page errors on these paths. A missing page, the editions config,
 the generated preview pointer and the internal handoff path all returned HTTP 404.
-Use this publish run as the initial recovery reference.
+The owner also reviewed the published content and reported no issues. Use this publish run as the initial recovery reference.
 
 Hosting decision already made: GitHub Pages at `https://gitlode.github.io/docs/`, no custom domain.
 The owner previously reported GitHub settings correct. Recheck only relevant settings when preparing
@@ -271,9 +269,9 @@ acceptance point, separate from PoC completion.
 
 ### P6. Documentation for the documentation system
 
-Current limitation: architecture and development material exist, but the repository still presents
-parts of itself as a PoC project. This task concerns this system's internal project documentation,
-not the gitlode product documents selected for publication. Completing the PoC does not complete it.
+Final review followed the first deployment. The repository README now directs maintainers to the
+four operating guides and developers to the tested local workflow. The review corrected the former
+staging count and pending-launch status, and identified the PoC material as historical.
 
 Entry points: `README.md`, `AGENTS.md`, `docs/README.md`, `docs/design/architecture.md`,
 `docs/contributing/development.md`, and the active `docs/poc/` and `docs/handoff/` material.
