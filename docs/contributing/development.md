@@ -204,6 +204,13 @@ a translation change. Stable translations may be added and improved after releas
 
 ## VitePress upgrades
 
+To review the locked dependencies, start in a clean checkout with the project Node/npm
+versions. Run `npm ci --ignore-scripts --no-audit`, `npm ls --all`, then `npm audit --json`
+with development dependencies included. Build and type-check tools are development dependencies.
+For a finding, use `npm explain <package>` to trace it to a caller and check the advisory
+status before choosing an update. Record the revision, date, registry, package versions,
+findings and any remaining release decision. Run `npm run check` against the clean install.
+
 The sole renderer is exact-pinned as `vitepress@2.0.0-alpha.21`; application code imports the
 canonical package. The old `vitepress-v2` alias and alias-specific SSR bundling are removed.
 Use the retained PoC comparison documents as historical evidence, not current command references.

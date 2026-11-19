@@ -131,6 +131,19 @@ fallback notices and correct body language. Notifications and automated translat
 
 ### P3. Dependencies and upgrade maintenance
 
+Completed on 2026-11-19 for docs revision `2f763d6`. An isolated Windows install with Node
+22.23.4 and npm 11.11.0 installed the committed lockfile using `npm ci --ignore-scripts --no-audit`.
+The lockfile SHA-256 was `51c9dc52528b2fd6cc2c1056b950c9ee94e49ace1c7d8f4cbe41f6c0e175fcfb`.
+`npm ls --all` passed and a separate full `npm audit --json` against registry.npmjs.org
+returned zero findings at every severity. Formatting, lint, type checks and all 45 tests passed
+using that clean install. The audit required no dependency change or outstanding risk decision.
+
+The installed graph still resolves picomatch 4.0.7 through VitePress 2.0.0-alpha.21 and Vite
+8.3.8 (also via tinyglobby), and through vue-tsc 3.3.14 and @vue/language-core 3.3.14.
+These paths are used by build and type-check tooling. GitHub marked the previous advisory
+withdrawn on November 18. The earlier audit remains dated PoC evidence.
+[GitHub advisory GHSA-fc5q-39xc-vjpf](https://github.com/advisories/GHSA-fc5q-39xc-vjpf)
+
 Known observation, dated 2026-11-18: npm audit reported seven high package findings derived from one
 picomatch advisory, GHSA-fc5q-39xc-vjpf. Compatible updates did not resolve them. This is not a fresh
 audit or seven independent vulnerabilities; see [consolidation evidence](../poc/consolidation.md).

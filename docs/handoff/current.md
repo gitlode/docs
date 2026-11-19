@@ -24,6 +24,9 @@ launch requires a separate owner decision. Read the [documentation guide](../REA
 [architecture](../design/architecture.md), [development workflow](../contributing/development.md)
 and [SSG decision](../decisions/0001-use-vitepress-v2.md) before implementation.
 
+P3 completed on 2026-11-19 with zero npm audit findings and 45 passing tests on a clean
+install. Continue with the P4 source update rehearsal and update ownership/cadence decision.
+
 ## Restart commands
 
 Use Node 22.23.4 / npm 11.11.0, Git, and a clean checkout. With Volta, prefix npm commands with
