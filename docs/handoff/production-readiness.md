@@ -1,6 +1,6 @@
 ﻿# Production readiness handoff
 
-Status: active follow-up backlog, 2026-11-19. Production implementation has not started.
+Status: production preparation in progress, 2026-11-19. The initial inputs and audience are agreed.
 Maintainer: the next human or LLM continuing this repository. Decision authority: project owner.
 Retire this document only after each item is completed or explicitly deferred with an owner decision;
 promote implemented contracts to durable development and operations documentation, following P6.
@@ -41,6 +41,32 @@ Fixed inputs tested by the PoC (not a claim that these are the latest release/de
 moves; rerunning acquisition is not a source update. Source updates need explicit configuration changes.
 
 ## Recommended order and dependencies
+
+### Owner decisions and operations to design (2026-11-19)
+
+Use the two pins above for current work. The initial audience is CLI users, official plugin
+users and gitlode developers. Include the CLI package README, usage and profiling guides,
+design and contributing guides present in each edition, and the five official plugin READMEs.
+Keep the repository README, package documentation index and internal package material on GitHub.
+The two telemetry guides currently exist only in next. Enumerate selected paths explicitly.
+
+Treat routine ref/pin updates, display-label changes, and edits to an edition's publication
+scope as operator tasks. Rehearse a subsequent change as well as the initial build. The current
+pipeline already accepts configured pins, but stages one shared file list. The switcher and
+combined landing page render edition keys as labels. These are implementation gaps.
+
+Discuss the following reader-visible behavior with the owner before implementing it:
+
+| Operator action                                | Proposed behavior to review                                                                                                                                |
+| ---------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Rename an edition for display                  | Change the text throughout the site while keeping bookmarked URLs, translation records and source identity stable.                                         |
+| Add a next-only guide or change its navigation | Select it for next independently. Validate its links, translations, search and navigation against that edition's inventory.                                |
+| Rename, move or withdraw a published guide     | Preserve the public URL across source moves where practical. Decide when a replacement warrants a redirect and what readers see on intentional withdrawal. |
+| Promote a release or correct stable            | Review the pin, selected documents and translations together. Allow next to advance independently and record the exact deployed inputs.                    |
+| Reject or recover a release                    | A failed candidate leaves the last successful site available. Rehearse recovery of both editions together, including the first-launch case in P5.          |
+
+Use these scenarios to refine P1–P5 with the owner. Record proven operator procedures in
+operations documentation as each increment lands.
 
 Start with P1: inspect the desired production corpus and present a concrete publication proposal.
 P2 and P3 can be investigated alongside that proposal. P4 depends on the chosen source and translation
