@@ -17,7 +17,8 @@ The initial stable 0.12.0 corpus now has one Japanese guide requiring review and
 A local rehearsal added an isolated third edition using configuration, built all three editions,
 checked edition navigation on 136 pages, and passed HTTP and search verification.
 Human publication review takes place when incorporating new or revised translations.
-The PoC Profiling Guide still awaits that decision before its first production publication.
+On 2026-11-19 the owner approved the Japanese Profiling Guide for production use. The stable
+copy keeps its source-difference notice because its checked English hash belongs to next.
 See [translation operations](../operations/translations.md). Production
 launch requires a separate owner decision. Read the [documentation guide](../README.md),
 [architecture](../design/architecture.md), [development workflow](../contributing/development.md)

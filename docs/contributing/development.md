@@ -41,8 +41,8 @@ stop an existing preview before starting another on port 4173.
 
 The language selector switches the current page. The header version links preserve the current
 locale and open the target edition home with a full reload, without retaining the current document
-or fragment. Stable has no owned translations in this corpus and uses English fallback. The next
-Profiling Guide has the Japanese example; the other five next documents demonstrate fallback.
+or fragment. The Japanese Profiling Guide matches the pinned next source. Its stable 0.12.0
+copy displays a source-difference notice. Other untranslated pages use English fallback.
 
 `npm run site:build -- stable` or `-- next` creates a single-edition diagnostic build without
 version controls. Run the default build again to restore the complete preview. The complete
@@ -198,8 +198,8 @@ No environment secrets, deployment keys, or privileged GitHub credentials are ne
 Add owned plain Markdown and its record using the [edition-specific translation workflow](../operations/translations.md).
 Record the canonical file SHA-256 from staging, not the repository
 commit. Relative links use the canonical document directory. Review translation and source changes
-before updating that hash. A matching hash does not certify translation quality. The current
-Profiling Guide is a PoC example awaiting human language review. Stable translations may be added and improved after release. Follow the
+before updating that hash. A human decides whether to publish the wording when incorporating
+a translation change. Stable translations may be added and improved after release. Follow the
 [stable release policy](../operations/editions.md#stable-release-policy).
 
 ## VitePress upgrades

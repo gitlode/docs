@@ -109,14 +109,10 @@ checks cover every form. Do not change canonical English just to satisfy VitePre
 
 ### P2. Translation policy and quality
 
-Current limitation: only the Profiling Guide has a Japanese example. Its stable copy requires review.
-A matching source hash certifies file identity, not translation quality. The example still needs
-human language review. Missing and source-changed translations already have distinct behavior.
-
-The next example has been compared with the pinned English guide and edited for clarity.
-Its PoC review notice remains until the owner reviews the translation or defers it.
-The current stable English guide differs from next's, so a stable translation would need
-review against its own original. The [translation maintenance procedure](../operations/translations.md)
+On 2026-11-19 the owner reviewed the Japanese Profiling Guide and approved its wording for
+production use. Its checked English source matches next. The transferred stable 0.12.0 copy
+retains the source-difference notice until reviewed against that release's original.
+The [translation maintenance procedure](../operations/translations.md)
 covers missing translations, source changes and Japanese-only corrections.
 
 Entry points: the edition translation manifests, `translations/ja/<edition>/`,
@@ -125,10 +121,8 @@ Entry points: the edition translation manifests, `translations/ja/<edition>/`,
 
 1. The [transfer procedure](../operations/translations.md#transfer-between-editions) applies in both directions.
    For stable 0.12.0 it produced one copy with a review notice and 20 English fallbacks.
-2. Have the owner review the Japanese example and decide initial production translation coverage.
-   Full translation coverage and automated generation are not implied prerequisites.
-3. Document a small maintainer workflow for source changes: review the English diff, edit the
-   translation if needed, then update the checked hash. A review may correctly require no text edit.
+2. The Profiling Guide is approved for initial publication. Untranslated pages use English fallback.
+3. Maintainers review the English diff before updating the checked hash. A review may require no text edit.
 
 Completion evidence: recorded policy and review responsibility; example reviewed or explicitly
 excluded/deferred for launch; tests cover source change, unchanged source across commits, missing
