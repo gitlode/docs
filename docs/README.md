@@ -32,6 +32,9 @@ The following homes contain tracked working material with a limited purpose:
 - `proposals/`: [development environment feedback](proposals/development-environment.md)
   and future suggestions from this project to gitlode itself.
 
+Start the closeout review with [PoC closeout](poc/closeout.md); continue implementation with
+[production readiness](handoff/production-readiness.md). PoC exit and production launch are separate decisions.
+
 The current post-selection implementation is covered by [VitePress consolidation](poc/consolidation.md).
 Earlier candidate comparisons retain their historical commands and measurements.
 

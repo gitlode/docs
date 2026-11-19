@@ -1,40 +1,63 @@
 ﻿# Current PoC handoff
 
-Status: active continuation note, updated 2026-11-18.
+Status: closeout in progress, updated 2026-11-19.
 Maintainer: next human or LLM. Decision authority: project owner.
-Replace this note at the next handoff; durable contracts live in architecture and development.
+Replace this note after integration/exit decisions; preserve the active production backlog until resolved.
 
-## Current state
+## Start here
 
-- Work branch: `work/poc-evaluation`, following the initial PoC merge into main.
-- Owner selected VitePress 2.0.0-alpha.21; see ADR 0001. Vue preference and acceptable custom
-  fallback maintenance outweigh the proposal's narrow Starlight preference.
-- Owner authorized consolidation, explicitly requiring SSG-dependent and independent domains.
-- `src/publishing/` owns acquisition, staging, content preparation, translation freshness,
-  Markdown safety/link rewriting, static serving and generic HTML reference checks.
-- `src/ssg/vitepress/` owns builds and rendering/localization/version/search verification.
-- `site/vitepress/` owns trusted config and Vue theme; `src/cli/site.ts` is the site entry point.
-- Non-selected implementations, package alias, and comparison-only dependencies are removed.
-  Comparison documents remain historical evidence, not current command references.
-- Current URLs are `/docs/{stable|next}/{en|ja}/`; use `npm run site:build`, `site:verify`,
-  `search:verify`, and `npm run preview`. Stop a manual preview with Ctrl+C.
+1. Read [documentation guide](../README.md), [architecture](../design/architecture.md),
+   [development workflow](../contributing/development.md), and [ADR 0001](../decisions/0001-use-vitepress-v2.md).
+2. Check Git status, branch and remote integration before editing. PR #2 was squash merged into main
+   as `1a3835c`. Active branch `work/poc-closeout` starts there and contains the post-selection commits;
+   consolidation is `09cb3f5` (original `be680f5` remains on `work/poc-evaluation`).
+   The closeout PR and its exact CI result must be recorded before claiming integration complete.
+3. Use [production readiness](production-readiness.md) as the actionable follow-up backlog. Start with
+   production publication scope; it supplies file entrypoints, dependencies, open decisions and evidence
+   required to close each gap. Do not infer production readiness from a successful PoC.
 
-## Verification and limitations
+## Decisions and verification
 
-See the Japanese [consolidation evidence](../poc/consolidation.md) for local validation.
-A clean install, 43 tests, two builds, 28 version-navigation checks, 32 search queries and
-Edge desktop/mobile checks passed. All owned browsers and listeners were closed.
-The current dependency audit reports seven high package findings from one picomatch advisory;
-compatible update did not resolve them. No forced downgrade to VitePress v1 was performed.
-Historical clean audit/CI observations do not certify this new dependency graph.
+The owner selected VitePress 2.0.0-alpha.21 and accepted its consolidation on 2026-11-19, including
+separate publication services, VitePress adaptation and site theme/config. Other candidate code is
+removed; historical comparison evidence remains. The owner approved closeout work and the deferred
+production backlog, prioritizing continuity between sessions. Final PoC exit and launch remain
+separate owner decisions.
 
-## Next work
+Use [closeout evidence](../poc/closeout.md) for the final review status. See
+[consolidation evidence](../poc/consolidation.md): clean install, 43 tests, two builds, 28 version
+navigation checks, 32 search queries, and Edge desktop/mobile behavior passed locally. Owned browsers
+and listeners were closed. Post-consolidation hosted CI still needs its exact revision/run recorded;
+older three-candidate CI evidence is not a substitute. The dated dependency finding and its follow-up
+are recorded in production-readiness.md; do not report it as a fresh audit.
 
-1. Owner reviews consolidation and separately accepts PoC exit.
-2. Define production publication and explicit assets; current links to unselected documents
-   deliberately point upstream. Do not automatically publish link targets.
-3. Decide stable translation snapshot policy and review Japanese sample quality.
-4. Review dependency findings and prepare deployment. Production launch is not authorized.
+## Restart commands
 
-Continue nonblocking cross-project feedback in `docs/proposals/`. Preserve canonical English
-upstream; do not edit gitlode itself or send notifications without authorization.
+Use Node 22.23.4 / npm 11.11.0, Git, and a clean checkout. With Volta, prefix npm commands with
+`volta run --node 22.23.4`. No upstream dependency installation or privileged source credentials are needed.
+
+```sh
+npm ci --ignore-scripts
+npm run check
+npm run source:acquire
+npm run content:stage
+npm run site:build
+npm run site:verify
+npm run search:verify
+```
+
+Dependency installation needs registry access unless cached; source acquisition needs GitHub access.
+The subsequent stage/build/verification commands use local input. Generated inputs and results are ignored under
+`.generated/`; regenerate them after a clone rather than depending on a previous session's files.
+For manual review use `npm run preview`, open `http://127.0.0.1:4173/docs/next/ja/`, and stop with
+Ctrl+C in the same terminal. Follow the development process-lifecycle procedure for agent-owned
+processes and verify actual PID exit and port release. No preview should be left running by default.
+
+## Remaining closeout actions
+
+- Record hosted CI for the consolidated revision and integrate the closeout PR through owner review
+  and squash merge; do not merge automatically.
+- Present the completed evidence and explicit production gaps for owner PoC-exit acceptance.
+- Record that decision and final integration state here, then continue with production-readiness.md
+  when the owner starts the next phase. Selection, consolidation acceptance and CI success alone do
+  not authorize deployment, upstream changes, or cross-repository notifications.

@@ -7,7 +7,8 @@ site implementation, and operations. Project documentation under `docs/` is not 
 **Status:** VitePress v2 is selected and the implementation is consolidated on
 `2.0.0-alpha.21`. The six-document PoC supports English/Japanese, stable/next, local search,
 and complete artifact validation. No production deployment is enabled.
-See [the accepted decision](docs/decisions/0001-use-vitepress-v2.md).
+See [the accepted decision](docs/decisions/0001-use-vitepress-v2.md),
+[PoC closeout](docs/poc/closeout.md), and the [production-readiness handoff](docs/handoff/production-readiness.md).
 
 ## Quick start
 
