@@ -20,12 +20,8 @@
     "packages/gitlode/docs/design/commit-traversal-internals.md",
     "packages/gitlode/docs/contributing/README.md",
     "packages/gitlode/docs/contributing/build-test-release.md",
-    "packages/gitlode/docs/contributing/lint-policy.md"
-  ],
-  "additionalFiles": {
-    "next": [
-      "packages/gitlode/docs/design/telemetry.md",
-      "packages/gitlode/docs/design/telemetry-verification.md"
-    ]
-  }
+    "packages/gitlode/docs/contributing/lint-policy.md",
+    "packages/gitlode/docs/design/telemetry.md",
+    "packages/gitlode/docs/design/telemetry-verification.md"
+  ]
 }

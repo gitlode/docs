@@ -143,11 +143,11 @@ integration instructions. Commit at practical work increments; do not merge auto
 
 1. Resolve an explicitly chosen tag/branch using `git ls-remote --heads --tags https://github.com/gitlode/gitlode.git`.
 2. For annotated tags, use the peeled `^{}` commit, not the tag object's SHA.
-3. Update the requested ref and full commit in `config/sources.json` together.
+3. Update the requested ref and full commit in `config/<edition>/source.json` together.
 4. Acquire, stage, inspect the diff and manifest, and run checks.
 
-Use exact file paths in `config/publication.json`; adding to the sidebar is a separate edit in
-`config/navigation.json`. Never follow all links or publish a whole repository to avoid failures.
+Use exact file paths in `config/<edition>/publication.json`; adding to the sidebar is a separate edit in
+`config/<edition>/navigation.json`. Never follow all links or publish a whole repository to avoid failures.
 
 ## Validation
 
@@ -198,8 +198,8 @@ Add owned plain Markdown under `translations/ja/<edition>/` and a record in
 `translations/manifest.json`. Record the canonical file SHA-256 from staging, not the repository
 commit. Relative links use the canonical document directory. Review translation and source changes
 before updating that hash. A matching hash does not certify translation quality. The current
-Profiling Guide is a PoC example awaiting human language review. Stable translation snapshot policy
-remains open; no next-to-stable substitution occurs.
+Profiling Guide is a PoC example awaiting human language review. Stable translations may be added and improved after release. Follow the
+[stable release policy](../operations/editions.md#stable-release-policy).
 
 ## VitePress upgrades
 

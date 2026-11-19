@@ -11,9 +11,10 @@ import {
 import { join, resolve } from "node:path";
 import test from "node:test";
 
+import { prepareContent } from "../src/publishing/content.ts";
 import {
   git,
-  publicationFiles,
+  loadSources,
   readDocument,
   resolveCommit,
   safeDirectory,
@@ -54,6 +55,14 @@ function fixture() {
       next: { path: "next", label: "next", ref: "refs/heads/main", commit },
     },
   };
+  for (const edition of ["stable", "next"]) {
+    const directory = safeDirectory(root, "config/" + edition);
+    writeFileSync(join(directory, "publication.json"), JSON.stringify({ files: [file] }));
+    writeFileSync(
+      join(directory, "navigation.json"),
+      JSON.stringify({ groups: [{ label: "Guides", files: [file] }] }),
+    );
+  }
   return { root, repository, sources, commit };
 }
 
@@ -90,29 +99,57 @@ test("publication excludes agent, handoff, executable MDX and duplicate paths", 
 });
 
 test("configured navigation is a subset of explicit publication", () => {
-  const publication = JSON.parse(readFileSync("config/publication.json", "utf8"));
-  const navigation = JSON.parse(readFileSync("config/navigation.json", "utf8"));
-  validatePublication(publication);
-  validateSources(JSON.parse(readFileSync("config/sources.json", "utf8")));
-  for (const group of navigation.groups)
-    for (const edition of group.editions ?? ["stable", "next"])
-      for (const path of group.files)
-        assert.ok(publicationFiles(publication, edition).includes(path));
+  const sources = loadSources(".");
+  for (const id of Object.keys(sources.editions)) {
+    const publication = JSON.parse(readFileSync(join("config", id, "publication.json"), "utf8"));
+    validatePublication(publication);
+    const navigation = JSON.parse(readFileSync(join("config", id, "navigation.json"), "utf8"));
+    for (const group of navigation.groups)
+      for (const path of group.files) assert.ok(publication.files.includes(path));
+  }
 });
 
-test("edition-only publication is explicit and validates both editions", () => {
-  const nextOnly = "packages/gitlode/docs/design/telemetry.md";
-  const publication = { files: [file], additionalFiles: { next: [nextOnly] } };
-  assert.deepEqual(publicationFiles(publication, "stable"), [file]);
-  assert.deepEqual(publicationFiles(publication, "next"), [file, nextOnly]);
-  assert.throws(
-    () => validatePublication({ files: [file], additionalFiles: { next: [file] } }),
-    /Duplicate/,
+test("next selection and navigation edits leave stable documents, links and sidebar intact", () => {
+  const { root, repository, sources } = fixture();
+  const guide = "packages/gitlode/docs/profiling.md";
+  writeFileSync(join(repository, guide), "# Profiling");
+  writeFileSync(join(repository, file), "# Usage\\n\\n[Profiling](profiling.md)");
+  git(repository, ["add", "."]);
+  git(repository, [
+    "-c",
+    "user.name=Test",
+    "-c",
+    "user.email=test@example.invalid",
+    "-c",
+    "commit.gpgsign=false",
+    "commit",
+    "-m",
+    "Add guide",
+  ]);
+  const commit = resolveCommit(repository, "HEAD");
+  for (const source of Object.values(sources.editions)) source.commit = commit;
+  writeFileSync(
+    join(safeDirectory(root, "translations"), "manifest.json"),
+    JSON.stringify({ translations: [] }),
   );
-  assert.throws(
-    () => validatePublication({ files: [file], additionalFiles: { next: ["AGENTS.md"] } }),
-    /policy/,
+  function content(id: string) {
+    const { pages, navigation } = prepareContent(root, id, "/", { staging: stage(root, sources) });
+    return { pages, navigation };
+  }
+  const stable = content("stable");
+  writeFileSync(
+    join(root, "config/next/publication.json"),
+    JSON.stringify({ files: [file, guide] }),
   );
+  writeFileSync(
+    join(root, "config/next/navigation.json"),
+    JSON.stringify({ groups: [{ label: "Next only", files: [guide, file] }] }),
+  );
+  const next = content("next");
+  assert.equal(next.navigation[0].pages[0].route, "profiling/");
+  assert.ok(next.pages[0].markdown.includes("/en/profiling/"));
+  assert.ok(stable.pages[0].markdown.includes("github.com/gitlode/gitlode/blob/"));
+  assert.deepEqual(content("stable"), stable);
 });
 
 test("source pins and edition names are validated before IO", () => {
@@ -132,7 +169,7 @@ test("source pins and edition names are validated before IO", () => {
 test("staging preserves exact Git bytes, excludes unselected files, records per-file identity and is repeatable", () => {
   const { root, repository, sources, commit } = fixture();
   writeFileSync(join(repository, file), "UNCOMMITTED CONTENT MUST NOT APPEAR");
-  const output = stage(root, sources, { files: [file] });
+  const output = stage(root, sources);
   const manifest = JSON.parse(readFileSync(join(output, "manifest.json"), "utf8"));
   assert.equal(manifest.editions.length, 2);
   for (const edition of manifest.editions) {
@@ -150,7 +187,7 @@ test("staging preserves exact Git bytes, excludes unselected files, records per-
     );
     assert.ok(document.sourceUrl.includes(commit));
   }
-  const repeated = stage(root, sources, { files: [file] });
+  const repeated = stage(root, sources);
   assert.notEqual(repeated, output);
   assert.deepEqual(
     readFileSync(join(repeated, "manifest.json")),
@@ -165,10 +202,11 @@ test("missing selected files and invalid revisions fail with actionable errors",
     () => readDocument(repository, commit, "packages/gitlode/docs/profiling.md"),
     /Missing or non-regular/,
   );
-  assert.throws(
-    () => stage(root, sources, { files: [file, "packages/gitlode/docs/profiling.md"] }),
-    /Missing/,
+  writeFileSync(
+    join(root, "config/next/publication.json"),
+    JSON.stringify({ files: [file, "packages/gitlode/docs/profiling.md"] }),
   );
+  assert.throws(() => stage(root, sources), /Missing/);
   assert.deepEqual(readdirSync(join(root, ".generated")), ["source"]);
 });
 

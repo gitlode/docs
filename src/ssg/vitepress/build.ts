@@ -6,7 +6,6 @@ import { performance } from "node:perf_hooks";
 import { prepareContent } from "../../publishing/content.ts";
 import { parseSafeMarkdown } from "../../publishing/markdown.ts";
 import { safeDirectory, stage } from "../../publishing/pipeline.ts";
-import type { Sources, Publication } from "../../publishing/pipeline.ts";
 import { startPreview, withPreviews } from "../../publishing/preview-server.ts";
 import { validateOutput } from "../../publishing/validate-output.ts";
 import { validateLocalization } from "./validate-localization.ts";
@@ -145,11 +144,7 @@ export function buildSite(edition = "all") {
     console.log(`Built documentation: ${result.output}`);
     return result.output;
   }
-  const staging = stage(
-    root,
-    json<Sources>(join(root, "config/sources.json")),
-    json<Publication>(join(root, "config/publication.json")),
-  );
+  const staging = stage(root);
   const output = mkdtempSync(join(safeDirectory(root, ".generated/previews"), "combined-"));
   const dist = safeDirectory(output, "dist");
   const editions = (["stable", "next"] as const).map((name) =>

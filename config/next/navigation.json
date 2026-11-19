@@ -46,8 +46,7 @@
       "files": [
         "packages/gitlode/docs/design/telemetry.md",
         "packages/gitlode/docs/design/telemetry-verification.md"
-      ],
-      "editions": ["next"]
+      ]
     }
   ]
 }

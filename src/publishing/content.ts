@@ -5,7 +5,6 @@ import { join } from "node:path";
 import { parseSafeMarkdown, prepareMarkdown, routeFor } from "./markdown.ts";
 import type { SourceTree } from "./markdown.ts";
 import { git, stage } from "./pipeline.ts";
-import type { Sources, Publication } from "./pipeline.ts";
 import { loadTranslation } from "./translations.ts";
 interface Document {
   sourcePath: string;
@@ -24,7 +23,7 @@ interface Manifest {
   editions: Edition[];
 }
 interface Navigation {
-  groups: { label: string; files: string[]; editions?: string[] }[];
+  groups: { label: string; files: string[] }[];
 }
 function json<T>(path: string): T {
   return JSON.parse(readFileSync(path, "utf8")) as T;
@@ -50,13 +49,7 @@ export function prepareContent(
   options: { staging?: string } = {},
 ) {
   if (!["stable", "next"].includes(editionName)) throw new Error("Edition must be stable or next.");
-  const staging =
-    options.staging ??
-    stage(
-      root,
-      json<Sources>(join(root, "config/sources.json")),
-      json<Publication>(join(root, "config/publication.json")),
-    );
+  const staging = options.staging ?? stage(root);
   const manifest = json<Manifest>(join(staging, "manifest.json"));
   const edition = manifest.editions.find((e) => e.name === editionName);
   if (!edition) throw new Error("Missing edition in staging manifest.");
@@ -66,7 +59,7 @@ export function prepareContent(
   );
   if (new Set([...routes.values()].map((route) => route.toLowerCase())).size !== routes.size)
     throw new Error("Published route collision.");
-  const navigation = json<Navigation>(join(root, "config/navigation.json"));
+  const navigation = json<Navigation>(join(root, "config", editionName, "navigation.json"));
   const pages = edition.documents.flatMap((doc) => {
     const content = readFileSync(join(staging, doc.stagedPath));
     if (createHash("sha256").update(content).digest("hex") !== doc.sha256)
@@ -100,29 +93,18 @@ export function prepareContent(
       };
     });
   });
-  for (const group of navigation.groups)
-    if (
-      group.editions &&
-      (!Array.isArray(group.editions) ||
-        !group.editions.length ||
-        group.editions.some((id) => !["stable", "next"].includes(id)))
-    )
-      throw new Error("Unknown or empty sidebar editions.");
-  const groups = navigation.groups
-    .filter((group) => !group.editions || group.editions.includes(editionName))
-    .map((group) => ({
-      label: group.label,
-      pages: group.files.map((file) => {
-        const page = pages.find((p) => p.sourcePath === file && p.locale === "en");
-        if (!page) throw new Error(`Sidebar contains unpublished page: ${file}`);
-        return {
-          title: page.title,
-          jaTitle:
-            pages.find((p) => p.sourcePath === file && p.locale === "ja")?.title ?? page.title,
-          route: routeFor(file),
-        };
-      }),
-    }));
+  const groups = navigation.groups.map((group) => ({
+    label: group.label,
+    pages: group.files.map((file) => {
+      const page = pages.find((p) => p.sourcePath === file && p.locale === "en");
+      if (!page) throw new Error(`Sidebar contains unpublished page: ${file}`);
+      return {
+        title: page.title,
+        jaTitle: pages.find((p) => p.sourcePath === file && p.locale === "ja")?.title ?? page.title,
+        route: routeFor(file),
+      };
+    }),
+  }));
 
   for (const group of groups) for (const page of group.pages) parseSafeMarkdown(page.title);
   return {

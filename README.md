@@ -41,7 +41,7 @@ and `manifest.json`. These are **raw selected inputs**, not safe-to-render websi
 All generated content is ignored by Git. No upstream scripts or Markdown are executed.
 
 Sources approved by the owner: stable `gitlode@0.12.0`, next `integration/v0.13.0`.
-Both are pinned in `config/sources.json`; changing a branch upstream does not change a build.
+Both are pinned in `config/<edition>/source.json`; changing a branch upstream does not change a build.
 
 Start with the [documentation guide](docs/README.md) for durable knowledge, PoC work, handoffs,
 and feedback proposals. See [development](docs/contributing/development.md), [architecture](docs/design/architecture.md),

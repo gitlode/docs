@@ -1,0 +1,13 @@
+{
+  "repository": "https://github.com/gitlode/gitlode.git",
+  "editions": {
+    "stable": {
+      "path": "stable",
+      "label": "stable"
+    },
+    "next": {
+      "path": "next",
+      "label": "next"
+    }
+  }
+}

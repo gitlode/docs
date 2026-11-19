@@ -6,7 +6,7 @@
 staging, the VitePress adapter, Japanese translation sources, validation, and publishing.
 Its own `docs/` directory is never automatically published as product documentation.
 
-Current flow: `config/sources.json` -> Git object acquisition -> explicit allowlist -> byte-preserving
+Current flow: `config/<edition>/source.json` -> Git object acquisition -> explicit allowlist -> byte-preserving
 staging/provenance -> shared content preparation -> VitePress adapter -> English/Japanese static builds
 and output validation. VitePress v2 is selected and consolidated; production deployment remains pending.
 
@@ -42,8 +42,8 @@ and submodule entries. No individual-file API calls or privileged source credent
 
 ## Selection and staging contract
 
-`config/publication.json` enumerates common and edition-specific Markdown paths, independently of the proposed
-sidebar groups in `config/navigation.json`. The renderer consumes the validated navigation subset.
+`config/<edition>/publication.json` enumerates the complete selection for one edition, independently of the proposed
+sidebar groups in `config/<edition>/navigation.json`. The renderer consumes the validated navigation subset.
 Missing selected files are errors. Agent/handoff content, arbitrary roots,
 MDX, duplicate/case-colliding paths, traversal, backslashes, and Windows reserved names are rejected.
 Broader publication requires explicit configuration and, if outside the durable document policy,

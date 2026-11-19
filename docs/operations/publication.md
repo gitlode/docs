@@ -1,9 +1,8 @@
 # Change the publication scope
 
-Edit `config/publication.json` using exact upstream paths. Put documents shared by both
-editions in `files`. Use `additionalFiles.stable` and `additionalFiles.next` for
-edition-specific documents. For example, the two telemetry guides belong only to next.
-To withdraw a shared guide from next, move its entry from `files` to `additionalFiles.stable`.
+Edit the target edition's `config/<edition>/publication.json` using exact upstream paths.
+Each file contains its edition's complete selection. For example, the two telemetry guides
+are present only in next. Review the target edition's sidebar and incoming links when removing a guide.
 
 Each edition must have at least one selected document. The supported sources are the CLI
 and plugin package READMEs, usage and profiling guides, and Markdown under the CLI design
@@ -11,9 +10,9 @@ and contributing directories. Agent and handoff material is excluded. Package RE
 at `packages/<package-name>/` under each locale. The section README and a link to its
 directory resolve to the same route. Other selected guides use their source-relative route.
 
-Edit `config/navigation.json` separately to list a guide in the sidebar. A group applies to
-both editions by default. Add `"editions": ["next"]` to a next-only group. Each sidebar entry
-must already be selected for every edition that displays it.
+Edit `config/<edition>/navigation.json` to change group labels, group order and page order
+within that edition. Each listed document must belong to the same edition's publication list.
+Follow the [stable release policy](editions.md#stable-release-policy) for released navigation.
 
 Check the file at each applicable pin and review incoming links and translation records.
 Relative links to published documents become site links; other existing files and directories

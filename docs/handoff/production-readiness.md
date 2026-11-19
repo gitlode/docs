@@ -37,7 +37,7 @@ Fixed inputs tested by the PoC (not a claim that these are the latest release/de
 | stable  | `refs/tags/gitlode@0.12.0`       | `76b124e23fcc069be1278629cf01b62ae1456c7a` |
 | next    | `refs/heads/integration/v0.13.0` | `90512564d76490088ecc99da7596128df1c45a2c` |
 
-`config/sources.json` is authoritative. Acquisition retains the configured commit if the named ref
+`config/<edition>/source.json` is authoritative. Acquisition retains the configured commit if the named ref
 moves; rerunning acquisition is not a source update. Source updates need explicit configuration changes.
 
 ## Recommended order and dependencies
@@ -81,7 +81,7 @@ See [publication operations](../operations/publication.md) for selection, routes
 Imported images are currently rejected. Existing generated theme assets do not establish support for
 arbitrary upstream assets, CSS URL references, or `srcset`.
 
-Entry points: `config/publication.json`, `config/navigation.json`, `src/publishing/pipeline.ts`,
+Entry points: `config/<edition>/publication.json`, `config/<edition>/navigation.json`, `src/publishing/pipeline.ts`,
 `src/publishing/markdown.ts`, `src/publishing/content.ts`, `src/publishing/validate-output.ts`,
 `src/ssg/vitepress/build.ts`, and `test/markdown.test.ts` / `test/output.test.ts`.
 
@@ -112,7 +112,7 @@ Entry points: `translations/manifest.json`, `translations/ja/<edition>/`,
 `src/publishing/translations.ts`, `src/ssg/vitepress/validate-localization.ts`,
 `site/vitepress/config.ts`, and `test/translations.test.ts` / `test/localization.test.ts`.
 
-1. Present a stable-release snapshot and post-release correction policy for owner review. Decide
+1. Follow the agreed [stable release policy](../operations/editions.md#stable-release-policy). Decide
    when a reviewed next translation can be promoted, how the matching source hash is recorded, and
    how stable corrections are maintained. Until decided, never substitute next translations for stable.
 2. Have the owner review the Japanese example and decide initial production translation coverage.
@@ -151,7 +151,7 @@ that a later dependency graph is safe. Maintain the selected alpha version until
 Current limitation: explicit source pins are reproducible, but there is no automatic release promotion
 or upstream synchronization service. The PoC's `next` is a snapshot, not a live mirror.
 
-Entry points: `config/sources.json`, `src/publishing/pipeline.ts`, translation metadata, and
+Entry points: `config/<edition>/source.json`, `src/publishing/pipeline.ts`, translation metadata, and
 [updating inputs](../contributing/development.md#updating-inputs).
 
 1. Confirm the production stable tag and development ref with the owner; do not choose a development
