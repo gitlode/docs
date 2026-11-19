@@ -221,7 +221,8 @@ builds, so the tested recovery is a functional rebuild rather than a byte-identi
 Read-only GitHub observations on the same date: default branch `main`, Pages enabled, and
 the existing `github-pages` environment allows only the `main` branch. No required reviewer
 was listed. The public API could not confirm the Pages publishing source or Actions allowlist.
-Pending evidence: PR checks and merge, owner confirmation of Pages source, artifact-only
+The owner confirmed in Settings that Pages uses GitHub Actions and has no custom domain.
+Pending evidence: PR checks and merge, artifact-only
 Actions run on main, explicit first-launch approval, deployment and hosted checks. No
 deployment or remote recovery was exercised during local preparation.
 
