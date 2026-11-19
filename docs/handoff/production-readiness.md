@@ -222,9 +222,24 @@ Read-only GitHub observations on the same date: default branch `main`, Pages ena
 the existing `github-pages` environment allows only the `main` branch. No required reviewer
 was listed. The public API could not confirm the Pages publishing source or Actions allowlist.
 The owner confirmed in Settings that Pages uses GitHub Actions and has no custom domain.
-Pending evidence: PR checks and merge, artifact-only
-Actions run on main, explicit first-launch approval, deployment and hosted checks. No
-deployment or remote recovery was exercised during local preparation.
+
+**First known-good release, 2026-11-19.** [PR #4](https://github.com/gitlode/docs/pull/4)
+landed on main at `af30cf58e18028b4a63e4068242cf5ea71bab361`.
+The [prepare run](https://github.com/gitlode/docs/actions/runs/44485270204) validated
+and uploaded the candidate. The owner triggered the [first publish run](https://github.com/gitlode/docs/actions/runs/44485557590)
+for that SHA. Validation and deployment succeeded with artifact `github-pages-44485557590-1`.
+Stable used `gitlode@0.12.0` at `76b124e23fcc069be1278629cf01b62ae1456c7a`;
+next used `integration/v0.13.0` at `90512564d76490088ecc99da7596128df1c45a2c`.
+
+Headless Edge opened the [production site](https://gitlode.github.io/docs/) over HTTPS.
+For both editions and languages, the home and nested plugins page loaded, heading fragments
+survived reload, upstream links contained the expected pin, both switches reached the
+expected destination, and selecting a CLI search result reached the CLI reference heading.
+The Japanese plugins pages displayed the English fallback. The Japanese Profiling Guide
+displayed the source-change notice on stable only. The browser observed no failed same-site
+asset loads or uncaught page errors on these paths. A missing page, the editions config,
+the generated preview pointer and the internal handoff path all returned HTTP 404.
+Use this publish run as the initial recovery reference.
 
 Hosting decision already made: GitHub Pages at `https://gitlode.github.io/docs/`, no custom domain.
 The owner previously reported GitHub settings correct. Recheck only relevant settings when preparing
