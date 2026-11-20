@@ -130,7 +130,6 @@ VitePress receives generated English fallback pages and a small trusted renderer
 Japanese notice and `lang="en"` body. Imported HTML remains disabled. VitePress uses native same-page
 language controls. Fallback body links retain the English locale; Japanese sidebar links remain
 Japanese. Translated heading IDs may differ: language switching does not map section fragments.
-See [localization evidence](../poc/localization.md) for current limitations.
 
 ## CI and publishing
 
@@ -143,8 +142,7 @@ enables a separate deployment job with scoped Pages/OIDC rights. See [deployment
 
 Native local search is enabled per edition: VitePress's local provider builds locale indexes.
 Combined assembly preserves these separate search assets rather than merging editions. Japanese fallback pages are indexed
-at their Japanese routes, including their English bodies. Query probes and limitations are recorded
-in [search evidence](../poc/search.md). This does not establish comprehensive Japanese search quality.
+at their Japanese routes, including their English bodies. See the [validation guide](../contributing/development.md#validation) for query coverage.
 
 VitePress extends the default theme's nav-bar-content-before slot with a small Vue control.
 The control remains in the upper navigation area on desktop and narrow screens. It shows the
@@ -156,10 +154,6 @@ placement across all published document and locale-home pages.
 
 Publication changes and package README routes are documented in [publication operations](../operations/publication.md).
 
-## Accepted SSG
+## Renderer maintenance
 
-The owner selected VitePress v2 on 2026-11-18; see [ADR 0001](../decisions/0001-use-vitepress-v2.md).
-The implementation uses the exact `vitepress` package version `2.0.0-alpha.21`; the v1 coexistence
-alias and Starlight implementation are removed. Historical comparison evidence remains under
-`docs/poc/`. Upgrades require renewed checks of custom fallback rendering, Vue navigation, and
-search-internal APIs. Selection does not grant production-launch approval.
+VitePress is pinned to an exact version. Follow the [upgrade procedure](../contributing/development.md#vitepress-upgrades) to verify fallback rendering, Vue navigation and local search after an update.

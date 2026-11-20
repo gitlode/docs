@@ -1,10 +1,5 @@
 {
   "$schema": "./node_modules/oxfmt/configuration_schema.json",
-  "ignorePatterns": [
-    ".generated/**",
-    "node_modules/**",
-    "package-lock.json",
-    "docs/poc/kickoff.md"
-  ],
+  "ignorePatterns": [".generated/**", "node_modules/**", "package-lock.json"],
   "sortImports": true
 }

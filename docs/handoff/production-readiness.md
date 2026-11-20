@@ -4,32 +4,7 @@ Production readiness status, 2026-11-19. P1–P5 are complete. P6 is awaiting ow
 The sections below preserve the original
 plan, owner decisions and verification results. For ongoing work use the [documentation guide](../README.md).
 
-The owner accepted VitePress v2 consolidation and approved the PoC closeout sequence. PoC exit,
-merge, and production launch are separate decisions. This document carries the work between a
-successful PoC and a usable production service; it does not authorize a deployment.
-
-## Resume from the existing foundation
-
-Read [current handoff](current.md), [architecture](../design/architecture.md),
-[development](../contributing/development.md), and [ADR 0001](../decisions/0001-use-vitepress-v2.md).
-Use this repository for production; do not rebuild the prototype in another repository.
-Check the actual branch, merge status, CI revision and working tree before editing. Historical
-comparison documents intentionally retain obsolete commands and are not restart instructions.
-
-Implemented and retained:
-
-- Exact-pinned VitePress 2.0.0-alpha.21; shared publication services in `src/publishing/`,
-  VitePress assembly/checks in `src/ssg/vitepress/`, trusted config/theme in `site/vitepress/`.
-- Immutable upstream Git blob reads, an explicit six-document allowlist, independent navigation,
-  provenance hashes, restricted Markdown, and ignored generated sources/artifacts.
-- Stable/next, English/Japanese, missing-translation notice and English body language, file-level
-  translation freshness, same-document language switching, locale-home version switching.
-- Complete static artifact under `/docs/`, local search, local validation, and read-only PR CI.
-  Manual Pages preparation and publishing are covered in P5.
-- Canonical English remains in `gitlode/gitlode`; Japanese sources remain in this repository.
-  No automatic link-following publication or executable upstream Markdown is permitted.
-
-Fixed inputs tested by the PoC (not a claim that these are the latest release/development refs):
+## Initial production inputs
 
 | Edition | Configured ref                   | Pinned commit                              |
 | ------- | -------------------------------- | ------------------------------------------ |
@@ -140,13 +115,8 @@ using that clean install. The audit required no dependency change or outstanding
 The installed graph still resolves picomatch 4.0.7 through VitePress 2.0.0-alpha.21 and Vite
 8.3.8 (also via tinyglobby), and through vue-tsc 3.3.14 and @vue/language-core 3.3.14.
 These paths are used by build and type-check tooling. GitHub marked the previous advisory
-withdrawn on November 18. The earlier audit remains dated PoC evidence.
+withdrawn on November 18.
 [GitHub advisory GHSA-fc5q-39xc-vjpf](https://github.com/advisories/GHSA-fc5q-39xc-vjpf)
-
-Known observation, dated 2026-11-18: npm audit reported seven high package findings derived from one
-picomatch advisory, GHSA-fc5q-39xc-vjpf. Compatible updates did not resolve them. This is not a fresh
-audit or seven independent vulnerabilities; see [consolidation evidence](../poc/consolidation.md).
-The old Vite/esbuild dependency inconsistency was resolved during consolidation.
 
 Entry points: `package.json`, `package-lock.json`, `site/vitepress/`, `src/ssg/vitepress/search.ts`,
 and the VitePress upgrade procedure in development documentation.
@@ -190,7 +160,7 @@ To reproduce the rehearsal with the two real upstream pins in the table above:
    all 32 search probes passed again against that previous artifact, and the listeners closed.
 
 Current limitation: explicit source pins are reproducible, but there is no automatic release promotion
-or upstream synchronization service. The PoC's `next` is a snapshot, not a live mirror.
+or upstream synchronization service. The configured `next` is a snapshot, not a live mirror.
 
 Entry points: `config/<edition>/source.json`, `src/publishing/pipeline.ts`, translation metadata, and
 [updating inputs](../contributing/development.md#updating-inputs).
@@ -241,8 +211,6 @@ the generated preview pointer and the internal handoff path all returned HTTP 40
 The owner also reviewed the published content and reported no issues. Use this publish run as the initial recovery reference.
 
 Hosting decision already made: GitHub Pages at `https://gitlode.github.io/docs/`, no custom domain.
-The owner previously reported GitHub settings correct. Recheck only relevant settings when preparing
-launch; that report is not evidence of a successful deployment. See [GitHub setup](../poc/github-setup.md).
 
 Entry points: `.github/workflows/docs.yml`, `src/ssg/vitepress/build.ts`, and development documentation.
 The successful build pointer `.generated/preview.json` identifies a run with its `build.json` and
@@ -266,7 +234,7 @@ complete `dist/`. Upload only static `dist/`, never the whole generated run or r
 
 Completion evidence: approved go-live, successful deployment and hosted checks, maintained operating
 instructions for updates and failures, and an agreed recovery procedure. This is the production
-acceptance point, separate from PoC completion.
+acceptance point.
 
 ### P6. Documentation for the documentation system
 
@@ -274,10 +242,10 @@ The documentation changes are ready for owner review. P6 closes when the owner h
 the documentation, any requested revisions have been addressed, and the owner confirms completion.
 The repository README now directs maintainers to the
 four operating guides and developers to the tested local workflow. The review corrected the former
-staging count and pending-launch status, and identified the PoC material as historical.
+staging count and pending-launch status. The owner chose Git history as the archive for the SSG comparison.
 
 Entry points: `README.md`, `AGENTS.md`, `docs/README.md`, `docs/design/architecture.md`,
-`docs/contributing/development.md`, and the active `docs/poc/` and `docs/handoff/` material.
+`docs/contributing/development.md`, and the active handoff material.
 
 1. Organize durable documentation by audience and purpose. Keep architecture, implementation,
    extension points and contributor setup in development-oriented material. Provide separate
@@ -285,9 +253,7 @@ Entry points: `README.md`, `AGENTS.md`, `docs/README.md`, `docs/design/architect
    troubleshooting and recovery. An operations home such as `docs/operations/` can be introduced
    when those procedures are implemented; do not create empty runbooks or describe proposals as live behavior.
 2. Update the project entry points, agent instructions, status and navigation to describe the
-   maintained production documentation system. Retain useful historical PoC evidence with explicit
-   historical status, and promote lasting contracts out of temporary reports. Preserve the original
-   kickoff and decision rationale; production users should not need to reconstruct them from session logs.
+   maintained production documentation system. Keep current operating and development contracts in the corresponding guides.
 3. Treat documentation as part of every P1-P5 completion condition: P1 records selection/assets
    rules and how to change them; P2 records translation policy and review procedures; P3 records
    upgrade/verification procedures and risk decisions; P4 records source promotion/update operations;
@@ -298,7 +264,7 @@ Entry points: `README.md`, `AGENTS.md`, `docs/README.md`, `docs/design/architect
    and make the correct guide discoverable from the repository entry points.
 
 Completion evidence: separate, discoverable development and operations guides reflecting actual
-behavior; maintained project-facing material no longer assumes an active comparison PoC; P1-P5
+behavior; P1-P5
 include their documentation changes; a new maintainer can develop and operate the system without
 the original chat or ignored artifacts. Durable documentation remains English. This work may be
 delivered across multiple implementation increments rather than as a standalone task.
@@ -308,4 +274,4 @@ delivered across multiple implementation increments rather than as a standalone 
 Cross-project development-setting feedback remains in `docs/proposals/` and is reviewed separately;
 do not wait for upstream adoption. Historical versions beyond stable/next, cross-version search,
 automated translation, analytics, custom domains, elaborate theme changes and build optimization
-remain optional unless the owner changes scope. Preserve evidence rather than reopening SSG selection.
+remain optional unless the owner changes scope.

@@ -19,4 +19,4 @@ Start with the [system overview and local preview](docs/overview.md) to see wher
 
 The [system overview](docs/overview.md) introduces the publishing flow and repository layout. For implementation details, see the [architecture](docs/design/architecture.md) and [development guide](docs/contributing/development.md).
 
-The [documentation index](docs/README.md) also links to design decisions and project history.
+The [documentation index](docs/README.md) also links to operating procedures and the production launch record.

@@ -119,8 +119,7 @@ and the contributor lint policy. Use it as a baseline when evolving this project
   to lint. `npm run lint:fix` applies supported fixes. Bare `npm run format` deliberately fails
   rather than ambiguously checking or modifying files, matching the upstream convention.
 - EditorConfig uses UTF-8, LF, and two spaces, preserving significant Markdown trailing spaces.
-  Generated content, dependencies, the lockfile, and the original kickoff attachment are excluded
-  from formatting. The attachment is retained verbatim.
+  Generated content, dependencies and the lockfile are excluded from formatting.
 - `oxlint` uses upstream's 1.77.0 baseline. `oxfmt` uses 0.78.0: upstream's 0.62.0 pulled in
   tinypool versions flagged by npm audit (GHSA-5gmw-xhrv-c9v3 and GHSA-85c8-ppgw-ccpr).
   The newer formatter removes that dependency exposure in this installation.
@@ -157,8 +156,7 @@ VitePress's tokenizer, and default UI query options. It runs in Node, not a brow
 search UI. It checks that the served index assets match the built files, records query results in
 the generated run's `search.json`, verifies result scope and destinations/fragments, and closes its
 ephemeral static server. Missing matches for Japanese substrings are observations rather than build
-failures. Historical comparisons and limitations remain in [search evidence](../poc/search.md) and
-[three-candidate evidence](../poc/three-candidates.md).
+failures.
 
 The probe intentionally depends on the pinned VitePress index format and internal tokenizer API.
 Revisit it when upgrading. MiniSearch is explicitly pinned to the installed VitePress dependency
@@ -174,8 +172,7 @@ validation failures. Generated test fixtures remain ignored for diagnosis.
 `.github/workflows/docs.yml` performs these checks plus real upstream acquisition/staging on PRs,
 main pushes, and manual runs, followed by both edition builds, English/Japanese output validation,
 bounded HTTP checks, and search probes. Manual publication and recovery follow the
-[deployment procedure](../operations/deployment.md). Historical clean-clone and hosted results are in
-[reproducibility evidence](../poc/reproducibility.md); they are not proof for a later untested commit.
+[deployment procedure](../operations/deployment.md).
 
 ## Troubleshooting
 
@@ -210,9 +207,7 @@ For a finding, use `npm explain <package>` to trace it to a caller and check the
 status before choosing an update. Record the revision, date, registry, package versions,
 findings and any remaining release decision. Run `npm run check` against the clean install.
 
-The sole renderer is exact-pinned as `vitepress@2.0.0-alpha.21`; application code imports the
-canonical package. The old `vitepress-v2` alias and alias-specific SSR bundling are removed.
-Use the retained PoC comparison documents as historical evidence, not current command references.
+The sole renderer is exact-pinned as `vitepress@2.0.0-alpha.21`.
 When upgrading, rerun type checks, both edition builds, output/localization/version checks,
 search probes, and browser checks of fallback notices, navigation, and search. Alpha status means
 compatibility must be verified against the actual pinned release; the owner's adoption decision
