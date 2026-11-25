@@ -1,7 +1,7 @@
 # Current production handoff
 
 Status: production launched and reviewed by the owner on 2026-11-19. Use the [documentation guide](../README.md) for ongoing work.
-P6 remains open for the owner's review of the maintainer documentation and any resulting revisions.
+The owner accepted the final documentation revisions and closed P6 on 2026-11-25.
 Decision authority: project owner. The trunk session coordinates work and owner decisions.
 
 The [production readiness record](production-readiness.md) preserves the launch decisions and verification evidence.

@@ -1,6 +1,6 @@
 ﻿# Production readiness handoff
 
-Production readiness status, 2026-11-19. P1–P5 are complete. P6 is awaiting owner review.
+Production readiness status, 2026-11-25. P1–P6 are complete.
 The sections below preserve the original
 plan, owner decisions and verification results. For ongoing work use the [documentation guide](../README.md).
 
@@ -238,8 +238,7 @@ acceptance point.
 
 ### P6. Documentation for the documentation system
 
-The documentation changes are ready for owner review. P6 closes when the owner has reviewed
-the documentation, any requested revisions have been addressed, and the owner confirms completion.
+On 2026-11-25 the owner reviewed the final revisions at `5e4ea65` and accepted P6 as complete.
 The repository README now directs maintainers to the
 four operating guides and developers to the tested local workflow. The review corrected the former
 staging count and pending-launch status. The owner chose Git history as the archive for the SSG comparison.
