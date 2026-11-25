@@ -10,12 +10,24 @@ them in the sidebar. You can change the sidebar order independently of the sourc
 
 ```mermaid
 flowchart TD
-    upstream["English Markdown in gitlode"] --> stage["Read selected files at the pinned commit"]
-    config["Edition configuration"] --> stage
-    stage --> build["Build English and Japanese pages for each edition"]
-    translations["Japanese translations and source hashes"] --> build
+    subgraph gitlode
+        upstream["Original English Markdown"]
+    end
+
+    subgraph doc["document system"]
+        stage["Read selected files at the pinned commit"]
+        config["Edition configuration"]
+        build["Build English and Japanese pages for each edition"]
+        translations["Japanese translations and source hashes"]
+        verify["Verify the combined static site"]
+    end
+
+    upstream --> stage
+    config --> stage
+    stage --> build
+    translations --> build
     config -->|Sidebar and edition settings| build
-    build --> verify["Verify the combined static site"]
+    build --> verify
     verify -->|Approved publish run| pages["GitHub Pages"]
 ```
 
