@@ -1,36 +1,10 @@
 ﻿# Production readiness handoff
 
-Status: production preparation in progress, 2026-11-19. The initial inputs and audience are agreed.
-Maintainer: the next human or LLM continuing this repository. Decision authority: project owner.
-Retire this document only after each item is completed or explicitly deferred with an owner decision;
-promote implemented contracts to durable development and operations documentation, following P6.
+Production readiness status, 2026-11-25. P1–P6 are complete.
+The sections below preserve the original
+plan, owner decisions and verification results. For ongoing work use the [documentation guide](../README.md).
 
-The owner accepted VitePress v2 consolidation and approved the PoC closeout sequence. PoC exit,
-merge, and production launch are separate decisions. This document carries the work between a
-successful PoC and a usable production service; it does not authorize a deployment.
-
-## Resume from the existing foundation
-
-Read [current handoff](current.md), [architecture](../design/architecture.md),
-[development](../contributing/development.md), and [ADR 0001](../decisions/0001-use-vitepress-v2.md).
-Use this repository for production; do not rebuild the prototype in another repository.
-Check the actual branch, merge status, CI revision and working tree before editing. Historical
-comparison documents intentionally retain obsolete commands and are not restart instructions.
-
-Implemented and retained:
-
-- Exact-pinned VitePress 2.0.0-alpha.21; shared publication services in `src/publishing/`,
-  VitePress assembly/checks in `src/ssg/vitepress/`, trusted config/theme in `site/vitepress/`.
-- Immutable upstream Git blob reads, an explicit six-document allowlist, independent navigation,
-  provenance hashes, restricted Markdown, and ignored generated sources/artifacts.
-- Stable/next, English/Japanese, missing-translation notice and English body language, file-level
-  translation freshness, same-document language switching, locale-home version switching.
-- Complete static artifact under `/docs/`, local search, local validation, and read-only PR CI.
-  Manual Pages preparation and publishing are covered in P5.
-- Canonical English remains in `gitlode/gitlode`; Japanese sources remain in this repository.
-  No automatic link-following publication or executable upstream Markdown is permitted.
-
-Fixed inputs tested by the PoC (not a claim that these are the latest release/development refs):
+## Initial production inputs
 
 | Edition | Configured ref                   | Pinned commit                              |
 | ------- | -------------------------------- | ------------------------------------------ |
@@ -59,7 +33,7 @@ is a concrete need.
 Edition names carry operational meaning only. Configuration drives acquisition, combined
 assembly and all edition switches. Translation transfer accepts explicit source and destination
 editions. Existing destination translations are preserved. Copied translations retain the hash
-of the checked English original and show a review notice when the destination differs.
+of the checked English original and show a source-change notice when the destination differs.
 
 Discuss the remaining reader-visible behavior with the owner as appropriate:
 
@@ -111,7 +85,7 @@ checks cover every form. Do not change canonical English just to satisfy VitePre
 
 On 2026-11-19 the owner reviewed the Japanese Profiling Guide and approved its wording for
 production use. Its checked English source matches next. The transferred stable 0.12.0 copy
-retains the source-difference notice until reviewed against that release's original.
+retains the source-change notice until reviewed against that release's original.
 The [translation maintenance procedure](../operations/translations.md)
 covers missing translations, source changes and Japanese-only corrections.
 
@@ -120,7 +94,7 @@ Entry points: the edition translation manifests, `translations/ja/<edition>/`,
 `site/vitepress/config.ts`, and `test/translations.test.ts` / `test/localization.test.ts`.
 
 1. The [transfer procedure](../operations/translations.md#transfer-between-editions) applies in both directions.
-   For stable 0.12.0 it produced one copy with a review notice and 20 English fallbacks.
+   For stable 0.12.0 it produced one copy with a source-change notice and 20 English fallbacks.
 2. The Profiling Guide is approved for initial publication. Untranslated pages use English fallback.
 3. Maintainers review the English diff before updating the checked hash. A review may require no text edit.
 
@@ -141,13 +115,8 @@ using that clean install. The audit required no dependency change or outstanding
 The installed graph still resolves picomatch 4.0.7 through VitePress 2.0.0-alpha.21 and Vite
 8.3.8 (also via tinyglobby), and through vue-tsc 3.3.14 and @vue/language-core 3.3.14.
 These paths are used by build and type-check tooling. GitHub marked the previous advisory
-withdrawn on November 18. The earlier audit remains dated PoC evidence.
+withdrawn on November 18.
 [GitHub advisory GHSA-fc5q-39xc-vjpf](https://github.com/advisories/GHSA-fc5q-39xc-vjpf)
-
-Known observation, dated 2026-11-18: npm audit reported seven high package findings derived from one
-picomatch advisory, GHSA-fc5q-39xc-vjpf. Compatible updates did not resolve them. This is not a fresh
-audit or seven independent vulnerabilities; see [consolidation evidence](../poc/consolidation.md).
-The old Vite/esbuild dependency inconsistency was resolved during consolidation.
 
 Entry points: `package.json`, `package-lock.json`, `site/vitepress/`, `src/ssg/vitepress/search.ts`,
 and the VitePress upgrade procedure in development documentation.
@@ -180,7 +149,7 @@ To reproduce the rehearsal with the two real upstream pins in the table above:
    body text. Commit and build. Both pages were current, with 21 selected documents per edition.
 2. Restore the configured next ref and commit (`90512564`) and its 23-document selection and
    sidebar, retaining the two fixture records. Commit, build and run the HTTP and search checks.
-   The Usage original changed and its Japanese page displayed the review notice. The plugin
+   The Usage original changed and its Japanese page displayed the source-change notice. The plugin
    README original was identical and its Japanese page stayed current. Stable remained on
    `76b124e2` with 21 documents. For both successful builds, the recorded docs revision matched
    the clean fixture commit, and all staged file hashes and attribution URLs matched the pinned blobs.
@@ -191,7 +160,7 @@ To reproduce the rehearsal with the two real upstream pins in the table above:
    all 32 search probes passed again against that previous artifact, and the listeners closed.
 
 Current limitation: explicit source pins are reproducible, but there is no automatic release promotion
-or upstream synchronization service. The PoC's `next` is a snapshot, not a live mirror.
+or upstream synchronization service. The configured `next` is a snapshot, not a live mirror.
 
 Entry points: `config/<edition>/source.json`, `src/publishing/pipeline.ts`, translation metadata, and
 [updating inputs](../contributing/development.md#updating-inputs).
@@ -222,13 +191,26 @@ Read-only GitHub observations on the same date: default branch `main`, Pages ena
 the existing `github-pages` environment allows only the `main` branch. No required reviewer
 was listed. The public API could not confirm the Pages publishing source or Actions allowlist.
 The owner confirmed in Settings that Pages uses GitHub Actions and has no custom domain.
-Pending evidence: PR checks and merge, artifact-only
-Actions run on main, explicit first-launch approval, deployment and hosted checks. No
-deployment or remote recovery was exercised during local preparation.
+
+**First known-good release, 2026-11-19.** [PR #4](https://github.com/gitlode/docs/pull/4)
+landed on main at `af30cf58e18028b4a63e4068242cf5ea71bab361`.
+The [prepare run](https://github.com/gitlode/docs/actions/runs/44485270204) validated
+and uploaded the candidate. The owner triggered the [first publish run](https://github.com/gitlode/docs/actions/runs/44485557590)
+for that SHA. Validation and deployment succeeded with artifact `github-pages-44485557590-1`.
+Stable used `gitlode@0.12.0` at `76b124e23fcc069be1278629cf01b62ae1456c7a`;
+next used `integration/v0.13.0` at `90512564d76490088ecc99da7596128df1c45a2c`.
+
+Headless Edge opened the [production site](https://gitlode.github.io/docs/) over HTTPS.
+For both editions and languages, the home and nested plugins page loaded, heading fragments
+survived reload, upstream links contained the expected pin, both switches reached the
+expected destination, and selecting a CLI search result reached the CLI reference heading.
+The Japanese plugins pages displayed the English fallback. The Japanese Profiling Guide
+displayed the source-change notice on stable only. The browser observed no failed same-site
+asset loads or uncaught page errors on these paths. A missing page, the editions config,
+the generated preview pointer and the internal handoff path all returned HTTP 404.
+The owner also reviewed the published content and reported no issues. Use this publish run as the initial recovery reference.
 
 Hosting decision already made: GitHub Pages at `https://gitlode.github.io/docs/`, no custom domain.
-The owner previously reported GitHub settings correct. Recheck only relevant settings when preparing
-launch; that report is not evidence of a successful deployment. See [GitHub setup](../poc/github-setup.md).
 
 Entry points: `.github/workflows/docs.yml`, `src/ssg/vitepress/build.ts`, and development documentation.
 The successful build pointer `.generated/preview.json` identifies a run with its `build.json` and
@@ -252,16 +234,17 @@ complete `dist/`. Upload only static `dist/`, never the whole generated run or r
 
 Completion evidence: approved go-live, successful deployment and hosted checks, maintained operating
 instructions for updates and failures, and an agreed recovery procedure. This is the production
-acceptance point, separate from PoC completion.
+acceptance point.
 
 ### P6. Documentation for the documentation system
 
-Current limitation: architecture and development material exist, but the repository still presents
-parts of itself as a PoC project. This task concerns this system's internal project documentation,
-not the gitlode product documents selected for publication. Completing the PoC does not complete it.
+On 2026-11-25 the owner reviewed the final revisions at `5e4ea65` and accepted P6 as complete.
+The repository README now directs maintainers to the
+four operating guides and developers to the tested local workflow. The review corrected the former
+staging count and pending-launch status. The owner chose Git history as the archive for the SSG comparison.
 
 Entry points: `README.md`, `AGENTS.md`, `docs/README.md`, `docs/design/architecture.md`,
-`docs/contributing/development.md`, and the active `docs/poc/` and `docs/handoff/` material.
+`docs/contributing/development.md`, and the active handoff material.
 
 1. Organize durable documentation by audience and purpose. Keep architecture, implementation,
    extension points and contributor setup in development-oriented material. Provide separate
@@ -269,9 +252,7 @@ Entry points: `README.md`, `AGENTS.md`, `docs/README.md`, `docs/design/architect
    troubleshooting and recovery. An operations home such as `docs/operations/` can be introduced
    when those procedures are implemented; do not create empty runbooks or describe proposals as live behavior.
 2. Update the project entry points, agent instructions, status and navigation to describe the
-   maintained production documentation system. Retain useful historical PoC evidence with explicit
-   historical status, and promote lasting contracts out of temporary reports. Preserve the original
-   kickoff and decision rationale; production users should not need to reconstruct them from session logs.
+   maintained production documentation system. Keep current operating and development contracts in the corresponding guides.
 3. Treat documentation as part of every P1-P5 completion condition: P1 records selection/assets
    rules and how to change them; P2 records translation policy and review procedures; P3 records
    upgrade/verification procedures and risk decisions; P4 records source promotion/update operations;
@@ -282,7 +263,7 @@ Entry points: `README.md`, `AGENTS.md`, `docs/README.md`, `docs/design/architect
    and make the correct guide discoverable from the repository entry points.
 
 Completion evidence: separate, discoverable development and operations guides reflecting actual
-behavior; maintained project-facing material no longer assumes an active comparison PoC; P1-P5
+behavior; P1-P5
 include their documentation changes; a new maintainer can develop and operate the system without
 the original chat or ignored artifacts. Durable documentation remains English. This work may be
 delivered across multiple implementation increments rather than as a standalone task.
@@ -292,4 +273,4 @@ delivered across multiple implementation increments rather than as a standalone 
 Cross-project development-setting feedback remains in `docs/proposals/` and is reviewed separately;
 do not wait for upstream adoption. Historical versions beyond stable/next, cross-version search,
 automated translation, analytics, custom domains, elaborate theme changes and build optimization
-remain optional unless the owner changes scope. Preserve evidence rather than reopening SSG selection.
+remain optional unless the owner changes scope.

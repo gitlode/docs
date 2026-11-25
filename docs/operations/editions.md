@@ -1,7 +1,6 @@
 # Update an edition
 
-Edit `config/editions.json` for the public path and label. Edit `config/<edition>/source.json` for the ref and pinned commit. The keys `stable` and `next`
-identify the release roles in translation records, staging and verification reports.
+Edit `config/editions.json` for the public path and label. Edit `config/<edition>/source.json` for the ref and pinned commit. The keys `stable` and `next` are edition IDs used in translation records, staging and verification reports.
 
 | Field              | Effect                                                                                                                                                              |
 | ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -48,8 +47,8 @@ cross-repository triggers if experience with this workflow shows a need.
 3. Commit the candidate inputs, then acquire, check, build and verify using the commands above.
    In the staging manifest, check the docs revision and dirty flag, each requested ref and
    resolved commit, and the canonical file hashes. In the combined build report, inspect the
-   Japanese page statuses and verify both editions. Report any new fallbacks or changed-source
-   notices so the maintainer can follow up through the ordinary translation workflow.
+   Japanese page statuses and verify both editions. Report any new fallbacks or source-change
+   notices so the maintainer can follow up using the [translation review procedure](translations.md#add-or-correct-a-translation).
 4. Record the tested docs revision and validation run in the PR. If the candidate fails,
    correct it and rebuild the complete site. The local preview pointer can still identify an
    earlier successful build. Successful HTTP or search checks against that preview do not

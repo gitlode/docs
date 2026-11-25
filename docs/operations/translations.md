@@ -11,7 +11,7 @@ until that decision. Record the decision in the change that brings the translati
 the publication branch, such as its pull request.
 
 An edition transfer can reuse a translation already accepted this way. The checked hash
-determines whether the destination displays the source-difference notice. A human reviews
+determines whether the destination displays the source-change notice. A human reviews
 subsequent edits when incorporating the revised wording.
 
 ## Transfer between editions
@@ -22,7 +22,7 @@ The destination publication list determines the candidate paths. An existing des
 always wins, including a translation corrected after an earlier transfer.
 
 For each missing destination record with a matching source path, copy the translation and retain
-its checked English SHA-256. Readers see the copy with a review notice if the destination's
+its checked English SHA-256. Readers see the copy with a source-change notice if the destination's
 English blob differs. A missing source translation uses English fallback. Relative links whose
 targets exist only at the origin are pinned to that upstream revision in the copied Markdown.
 Commit the destination manifest and new Markdown files together. Re-running the command fills

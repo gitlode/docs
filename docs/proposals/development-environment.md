@@ -1,8 +1,8 @@
 # Development environment alignment feedback
 
-Status: open feedback; nonblocking for the PoC. No cross-project adoption has been approved.
+Status: open feedback. No cross-project adoption has been approved.
 Recorded: 2026-11-16. Decision authority: human owner and each project's maintainers.
-Review point: a separate tooling-alignment review scheduled by the owner, not a PoC prerequisite.
+Review point: a separate tooling-alignment review scheduled by the owner.
 
 ## Context and evidence
 
@@ -19,11 +19,11 @@ and early environment checks. Neither is specific to documentation publishing or
 
 ## Suggestions for later review
 
-| Topic                    | Current documentation-project choice                                                            | Suggestion and trade-off                                                                                                                                                                                                                                             |
-| ------------------------ | ----------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Development Node version | `.node-version` contains `22.23.4`; CI reads it                                                 | Consider the same file convention upstream to share the local/CI baseline. Exact patch pins improve consistency but require intentional updates. The file needs a compatible version manager or CI consumer; it does not switch Node by itself.                      |
-| Dependency save policy   | `.npmrc` sets `save-exact=true`                                                                 | Decide jointly whether exact versions or caret ranges better fit update workflows. Exact saves are not necessary for locked installation: a committed lockfile and `npm ci` already serve that purpose. Keeping upstream's caret convention is a valid alternative.  |
-| Environment enforcement  | `.npmrc` sets `engine-strict=true`; local engines allow Node `>=22.23.4 <23` and npm `>=11 <12` | Review supported development ranges before aligning enforcement. Strict checking fails early but also rejects newer, possibly compatible environments. The Node lower bound now follows current Astro requirements; upper bounds remain a conservative local policy. |
+| Topic                    | Current documentation-project choice                                                            | Suggestion and trade-off                                                                                                                                                                                                                                            |
+| ------------------------ | ----------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Development Node version | `.node-version` contains `22.23.4`; CI reads it                                                 | Consider the same file convention upstream to share the local/CI baseline. Exact patch pins improve consistency but require intentional updates. The file needs a compatible version manager or CI consumer; it does not switch Node by itself.                     |
+| Dependency save policy   | `.npmrc` sets `save-exact=true`                                                                 | Decide jointly whether exact versions or caret ranges better fit update workflows. Exact saves are not necessary for locked installation: a committed lockfile and `npm ci` already serve that purpose. Keeping upstream's caret convention is a valid alternative. |
+| Environment enforcement  | `.npmrc` sets `engine-strict=true`; local engines allow Node `>=22.23.4 <23` and npm `>=11 <12` | Review supported development ranges before aligning enforcement. Strict checking fails early but also rejects newer, possibly compatible environments.                                                                                                              |
 
 Keep the recommended development runtime distinct from the gitlode product's supported runtime
 range. Agreeing on a development version does not justify narrowing compatibility for product users.
@@ -31,9 +31,7 @@ For npm behavior, see the [configuration reference](https://docs.npmjs.com/cli/v
 
 ## Current local decision and next action
 
-Retain the current documentation-project settings while the PoC proceeds. The English-preview increment raised the Node baseline to 22.23.4 to use current Astro dependencies; this local update does not settle cross-project adoption. This is a recorded local
-choice, not a conclusion that gitlode itself should adopt them. Continue normal dependency/security
-maintenance; do not hold SSG implementation or build validation for this feedback review.
+Use the current settings for this repository while each project reviews the proposal independently.
 
 At the later review, compare developer version-manager usage, CI maintenance cost, supported Node/npm
 ranges, and dependency-update practices. Record each project's decision independently. If accepted,

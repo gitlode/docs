@@ -5,7 +5,7 @@
 Use Node.js 22.23.4, npm 11 (verified with 11.11.0), and Git on Windows or Linux. Node runs the
 erasable TypeScript scripts directly; TypeScript 5.9.3 checks types separately. Build and preview
 dependencies are local to this repository; no upstream package installation occurs.
-`package-lock.json` is checked in. The runtime remains pinned after removing the comparison-only dependencies.
+`package-lock.json` is checked in.
 With Volta, `volta run --node 22.23.4 npm run check` uses the selected runtime without changing
 the global default; the same prefix works for installation, build, and preview commands.
 
@@ -18,14 +18,14 @@ npm run site:build
 ```
 
 `source:acquire` needs outbound HTTPS to GitHub; `content:stage` is offline after acquisition.
-Each successful stage prints a new directory with a manifest and 12 raw Markdown files (six per
-edition). Inspect that manifest to identify exact inputs. Do not mistake staged Markdown for a built site.
+Each successful stage prints a new directory. Its manifest lists the raw Markdown files selected
+by each edition's publication configuration, with their source revisions and hashes.
 
 ## Site builds and preview
 
-`npm run site:prepare` creates trusted VitePress inputs for `next` without building a site.
-`npm run site:build` defaults to both editions, then prints a unique
-`.generated/previews/combined-*/dist` complete artifact mounted at `/docs/`. The two builds share
+`npm run site:prepare` creates trusted VitePress inputs for the default edition (currently `next`) without building a site.
+`npm run site:build` builds all configured editions by default, then prints a unique
+`.generated/previews/combined-*/dist` complete artifact mounted at `/docs/`. The edition builds share
 one upstream staging manifest. Each edition retains its own report: `inputs.json` records source
 and translation provenance; `build.json` adds output checks and measurements. A failed build does
 not replace the `.generated/preview.json` pointer to the last successful build.
@@ -42,13 +42,12 @@ stop an existing preview before starting another on port 4173.
 The language selector switches the current page. The header version links preserve the current
 locale and open the target edition home with a full reload, without retaining the current document
 or fragment. The Japanese Profiling Guide matches the pinned next source. Its stable 0.12.0
-copy displays a source-difference notice. Other untranslated pages use English fallback.
+copy displays a source-change notice. Other untranslated pages use English fallback.
 
 `npm run site:build -- stable` or `-- next` creates a single-edition diagnostic build without
 version controls. Run the default build again to restore the complete preview. The complete
 artifact includes both editions/locales, an edition/language landing, 404 and `.nojekyll`.
-This is a Pages-path simulation; nothing is deployed. Old candidate-prefixed URLs and `preview:*`
-commands are retired. Rebuild before previewing outputs created by the former comparison pipeline.
+For the steps from a verified build to a hosted release, see [deployment and recovery](../operations/deployment.md#prepare-then-publish).
 
 ## Code organization
 
@@ -73,8 +72,7 @@ The manual `preview` command keeps serving until interrupted. Its CLI handles SI
 waits for server closure. A forced termination or a terminated shell wrapper is not proof that its
 children stopped; signal behavior varies across operating systems and launch tools.
 
-For every agent-owned long-running verification process, including browsers and other future PoC
-tools, follow this procedure:
+For every agent-owned long-running verification process, including browsers, follow this procedure:
 
 1. Prefer a finite command with timeouts and `try/finally` cleanup. For custom checks, use
    `withPreviews` from `src/publishing/preview-server.ts` and await all work inside its callback.
@@ -104,7 +102,7 @@ pipeline output, not a runtime-validated external API. Vue is a direct pinned de
 because the theme imports it; vue-tsc supplies SFC/template type checking.
 
 Tooling alignment is bidirectional: both projects can benefit from each other's choices. Record
-cross-project suggestions in `../proposals/` and continue authorized PoC work using the
+cross-project suggestions in `../proposals/` and continue authorized work using the
 current local configuration. See the [documentation lifecycle](../README.md) and the open
 [environment feedback](../proposals/development-environment.md). Pending upstream
 adoption is not a prerequisite for local development.
@@ -120,8 +118,7 @@ and the contributor lint policy. Use it as a baseline when evolving this project
   to lint. `npm run lint:fix` applies supported fixes. Bare `npm run format` deliberately fails
   rather than ambiguously checking or modifying files, matching the upstream convention.
 - EditorConfig uses UTF-8, LF, and two spaces, preserving significant Markdown trailing spaces.
-  Generated content, dependencies, the lockfile, and the original kickoff attachment are excluded
-  from formatting. The attachment is retained verbatim.
+  Generated content, dependencies and the lockfile are excluded from formatting.
 - `oxlint` uses upstream's 1.77.0 baseline. `oxfmt` uses 0.78.0: upstream's 0.62.0 pulled in
   tinypool versions flagged by npm audit (GHSA-5gmw-xhrv-c9v3 and GHSA-85c8-ppgw-ccpr).
   The newer formatter removes that dependency exposure in this installation.
@@ -136,15 +133,15 @@ and the contributor lint policy. Use it as a baseline when evolving this project
 - Dependencies remain exact-pinned with a committed lockfile. `npm run lockfile:sync` follows
   the upstream lockfile-refresh convention. CI runs the same `npm run check` used locally.
 
-Follow the [current handoff](../handoff/current.md) for the working branch and
-integration instructions. Commit at practical work increments; do not merge automatically.
+Use a topic branch and submit changes through a PR. The [deployment procedure](../operations/deployment.md)
+covers publication after integration.
 
 ## Updating inputs
 
 1. Resolve an explicitly chosen tag/branch using `git ls-remote --heads --tags https://github.com/gitlode/gitlode.git`.
 2. For annotated tags, use the peeled `^{}` commit, not the tag object's SHA.
 3. Update the requested ref and full commit in `config/<edition>/source.json` together.
-4. Acquire the pin. For a new stable release run `npm run translations:transfer -- --from next --to stable`.
+4. Acquire the pin. For a new stable release, follow the [edition update procedure](../operations/editions.md) to select a fresh translation set before transferring translations.
    Stage, inspect the diff and manifest, and run checks.
 
 Use exact file paths in `config/<edition>/publication.json`; adding to the sidebar is a separate edit in
@@ -152,14 +149,13 @@ Use exact file paths in `config/<edition>/publication.json`; adding to the sideb
 
 ## Validation
 
-`npm run search:verify` probes the built native local search indexes after a complete two-edition
-build. It executes 32 queries (eight queries across two editions and two locales) using MiniSearch,
+`npm run search:verify` probes the built native local search indexes after a complete
+build. It executes eight queries per edition and locale (32 with the current configuration) using MiniSearch,
 VitePress's tokenizer, and default UI query options. It runs in Node, not a browser or simulated
 search UI. It checks that the served index assets match the built files, records query results in
 the generated run's `search.json`, verifies result scope and destinations/fragments, and closes its
 ephemeral static server. Missing matches for Japanese substrings are observations rather than build
-failures. Historical comparisons and limitations remain in [search evidence](../poc/search.md) and
-[three-candidate evidence](../poc/three-candidates.md).
+failures.
 
 The probe intentionally depends on the pinned VitePress index format and internal tokenizer API.
 Revisit it when upgrading. MiniSearch is explicitly pinned to the installed VitePress dependency
@@ -175,8 +171,7 @@ validation failures. Generated test fixtures remain ignored for diagnosis.
 `.github/workflows/docs.yml` performs these checks plus real upstream acquisition/staging on PRs,
 main pushes, and manual runs, followed by both edition builds, English/Japanese output validation,
 bounded HTTP checks, and search probes. Manual publication and recovery follow the
-[deployment procedure](../operations/deployment.md). Historical clean-clone and hosted results are in
-[reproducibility evidence](../poc/reproducibility.md); they are not proof for a later untested commit.
+[deployment procedure](../operations/deployment.md).
 
 ## Troubleshooting
 
@@ -211,9 +206,7 @@ For a finding, use `npm explain <package>` to trace it to a caller and check the
 status before choosing an update. Record the revision, date, registry, package versions,
 findings and any remaining release decision. Run `npm run check` against the clean install.
 
-The sole renderer is exact-pinned as `vitepress@2.0.0-alpha.21`; application code imports the
-canonical package. The old `vitepress-v2` alias and alias-specific SSR bundling are removed.
-Use the retained PoC comparison documents as historical evidence, not current command references.
+The sole renderer is exact-pinned as `vitepress@2.0.0-alpha.21`.
 When upgrading, rerun type checks, both edition builds, output/localization/version checks,
 search probes, and browser checks of fallback notices, navigation, and search. Alpha status means
 compatibility must be verified against the actual pinned release; the owner's adoption decision
