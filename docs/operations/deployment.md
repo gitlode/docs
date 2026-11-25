@@ -2,7 +2,7 @@
 
 The owner authorizes the first production launch. A maintainer runs the existing
 [Documentation validation workflow](../../.github/workflows/docs.yml) manually on `main`.
-PRs and pushes run read-only validation. Only the manual deploy job gets Pages and OIDC
+PRs and pushes to `main` run read-only validation. Only the manual deploy job gets Pages and OIDC
 write permissions and uses the `github-pages` environment.
 
 ## Before the first launch
@@ -35,7 +35,7 @@ write permissions and uses the `github-pages` environment.
    allowed. A repository-wide writable token or a personal token is unnecessary.
 4. Keep the publish run URL, docs SHA, edition pins and hosted verification result in the
    release PR or release record. Mark a release known-good only after the hosted checks pass.
-   This record survives expiration of the uploaded artifact.
+   For an example, see the [first verified deployment](../handoff/production-readiness.md#p5-deployment-verification-and-recovery).
 
 ## Verify the hosted release
 

@@ -12,7 +12,7 @@ and code comments are written in English.
 Documents are organized by subject and purpose, not by a `durable` or `temporary` parent directory.
 The following homes contain maintained knowledge for development and operation:
 
-- [Architecture](design/architecture.md): ownership, current contracts, boundaries, and constraints.
+- [Architecture](design/architecture.md): component responsibilities, build execution, trust boundaries and failure behavior.
 - [Publication operations](operations/publication.md): select documents and maintain edition-specific sidebars.
 - [Translation operations](operations/translations.md): add a Japanese translation or review it after its English source changes.
 - [Edition operations](operations/editions.md): update edition labels, public paths and pinned inputs.
@@ -33,7 +33,7 @@ The following homes contain tracked working material with a limited purpose:
 - `proposals/`: [development environment feedback](proposals/development-environment.md)
   and future suggestions from this project to gitlode itself.
 
-The [production launch record](handoff/production-readiness.md) identifies the first verified deployment.
+The [production launch record](handoff/production-readiness.md#p5-deployment-verification-and-recovery) identifies the first verified deployment.
 
 Temporary does not mean disposable before review. Keep active evidence and proposals in Git.
 Each working document should identify status, owner or decision authority, next action, and its

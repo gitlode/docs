@@ -12,7 +12,7 @@ The [shared overview](../overview.md) covers the repository layout and local pre
 
 - **Explicit publication.** Each edition has a list of permitted documents. Sidebar groups can order or omit entries from that list. Following a Markdown link never adds a document to it.
 - **Edition-independent processing.** The edition ID selects configuration. The public path, display label and upstream revision are separate fields. Keeping a released edition's navigation fixed is an [operating policy](../operations/editions.md#stable-release-policy). All editions use the same build and translation rules.
-- **Traceable inputs.** Gitlode owns the English source. This repository owns configuration, translations and renderer code. Transformations apply to generated copies. The staged manifest and per-edition reports identify the inputs used for each page.
+- **Traceable inputs.** The gitlode project owns the English source. This repository owns configuration, translations and renderer code. Transformations apply to generated copies. The staging manifest and per-edition reports identify the inputs used for each page.
 - **Predictable operation.** A maintainer chooses the revision to publish and the source and destination of a translation transfer. The build can detect that English text changed. A reviewer decides whether the translation conveys its meaning.
 
 ## Component responsibilities
@@ -99,12 +99,12 @@ The adapter adds trusted frontmatter, attribution, landing pages and theme code 
 
 All paths below are relative to `.generated/`. For a build failure, inspect the report closest to the failing step.
 
-| Artifact                                           | What it establishes                                                                                                                                                                                  |
-| -------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `staging/run-*/manifest.json`                      | Staging completed. Written last, it records source paths, blob IDs, file hashes, edition pins, configuration hash and docs revision/dirty state. A partial directory can survive an interrupted run. |
-| `previews/run-*/inputs.json` and `site/snapshots/` | Identify the route, canonical source, chosen render input and translation status before VitePress runs.                                                                                              |
-| `previews/run-*/build.json`                        | Rendering and localization checks finished for one edition. Other editions or combined validation may still fail.                                                                                    |
-| `previews/combined-*/build.json` and `dist/`       | All editions were assembled in a fresh directory and combined-output checks passed. The report stays outside the public artifact.                                                                    |
-| `preview.json`                                     | Points preview and subsequent checks to the selected successful build. A build that fails before selection leaves the earlier pointer in place.                                                      |
+| Artifact                                                          | What it establishes                                                                                                                                                                                  |
+| ----------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `staging/run-*/manifest.json`                                     | Staging completed. Written last, it records source paths, blob IDs, file hashes, edition pins, configuration hash and docs revision/dirty state. A partial directory can survive an interrupted run. |
+| `previews/run-*/inputs.json` and `previews/run-*/site/snapshots/` | Identify the route, canonical source, chosen render input and translation status before VitePress runs.                                                                                              |
+| `previews/run-*/build.json`                                       | Rendering and localization checks finished for one edition. Other editions or combined validation may still fail.                                                                                    |
+| `previews/combined-*/build.json` and `previews/combined-*/dist/`  | All editions were assembled in a fresh directory and combined-output checks passed. The report stays outside the public artifact.                                                                    |
+| `preview.json`                                                    | Points preview and subsequent checks to the selected successful build. A build that fails before selection leaves the earlier pointer in place.                                                      |
 
 A failure in the later HTTP or search checks blocks the workflow upload or deployment. It does not roll back the local preview pointer, which was already written by the build. For deployed releases, the publish run and its verified source pins provide the [recovery reference](../operations/deployment.md#recover-a-release).

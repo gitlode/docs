@@ -8,13 +8,13 @@ The [production readiness record](production-readiness.md) preserves the launch 
 The owner approved the initial pins and publication scope for current work. Edition identity and URL behavior are agreed; see [edition operations](../operations/editions.md).
 The approved corpus is configured; see [publication operations](../operations/publication.md).
 The owner confirmed that the stable publication list and navigation share the same defect-only correction rule for each release.
-Edition-neutral transfer preserves existing destination translations and the checked hash on each copy. A mismatch displays a review notice.
+Edition-neutral transfer preserves existing destination translations and the checked hash on each copy. A mismatch displays a source-change notice.
 The initial stable 0.12.0 corpus now has one Japanese guide requiring review and 20 fallbacks.
 A local rehearsal added an isolated third edition using configuration, built all three editions,
 checked edition navigation on 136 pages, and passed HTTP and search verification.
 Human publication review takes place when incorporating new or revised translations.
 On 2026-11-19 the owner approved the Japanese Profiling Guide for production use. The stable
-copy keeps its source-difference notice because its checked English hash belongs to next.
+copy keeps its source-change notice because its checked English hash belongs to next.
 See [translation operations](../operations/translations.md). Read the [documentation guide](../README.md),
 [architecture](../design/architecture.md) and [development workflow](../contributing/development.md) before implementation.
 

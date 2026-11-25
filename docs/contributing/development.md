@@ -5,7 +5,7 @@
 Use Node.js 22.23.4, npm 11 (verified with 11.11.0), and Git on Windows or Linux. Node runs the
 erasable TypeScript scripts directly; TypeScript 5.9.3 checks types separately. Build and preview
 dependencies are local to this repository; no upstream package installation occurs.
-`package-lock.json` is checked in. The runtime remains pinned after removing the comparison-only dependencies.
+`package-lock.json` is checked in.
 With Volta, `volta run --node 22.23.4 npm run check` uses the selected runtime without changing
 the global default; the same prefix works for installation, build, and preview commands.
 
@@ -23,9 +23,9 @@ by each edition's publication configuration, with their source revisions and has
 
 ## Site builds and preview
 
-`npm run site:prepare` creates trusted VitePress inputs for `next` without building a site.
-`npm run site:build` defaults to both editions, then prints a unique
-`.generated/previews/combined-*/dist` complete artifact mounted at `/docs/`. The two builds share
+`npm run site:prepare` creates trusted VitePress inputs for the default edition (currently `next`) without building a site.
+`npm run site:build` builds all configured editions by default, then prints a unique
+`.generated/previews/combined-*/dist` complete artifact mounted at `/docs/`. The edition builds share
 one upstream staging manifest. Each edition retains its own report: `inputs.json` records source
 and translation provenance; `build.json` adds output checks and measurements. A failed build does
 not replace the `.generated/preview.json` pointer to the last successful build.
@@ -42,13 +42,12 @@ stop an existing preview before starting another on port 4173.
 The language selector switches the current page. The header version links preserve the current
 locale and open the target edition home with a full reload, without retaining the current document
 or fragment. The Japanese Profiling Guide matches the pinned next source. Its stable 0.12.0
-copy displays a source-difference notice. Other untranslated pages use English fallback.
+copy displays a source-change notice. Other untranslated pages use English fallback.
 
 `npm run site:build -- stable` or `-- next` creates a single-edition diagnostic build without
 version controls. Run the default build again to restore the complete preview. The complete
 artifact includes both editions/locales, an edition/language landing, 404 and `.nojekyll`.
-This is a Pages-path simulation; nothing is deployed. Old candidate-prefixed URLs and `preview:*`
-commands are retired. Rebuild before previewing outputs created by the former comparison pipeline.
+For the steps from a verified build to a hosted release, see [deployment and recovery](../operations/deployment.md#prepare-then-publish).
 
 ## Code organization
 
@@ -142,7 +141,7 @@ covers publication after integration.
 1. Resolve an explicitly chosen tag/branch using `git ls-remote --heads --tags https://github.com/gitlode/gitlode.git`.
 2. For annotated tags, use the peeled `^{}` commit, not the tag object's SHA.
 3. Update the requested ref and full commit in `config/<edition>/source.json` together.
-4. Acquire the pin. For a new stable release run `npm run translations:transfer -- --from next --to stable`.
+4. Acquire the pin. For a new stable release, follow the [edition update procedure](../operations/editions.md) to select a fresh translation set before transferring translations.
    Stage, inspect the diff and manifest, and run checks.
 
 Use exact file paths in `config/<edition>/publication.json`; adding to the sidebar is a separate edit in
@@ -150,8 +149,8 @@ Use exact file paths in `config/<edition>/publication.json`; adding to the sideb
 
 ## Validation
 
-`npm run search:verify` probes the built native local search indexes after a complete two-edition
-build. It executes 32 queries (eight queries across two editions and two locales) using MiniSearch,
+`npm run search:verify` probes the built native local search indexes after a complete
+build. It executes eight queries per edition and locale (32 with the current configuration) using MiniSearch,
 VitePress's tokenizer, and default UI query options. It runs in Node, not a browser or simulated
 search UI. It checks that the served index assets match the built files, records query results in
 the generated run's `search.json`, verifies result scope and destinations/fragments, and closes its

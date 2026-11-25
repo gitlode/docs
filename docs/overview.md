@@ -14,7 +14,7 @@ flowchart TD
         upstream["Original English Markdown"]
     end
 
-    subgraph doc["document system"]
+    subgraph doc["Documentation system"]
         stage["Read selected files at the pinned commit"]
         config["Edition configuration"]
         build["Build English and Japanese pages for each edition"]
@@ -32,7 +32,7 @@ flowchart TD
 ```
 
 For a Japanese page, the build uses the translation when available. If its recorded English
-source hash differs from the edition's English file hash, the page displays a review notice.
+source hash differs from the edition's English file hash, the page displays a source-change notice.
 A missing translation displays the English text with a fallback notice. See
 [translation operations](operations/translations.md).
 

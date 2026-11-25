@@ -33,7 +33,7 @@ is a concrete need.
 Edition names carry operational meaning only. Configuration drives acquisition, combined
 assembly and all edition switches. Translation transfer accepts explicit source and destination
 editions. Existing destination translations are preserved. Copied translations retain the hash
-of the checked English original and show a review notice when the destination differs.
+of the checked English original and show a source-change notice when the destination differs.
 
 Discuss the remaining reader-visible behavior with the owner as appropriate:
 
@@ -85,7 +85,7 @@ checks cover every form. Do not change canonical English just to satisfy VitePre
 
 On 2026-11-19 the owner reviewed the Japanese Profiling Guide and approved its wording for
 production use. Its checked English source matches next. The transferred stable 0.12.0 copy
-retains the source-difference notice until reviewed against that release's original.
+retains the source-change notice until reviewed against that release's original.
 The [translation maintenance procedure](../operations/translations.md)
 covers missing translations, source changes and Japanese-only corrections.
 
@@ -94,7 +94,7 @@ Entry points: the edition translation manifests, `translations/ja/<edition>/`,
 `site/vitepress/config.ts`, and `test/translations.test.ts` / `test/localization.test.ts`.
 
 1. The [transfer procedure](../operations/translations.md#transfer-between-editions) applies in both directions.
-   For stable 0.12.0 it produced one copy with a review notice and 20 English fallbacks.
+   For stable 0.12.0 it produced one copy with a source-change notice and 20 English fallbacks.
 2. The Profiling Guide is approved for initial publication. Untranslated pages use English fallback.
 3. Maintainers review the English diff before updating the checked hash. A review may require no text edit.
 
@@ -149,7 +149,7 @@ To reproduce the rehearsal with the two real upstream pins in the table above:
    body text. Commit and build. Both pages were current, with 21 selected documents per edition.
 2. Restore the configured next ref and commit (`90512564`) and its 23-document selection and
    sidebar, retaining the two fixture records. Commit, build and run the HTTP and search checks.
-   The Usage original changed and its Japanese page displayed the review notice. The plugin
+   The Usage original changed and its Japanese page displayed the source-change notice. The plugin
    README original was identical and its Japanese page stayed current. Stable remained on
    `76b124e2` with 21 documents. For both successful builds, the recorded docs revision matched
    the clean fixture commit, and all staged file hashes and attribution URLs matched the pinned blobs.
