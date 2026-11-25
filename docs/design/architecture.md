@@ -1,159 +1,110 @@
 # Architecture
 
-## Ownership and flow
+## Developer overview
 
-`gitlode/gitlode` owns canonical English documents. This repository owns selection, acquisition,
-staging, the VitePress adapter, Japanese translation sources, validation, and publishing.
-Its own `docs/` directory is never automatically published as product documentation.
+The publishing system runs at build time. Its unit of input is a selected file at an edition's pinned Git commit. Its unit of deployment is one static directory containing **all** configured editions. GitHub Pages serves those files. Navigation and local search run in the browser using assets built for the selected edition.
 
-Current flow: `config/<edition>/source.json` -> Git object acquisition -> explicit allowlist -> byte-preserving
-staging/provenance -> shared content preparation -> VitePress adapter -> English/Japanese static builds
-and output validation. The [Pages workflow](../operations/deployment.md) publishes the combined static site.
+For example, a selected `packages/gitlode/docs/usage.md` produces both `/docs/stable/en/usage/` and `/docs/stable/ja/usage/` when the edition path is `stable`. Both pages refer to the same upstream blob. The Japanese route exists even when its body comes from the English original. To trace that page through the code, start at [`buildSite`](../../src/ssg/vitepress/build.ts), then follow [`prepareContent`](../../src/publishing/content.ts) for the choice of body and route.
 
-## Design for gitlode maintainers
+The [shared overview](../overview.md) covers the repository layout and local preview. The sections below describe the implementation of a complete build and the contracts that changes must preserve.
 
-A gitlode developer should be able to publish documentation using familiar release conventions,
-the configuration and the operations guide. When choosing where a rule belongs, consider both
-the work it saves and what a maintainer would have to know to predict the result. Prefer a
-simple, explicit operation when special cases would require knowledge of the publishing internals.
+## Design principles
 
-For example, keeping a released edition's navigation fixed is a familiar release practice.
-The [edition procedure](../operations/editions.md#stable-release-policy) records that convention.
-The build processes each configured edition the same way, and the operator chooses the source
-and destination of a translation transfer explicitly.
+- **Explicit publication.** Each edition has a list of permitted documents. Sidebar groups can order or omit entries from that list. Following a Markdown link never adds a document to it.
+- **Edition-independent processing.** The edition ID selects configuration. The public path, display label and upstream revision are separate fields. Keeping a released edition's navigation fixed is an [operating policy](../operations/editions.md#stable-release-policy). All editions use the same build and translation rules.
+- **Traceable inputs.** Gitlode owns the English source. This repository owns configuration, translations and renderer code. Transformations apply to generated copies. The staged manifest and per-edition reports identify the inputs used for each page.
+- **Predictable operation.** A maintainer chooses the revision to publish and the source and destination of a translation transfer. The build can detect that English text changed. A reviewer decides whether the translation conveys its meaning.
 
-## Code domains
+## Component responsibilities
 
-- `src/publishing/` owns acquisition, selection/staging, Markdown safety and link rewriting,
-  translation metadata, and renderer-independent content preparation. It also provides generic
-  static HTTP serving/lifecycle and local HTML reference validation. It imports no SSG package.
-- `src/ssg/vitepress/` consumes prepared content, generates VitePress inputs, invokes the pinned
-  CLI, assembles editions, and verifies VitePress rendering, localization, version navigation,
-  and search indexes. Checks coupled to theme markup and search internals belong here.
-- `site/vitepress/` contains trusted configuration, metadata types, and the Vue theme. These
-  templates are copied into generated build roots; generated content is never stored here.
-- `src/cli/site.ts` is the command entry point for the selected adapter. Source acquisition and
-  staging remain independently callable through `src/publishing/cli.ts`.
+| Component                                                                            | Responsibility and interface                                                                                                                                                          |
+| ------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [Publication services](../../src/publishing/)                                        | Acquire Git objects, stage selected files, prepare pages and navigation. Also provide static serving and HTML reference validation. These modules have no VitePress dependency.       |
+| [VitePress adapter](../../src/ssg/vitepress/)                                        | Consume prepared pages, generate renderer inputs, invoke VitePress and assemble edition outputs. Own checks that depend on theme markup, version controls or the search index format. |
+| [Site configuration and theme](../../site/vitepress/)                                | Define how VitePress renders the generated site, including language controls, fallback markup and edition switching. The adapter copies these trusted files into each build root.     |
+| [Publication CLI](../../src/publishing/cli.ts) and [site CLI](../../src/cli/site.ts) | Dispatch acquisition, staging and translation transfer to publication services, and preparation, build, preview and HTTP verification to the adapter.                                 |
+| [Pages workflow](../../.github/workflows/docs.yml)                                   | Run validation and, on manual runs, select the combined artifact. A separate deployment job holds Pages and OIDC write permissions.                                                   |
 
-Dependencies point from the adapter to publication services. Content preparation returns pages,
-provenance, translation status, and navigation; it does not write SSG frontmatter or theme markup.
-A strict shared Markdown policy can reject syntax meaningful to a renderer without coupling the
-publication layer to that renderer's runtime or theme API.
+## Build execution
 
-## Acquisition and pins
+### One staging run feeds all edition builds
 
-`src/publishing/pipeline.ts` fetches each explicitly configured ref from the public upstream into
-`.generated/source`. It resolves the fetched ref to a commit before reading content. Checked-in
-commit pins determine build input; upstream movement produces a warning and fetches the original
-pin instead. Updating a pin is an explicit reviewed config change, not an automatic branch switch.
+The diagram follows `npm run site:build` with no edition argument. Before it starts, `source:acquire` fetches the configured refs into `.generated/source`. If a ref moved, acquisition fetches the configured commit and retains that pin. The build reads local Git objects. Running `content:stage` separately produces an inspection run; the complete build creates its own staging run.
 
-This refines the proposed Git checkout approach: the pipeline reads regular blobs with `ls-tree`
-and `cat-file` without checking out files. This preserves exact committed bytes, avoids local dirty
-changes and checkout filters, and does not run upstream package scripts. It also rejects symlink
-and submodule entries. No individual-file API calls or privileged source credentials are needed.
+```mermaid
+sequenceDiagram
+    participant B as buildSite
+    participant S as stage
+    participant E as buildEdition
+    participant P as prepareSite
+    participant C as prepareContent
+    participant V as VitePress CLI
+    B->>S: Stage all selected English files
+    S-->>B: Directory containing manifest.json
+    loop Each configured edition in sequence
+        B->>E: Edition ID and shared staging directory
+        E->>P: Prepare this edition for a combined build
+        P->>C: Resolve routes, translations and navigation
+        C-->>P: Prepared pages and metadata
+        P-->>E: Generated site root and inputs report
+        E->>V: Build the edition, including both locales
+        V-->>E: Static output in site/dist
+        E->>E: Check localization and rendering
+        E-->>B: Edition build report
+    end
+    B->>B: Copy edition outputs and check version navigation
+    B->>B: Write root landing page, 404 and .nojekyll
+    B->>B: Validate combined output and write build.json
+    B->>B: Update preview.json
+```
 
-## Selection and staging contract
+`site:prepare` stops after generating one edition's inputs. A single-edition diagnostic build runs VitePress and validates its own output without cross-edition controls. It can become the local preview. Publication requires a combined build.
 
-`config/<edition>/publication.json` enumerates the complete selection for one edition, independently of the proposed
-sidebar groups in `config/<edition>/navigation.json`. The renderer consumes the validated navigation subset.
-Missing selected files are errors. Agent/handoff content, arbitrary roots,
-MDX, duplicate/case-colliding paths, traversal, backslashes, and Windows reserved names are rejected.
-Broader publication requires explicit configuration and, if outside the durable document policy,
-a justified policy change.
+### Verification and publication follow the build
 
-Each staging command creates a new run below `.generated/staging/`. It validates inputs before
-writing, never overwrites a previous run, preserves source paths, and writes `manifest.json` last.
-Only runs with a manifest are complete. An interrupted run may remain for inspection. Generated
-directories reject symlink/junction components; writes use exclusive creation. Concurrent hostile
-local filesystem mutation is outside the pipeline's threat model.
+HTTP and search verification are separate commands that read the selected build. HTTP probes serve the static files on loopback and check document, landing and missing-page responses. Search verification serves the built index assets, queries the indexes and checks result paths and fragments. These commands run after the build in CI.
 
-The manifest records requested ref, resolved commit, upstream URL, source/staged paths, Git blob ID,
-SHA-256, docs repository revision and dirty state, and a hash of acquisition/publication config.
-A dirty flag makes uncommitted implementation explicit; it does not make uncommitted builds fully
-reproducible. The Pages workflow selects release artifacts from a clean committed docs revision.
+On a manual run from `main`, the [candidate selector](../../src/cli/pages-candidate.ts) checks the combined report, base path and staging manifest, including the clean docs revision against the workflow SHA. Only the selected `dist/` is uploaded. An empty publication SHA prepares a candidate. Supplying the matching SHA deploys the artifact produced and verified by that run. See [deployment and recovery](../operations/deployment.md).
 
-## Renderer boundary and security
+## Content model
 
-Staging is raw source acquisition, **not sanitization**. It deliberately retains original Markdown.
-`markdown.ts` parses staged copies with remark/GFM, rejects raw HTML/components, upstream frontmatter,
-Vue interpolation outside code, SSG directives, code-fence metadata, unsafe URLs, and image syntax
-without an explicit asset policy. Include comments are rejected even inside code because VitePress
-expands them before Markdown parsing. VitePress also disables HTML, attributes, and snippet handling.
-Titles reused in generated navigation are checked and Markdown link labels escaped.
+### Document identity and links
 
-The shared preparation step uses the parser's native tree only for narrow validation/link rewriting;
-it does not define a universal adapter AST. Serialization normalizes Markdown formatting in generated
-copies. Fenced code values and Markdown structure are preserved and checked; source bytes remain
-unchanged in staging. Unsupported syntax fails with an actionable error instead of being executed.
+The source path determines the route within each locale. For example, `design/README.md` becomes `design/`. Preparation rejects case-insensitive route collisions. Relative links resolve against the canonical source path and pinned Git tree, including links written in Japanese translations. A selected target becomes an internal link. A valid unselected upstream file or directory becomes a link at the pinned commit. Missing targets and symlinks fail validation. See [publication and navigation](../operations/publication.md).
 
-Prepared content uses directory routes (`usage.md` -> `usage/`, `design/README.md` -> `design/`).
-VitePress keeps the original H1. Git tree entries resolve links before rewriting. Selected pages
-become internal links; unselected regular files/directories link to their fixed upstream SHA.
-Missing targets and symlinks fail. The adapter requests site-root Markdown paths because VitePress
-adds its configured deployment base. External HTTP(S) links are not fetched.
+### Translation state and page behavior
 
-`src/ssg/vitepress/build.ts` copies trusted configuration from `site/vitepress/` into unique
-`.generated/previews/run-*` roots and emits source hashes in `inputs.json`. Sites use
-`/docs/<configured-edition-path>/<locale>/`.
-The default build processes all configured editions using one upstream staging manifest and assembles a
-fresh `combined-*/dist` artifact. Only static dist files enter it; source snapshots and provenance
-reports remain outside deployment. Combined href/src and fragment validation runs after assembly,
-so version links resolve across builds. No existing deployment or previous artifact is appended to.
-Local translations/configs should not be edited during a build; generated snapshots record the
-actual render input. This is a local Pages-path simulation, not an executed deployment.
-`build.json` records validation and timings. Only successful runs update the local preview pointer.
-The loopback preview server exposes static output without development middleware.
-See the [development workflow](../contributing/development.md).
+Each English page is canonical. For each Japanese page, [translation loading](../../src/publishing/translations.ts) compares the recorded English SHA-256 with the **selected file's** SHA-256.
 
-HTML validation checks expected pages, a single H1, local href/src targets, fragment IDs, nested
-base containment, and absence of excluded output. Imported images remain unsupported: selected
-assets, CSS URLs, and srcset validation require a later increment. Record dependency changes and their verification in the corresponding PR.
+| Japanese input                  | Generated page                                                                                                                |
+| ------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| No translation record           | English body marked with `lang="en"` and a fallback notice. Body links follow the English locale. The sidebar stays Japanese. |
+| Translation and matching hash   | Japanese body. The match identifies the reviewed source bytes.                                                                |
+| Translation and different hash  | Japanese body with a source-change notice.                                                                                    |
+| Record points to an absent file | Build error.                                                                                                                  |
 
-## Translation boundary
+Translation transfer is a separate operation. It preserves existing destination translations and carries the original checked hash with each copy. See [translation operations](../operations/translations.md#transfer-between-editions).
 
-Japanese translation sources belong to this repository. Missing translations and source changes
-are distinct conditions; freshness must use file-level identity rather than a repository-wide commit.
-The next manifest and each stable release's own manifest record edition, locale, canonical source path, checked source SHA-256,
-and repository-owned translation path. A matching file hash means `current`, not human approval;
-a changed hash means `source-changed` and renders a review warning while retaining the translation.
-No record means `missing`; a declared but absent file is an error. Invalid paths, duplicate records,
-and symlink/junction paths fail closed. Stable builds read the release's independent snapshot.
-The [release preparation command](../operations/translations.md#transfer-between-editions)
-copies missing destination translations while preserving their checked English hashes. Every edition uses the same freshness check.
+Language switching targets the same document in the other locale. Heading IDs can differ across translations. Edition switching performs a full navigation to the other edition's home in the current locale because each edition has its own built client. Each edition also has separate locale search indexes. An English fallback body is searchable in the Japanese index at its Japanese URL.
 
-Translations use the same restricted Markdown preparation as English, with relative links resolved
-against the canonical source path. Each generated edition stores render-input snapshots and hashes,
-translation paths, and checked source hashes in its inputs report. Do not automatically update the
-checked hash when upstream changes; review the actual file difference first.
+## Trust boundaries
 
-VitePress receives generated English fallback pages and a small trusted renderer wrapper for the
-Japanese notice and `lang="en"` body. Imported HTML remains disabled. VitePress uses native same-page
-language controls. Fallback body links retain the English locale; Japanese sidebar links remain
-Japanese. Translated heading IDs may differ: language switching does not map section fragments.
+[Staging](../../src/publishing/pipeline.ts) reads regular blobs using Git tree and object commands, preserving their bytes. It rejects unsupported paths and entries, including traversal, symlinks and submodules. Generated directory checks reject symlinks and junctions. Concurrent hostile mutation of the local filesystem is outside this model.
 
-## CI and publishing
+Staged Markdown is still untrusted. Preparation rechecks its hash and applies the [Markdown policy](../../src/publishing/markdown.ts) to the chosen English or Japanese body. It rejects raw HTML, imported frontmatter, Vue expressions outside code, unsafe URLs, imported images and include directives. Include comments are rejected even inside code fences because the renderer expands them before Markdown parsing. Serialization and link rewriting affect generated Markdown only.
 
-PR CI has only `contents: read`, installs locked dependencies, checks types/tests, acquires public
-source, stages both editions, then builds and validates both editions in English and Japanese. It does not
-deploy. Manual main runs upload a complete verified artifact. Supplying the approved main SHA
-enables a separate deployment job with scoped Pages/OIDC rights. See [deployment operations](../operations/deployment.md).
+The adapter adds trusted frontmatter, attribution, landing pages and theme code after content preparation. Rendering checks compare generated HTML with snapshots, including headings and code blocks. Combined-output checks validate local references and fragments under the deployment base and reject excluded output. External HTTP links are not fetched. See the [VitePress upgrade checks](../contributing/development.md#vitepress-upgrades) when changing the renderer or its configuration.
 
-## Search and version navigation
+## Build artifacts and failure behavior
 
-Native local search is enabled per edition: VitePress's local provider builds locale indexes.
-Combined assembly preserves these separate search assets rather than merging editions. Japanese fallback pages are indexed
-at their Japanese routes, including their English bodies. See the [validation guide](../contributing/development.md#validation) for query coverage.
+All paths below are relative to `.generated/`. For a build failure, inspect the report closest to the failing step.
 
-VitePress extends the default theme's nav-bar-content-before slot with a small Vue control.
-The control remains in the upper navigation area on desktop and narrow screens. It shows the
-current edition and links to each other edition's home in the current locale, regardless of the current document.
-Full-page navigation avoids carrying separately built client state across editions. No document
-mapping or fragment preservation is needed. This simple switch is the owner's required behavior,
-not a compromise for missing features. Combined validation checks locale-home targets and header
-placement across all published document and locale-home pages.
+| Artifact                                           | What it establishes                                                                                                                                                                                  |
+| -------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `staging/run-*/manifest.json`                      | Staging completed. Written last, it records source paths, blob IDs, file hashes, edition pins, configuration hash and docs revision/dirty state. A partial directory can survive an interrupted run. |
+| `previews/run-*/inputs.json` and `site/snapshots/` | Identify the route, canonical source, chosen render input and translation status before VitePress runs.                                                                                              |
+| `previews/run-*/build.json`                        | Rendering and localization checks finished for one edition. Other editions or combined validation may still fail.                                                                                    |
+| `previews/combined-*/build.json` and `dist/`       | All editions were assembled in a fresh directory and combined-output checks passed. The report stays outside the public artifact.                                                                    |
+| `preview.json`                                     | Points preview and subsequent checks to the selected successful build. A build that fails before selection leaves the earlier pointer in place.                                                      |
 
-Publication changes and package README routes are documented in [publication operations](../operations/publication.md).
-
-## Renderer maintenance
-
-VitePress is pinned to an exact version. Follow the [upgrade procedure](../contributing/development.md#vitepress-upgrades) to verify fallback rendering, Vue navigation and local search after an update.
+A failure in the later HTTP or search checks blocks the workflow upload or deployment. It does not roll back the local preview pointer, which was already written by the build. For deployed releases, the publish run and its verified source pins provide the [recovery reference](../operations/deployment.md#recover-a-release).
