@@ -21,7 +21,7 @@ The [shared overview](../overview.md) covers the repository layout and local pre
 | ------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | [Publication services](../../src/publishing/)                                        | Acquire Git objects, stage selected files, prepare pages and navigation. Also provide static serving and HTML reference validation. These modules have no VitePress dependency.       |
 | [VitePress adapter](../../src/ssg/vitepress/)                                        | Consume prepared pages, generate renderer inputs, invoke VitePress and assemble edition outputs. Own checks that depend on theme markup, version controls or the search index format. |
-| [Site configuration and theme](../../site/vitepress/)                                | Define how VitePress renders the generated site, including language controls, fallback markup and edition switching. The adapter copies these trusted files into each build root.     |
+| [Site configuration](../../site/vitepress/)                                          | Configures the VitePress default theme, including language controls, fallback markup and edition navigation. The adapter copies these trusted files into each build root.             |
 | [Publication CLI](../../src/publishing/cli.ts) and [site CLI](../../src/cli/site.ts) | Dispatch acquisition, staging and translation transfer to publication services, and preparation, build, preview and HTTP verification to the adapter.                                 |
 | [Pages workflow](../../.github/workflows/docs.yml)                                   | Run validation and, on manual runs, select the combined artifact. A separate deployment job holds Pages and OIDC write permissions.                                                   |
 
@@ -85,7 +85,7 @@ Each English page is canonical. For each Japanese page, [translation loading](..
 
 Translation transfer is a separate operation. It preserves existing destination translations and carries the original checked hash with each copy. See [translation operations](../operations/translations.md#transfer-between-editions).
 
-Language switching targets the same document in the other locale. Heading IDs can differ across translations. Edition switching performs a full navigation to the other edition's home in the current locale because each edition has its own built client. Each edition also has separate locale search indexes. An English fallback body is searchable in the Japanese index at its Japanese URL.
+Language switching targets the same document in the other locale. Heading IDs can differ across translations. The VitePress default theme's `nav` menu lists the configured editions for the current locale. Edition links use `target="_self"` for a full navigation to the selected edition's home because each edition has its own built client. VitePress adds the current edition base to sibling links, and the browser resolves their parent path segment on the same host. Each edition also has separate locale search indexes. An English fallback body is searchable in the Japanese index at its Japanese URL.
 
 ## Trust boundaries
 
@@ -93,7 +93,7 @@ Language switching targets the same document in the other locale. Heading IDs ca
 
 Staged Markdown is still untrusted. Preparation rechecks its hash and applies the [Markdown policy](../../src/publishing/markdown.ts) to the chosen English or Japanese body. It rejects raw HTML, imported frontmatter, Vue expressions outside code, unsafe URLs, imported images and include directives. Include comments are rejected even inside code fences because the renderer expands them before Markdown parsing. Serialization and link rewriting affect generated Markdown only.
 
-The adapter adds trusted frontmatter, attribution, landing pages and theme code after content preparation. Rendering checks compare generated HTML with snapshots, including headings and code blocks. Combined-output checks validate local references and fragments under the deployment base and reject excluded output. External HTTP links are not fetched. See the [VitePress upgrade checks](../contributing/development.md#vitepress-upgrades) when changing the renderer or its configuration.
+The adapter adds trusted frontmatter, attribution, landing pages and VitePress configuration after content preparation. Rendering checks compare generated HTML with snapshots, including headings and code blocks. Combined-output checks validate local references and fragments under the deployment base and reject excluded output. External HTTP links are not fetched. See the [VitePress upgrade checks](../contributing/development.md#vitepress-upgrades) when changing the renderer or its configuration.
 
 ## Build artifacts and failure behavior
 

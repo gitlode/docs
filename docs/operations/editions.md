@@ -1,6 +1,7 @@
 # Update an edition
 
 Edit `config/editions.json` for the public path and label. Edit `config/<edition>/source.json` for the ref and pinned commit. The keys `stable` and `next` are edition IDs used in translation records, staging and verification reports.
+The header dropdown uses the configured labels, paths, and edition order in both languages.
 
 | Field              | Effect                                                                                                                                                              |
 | ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |

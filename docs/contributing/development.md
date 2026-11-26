@@ -39,7 +39,8 @@ Stop with Ctrl+C. The preview server serves built static files on loopback; it d
 VitePress development server or watch files. Rebuild after changes. The preview port is fixed;
 stop an existing preview before starting another on port 4173.
 
-The language selector switches the current page. The header version links preserve the current
+The language selector switches the current page. The header dropdown shows the current edition
+and lists the editions from `config/editions.json`. Its links preserve the current
 locale and open the target edition home with a full reload, without retaining the current document
 or fragment. The Japanese Profiling Guide matches the pinned next source. Its stable 0.12.0
 copy displays a source-change notice. Other untranslated pages use English fallback.
@@ -55,7 +56,7 @@ Keep SSG-independent acquisition, staging, Markdown processing, translations, st
 HTML reference validation in `src/publishing/`. `content.ts` returns prepared content and metadata
 without generating framework files. Keep VitePress build assembly and checks that depend on its
 rendered markup or search APIs in `src/ssg/vitepress/`. `src/cli/site.ts` composes that adapter.
-Trusted VitePress config, metadata types, and Vue theme code live in `site/vitepress/` and are
+Trusted VitePress config and metadata types live in `site/vitepress/` and are
 copied into disposable generated roots. All generated inputs and output stay under `.generated/`.
 Do not import VitePress into the publication domain. See [architecture](../design/architecture.md).
 
