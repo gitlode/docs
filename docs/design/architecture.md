@@ -10,6 +10,15 @@ The [shared overview](../overview.md) covers the repository layout and local pre
 
 ## Design principles
 
+**Keep publishing as simple as possible.** The documentation system
+publishes gitlode's documentation in a form that is easy to use when
+using or developing gitlode. To keep the project's development effort
+focused on gitlode itself, reuse existing software wherever possible.
+Use VitePress as the static site generator and keep the custom code that
+coordinates the build and fills gaps in VitePress as simple as possible.
+
+### Publishing and maintenance rules
+
 - **Explicit publication.** Each edition has a list of permitted documents. Sidebar groups can order or omit entries from that list. Following a Markdown link never adds a document to it.
 - **Edition-independent processing.** The edition ID selects configuration. The public path, display label and upstream revision are separate fields. Keeping a released edition's navigation fixed is an [operating policy](../operations/editions.md#stable-release-policy). All editions use the same build and translation rules.
 - **Traceable inputs.** The gitlode project owns the English source. This repository owns configuration, translations and renderer code. Transformations apply to generated copies. The staging manifest and per-edition reports identify the inputs used for each page.
