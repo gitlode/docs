@@ -1,13 +1,11 @@
 {
-  "ref": "refs/tags/gitlode@0.12.0",
-  "commit": "76b124e23fcc069be1278629cf01b62ae1456c7a",
   "translations": [
     {
       "edition": "stable",
       "locale": "ja",
       "sourcePath": "packages/gitlode/docs/profiling.md",
       "sourceSha256": "9faaccb116a7fd5136214404f2dced2dda92aa92c18af86d3bd99a31a55495a3",
-      "translationPath": "translations/ja/stable/0.12.0/copied/fc3b99107c92c973/packages/gitlode/docs/profiling.md"
+      "translationPath": "translations/ja/stable/packages/gitlode/docs/profiling.md"
     }
   ]
 }

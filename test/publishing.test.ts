@@ -1,14 +1,18 @@
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
-import {
+import fs, {
+  existsSync,
   mkdirSync,
   mkdtempSync,
   readFileSync,
   readdirSync,
   symlinkSync,
+  unlinkSync,
   writeFileSync,
 } from "node:fs";
-import { join, resolve } from "node:path";
+import type { PathLike } from "node:fs";
+import { syncBuiltinESMExports } from "node:module";
+import { basename, join, resolve } from "node:path";
 import test from "node:test";
 
 import { prepareContent } from "../src/publishing/content.ts";
@@ -24,8 +28,8 @@ import {
   validateSources,
 } from "../src/publishing/pipeline.ts";
 import type { Sources } from "../src/publishing/pipeline.ts";
-import { transferTranslations, editionManifest } from "../src/publishing/translation-transfer.ts";
-import { loadTranslation } from "../src/publishing/translations.ts";
+import { transferTranslations } from "../src/publishing/translation-transfer.ts";
+import { loadTranslation, readTranslationManifest } from "../src/publishing/translations.ts";
 
 const scratch = safeDirectory(resolve("."), ".generated/tests");
 const file = "packages/gitlode/docs/usage.md";
@@ -66,6 +70,22 @@ function fixture() {
     );
   }
   return { root, repository, sources, commit };
+}
+
+function transferFixture() {
+  const state = fixture();
+  const next = safeDirectory(state.root, "translations/ja/next");
+  const nextManifest = join(next, "manifest.json");
+  const candidate = {
+    edition: "next",
+    locale: "ja",
+    sourcePath: file,
+    translationPath: "translations/ja/next/usage.md",
+    sourceSha256: "a".repeat(64),
+  };
+  writeFileSync(nextManifest, JSON.stringify({ translations: [candidate] }));
+  writeFileSync(join(state.root, candidate.translationPath), "# Japanese");
+  return { ...state, candidate, nextManifest };
 }
 
 test("paths reject traversal, Windows special paths, absolute paths and alternate streams", () => {
@@ -155,39 +175,37 @@ test("next selection and navigation edits leave stable documents, links and side
   assert.deepEqual(content("stable"), stable);
 });
 
-test("transfer preserves checked hashes and destination corrections across directions and edition names", () => {
-  const { root, sources, repository, commit } = fixture();
+test("transfer replaces destination translations, removes unused files, and preserves checked hashes", () => {
+  const { root, sources, repository, commit, candidate } = transferFixture();
   const hash = readDocument(repository, commit, file).sha256;
-  const path = "translations/ja/next/usage.md";
-  safeDirectory(root, "translations/ja/next");
-  const nextManifest = join(root, "translations/ja/next/manifest.json");
-  const candidate = {
-    edition: "next",
-    locale: "ja",
-    sourcePath: file,
-    translationPath: path,
-    sourceSha256: "a".repeat(64),
-  };
-  writeFileSync(nextManifest, JSON.stringify({ translations: [candidate] }));
-  assert.throws(
-    () => transferTranslations(root, "next", "stable", sources),
-    /unreadable translation/,
-  );
-  writeFileSync(join(root, path), "# Japanese");
-  assert.equal(transferTranslations(root, "next", "stable", sources).review, 1);
-  const manifest = editionManifest(root, "stable", sources.editions.stable);
-  const received = loadTranslation(root, "stable", file, hash, manifest);
+  const result = { from: "next", to: "stable", copied: 1, review: 1, missing: 0 };
+  assert.deepEqual(transferTranslations(root, "next", "stable", sources), result);
+  const records = readTranslationManifest(root, "stable");
+  const received = loadTranslation(root, file, hash, records);
   assert.equal(received.status, "source-changed");
   assert.equal(received.sourceSha256, candidate.sourceSha256);
-  writeFileSync(join(root, received.translationPath), "# Stable correction");
-  assert.equal(transferTranslations(root, "next", "stable", sources).copied, 0);
-  assert.equal(transferTranslations(root, "stable", "next", sources).copied, 0);
-  assert.equal(readFileSync(join(root, path), "utf8"), "# Japanese");
-  writeFileSync(nextManifest, JSON.stringify({ translations: [] }));
+  const stableCopy = join(root, received.translationPath);
+  const obsolete = join(safeDirectory(root, "translations/ja/stable/obsolete"), "draft.md");
+  writeFileSync(obsolete, "# No longer referenced");
+  writeFileSync(stableCopy, "# Stable correction");
+  for (let attempt = 0; attempt < 2; attempt++) {
+    assert.deepEqual(transferTranslations(root, "next", "stable", sources), result);
+    assert.deepEqual(readTranslationManifest(root, "stable"), records);
+    assert.equal(readFileSync(stableCopy, "utf8"), "# Japanese");
+    assert.equal(existsSync(obsolete), false);
+    assert.equal(readFileSync(join(root, candidate.translationPath), "utf8"), "# Japanese");
+  }
+  writeFileSync(stableCopy, "# Stable correction");
   assert.equal(transferTranslations(root, "stable", "next", sources).copied, 1);
-  const reverse = loadTranslation(root, "next", file, hash, "translations/ja/next/manifest.json");
+  const reverse = loadTranslation(root, file, hash, readTranslationManifest(root, "next"));
   assert.equal(reverse.status, "source-changed");
   assert.equal(reverse.content, "# Stable correction");
+  assert.equal(existsSync(join(root, candidate.translationPath)), false);
+});
+
+test("transfer applies the destination publication list for any registered edition", () => {
+  const { root, sources, repository, commit, candidate, nextManifest } = transferFixture();
+  const hash = readDocument(repository, commit, file).sha256;
   sources.editions.lts = { ...sources.editions.next, path: "lts" };
   writeFileSync(
     join(safeDirectory(root, "config/lts"), "publication.json"),
@@ -195,14 +213,107 @@ test("transfer preserves checked hashes and destination corrections across direc
   );
   writeFileSync(
     nextManifest,
-    JSON.stringify({ translations: [{ ...candidate, sourceSha256: hash }] }),
+    JSON.stringify({
+      translations: [
+        { ...candidate, sourceSha256: hash },
+        {
+          ...candidate,
+          sourcePath: "packages/gitlode/docs/profiling.md",
+          translationPath: "translations/ja/next/profiling.md",
+        },
+      ],
+    }),
   );
-  assert.equal(transferTranslations(root, "next", "lts", sources).review, 0);
+  assert.deepEqual(transferTranslations(root, "next", "lts", sources), {
+    from: "next",
+    to: "lts",
+    copied: 1,
+    review: 0,
+    missing: 0,
+  });
   assert.equal(
-    loadTranslation(root, "lts", file, hash, editionManifest(root, "lts", sources.editions.lts))
-      .status,
+    loadTranslation(root, file, hash, readTranslationManifest(root, "lts")).status,
     "current",
   );
+});
+
+test("a valid empty transfer clears the destination and produces English fallback", () => {
+  const { root, sources, nextManifest } = transferFixture();
+  assert.equal(transferTranslations(root, "next", "stable", sources).copied, 1);
+  writeFileSync(nextManifest, JSON.stringify({ translations: [] }));
+  assert.deepEqual(transferTranslations(root, "next", "stable", sources), {
+    from: "next",
+    to: "stable",
+    copied: 0,
+    review: 0,
+    missing: 1,
+  });
+  assert.deepEqual(readdirSync(join(root, "translations/ja/stable")), ["manifest.json"]);
+  const prepared = prepareContent(root, "stable", "/", { staging: stage(root, sources) });
+  assert.equal(prepared.pages.find((page) => page.locale === "ja")?.status, "missing");
+});
+
+test("missing transfer input leaves the previous translation directory intact", () => {
+  const { root, sources, candidate, nextManifest } = transferFixture();
+  transferTranslations(root, "next", "stable", sources);
+  const stableManifest = join(root, "translations/ja/stable/manifest.json");
+  const previous = readFileSync(stableManifest);
+  unlinkSync(join(root, candidate.translationPath));
+  assert.throws(
+    () => transferTranslations(root, "next", "stable", sources),
+    /unreadable translation/,
+  );
+  writeFileSync(nextManifest, JSON.stringify({ translations: [] }));
+  writeFileSync(
+    join(root, "config/stable/publication.json"),
+    JSON.stringify({ files: ["packages/gitlode/docs/profiling.md"] }),
+  );
+  assert.throws(() => transferTranslations(root, "next", "stable", sources), /selected file/);
+  assert.deepEqual(readFileSync(stableManifest), previous);
+  assert.equal(readFileSync(join(root, "translations/ja/stable", file), "utf8"), "# Japanese");
+});
+
+test("transfer restores the previous directory when installation fails", (t) => {
+  const { root, sources, candidate } = transferFixture();
+  transferTranslations(root, "next", "stable", sources);
+  writeFileSync(join(root, candidate.translationPath), "# Updated Japanese");
+  const target = join(root, "translations/ja/stable");
+  const rename = fs.renameSync;
+  const mocked = t.mock.method(fs, "renameSync", (from: PathLike, to: PathLike) => {
+    if (basename(String(from)) === "replacement" && to === target)
+      throw new Error("Installation failed");
+    rename(from, to);
+  });
+  syncBuiltinESMExports();
+  try {
+    assert.throws(
+      () => transferTranslations(root, "next", "stable", sources),
+      /Installation failed/,
+    );
+  } finally {
+    mocked.mock.restore();
+    syncBuiltinESMExports();
+  }
+  assert.equal(readFileSync(join(target, file), "utf8"), "# Japanese");
+  assert.equal(readTranslationManifest(root, "stable").size, 1);
+  transferTranslations(root, "next", "stable", sources);
+  assert.equal(readFileSync(join(target, file), "utf8"), "# Updated Japanese");
+});
+
+test("transfer refuses a linked destination directory and respects the shared lock", () => {
+  const { root, sources, candidate } = transferFixture();
+  const origin = join(root, "translations/ja/next");
+  symlinkSync(
+    origin,
+    join(root, "translations/ja/stable"),
+    process.platform === "win32" ? "junction" : "dir",
+  );
+  assert.throws(() => transferTranslations(root, "next", "stable", sources), /Unsafe destination/);
+  assert.equal(readFileSync(join(root, candidate.translationPath), "utf8"), "# Japanese");
+  const lock = join(root, ".generated/translation-transfer.lock");
+  writeFileSync(lock, "locked", { flag: "wx" });
+  assert.throws(() => transferTranslations(root, "stable", "next", sources), { code: "EEXIST" });
+  assert.equal(readFileSync(lock, "utf8"), "locked");
 });
 
 test("source pins and edition names are validated before IO", () => {

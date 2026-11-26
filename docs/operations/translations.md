@@ -16,27 +16,34 @@ subsequent edits when incorporating the revised wording.
 
 ## Transfer between editions
 
-After acquiring the configured pins, run `npm run translations:transfer -- --from next --to stable`.
-Either argument accepts any registered edition ID. Swap the arguments for the reverse direction.
-The destination publication list determines the candidate paths. An existing destination record
-always wins, including a translation corrected after an earlier transfer.
+Use a transfer when preparing a complete replacement for an edition, such as a new stable release.
+It replaces every file under `translations/ja/<to>/`, including drafts and unreferenced Markdown.
+Git history can restore committed contents. Commit or save any work in the destination directory
+before running the transfer on the PR branch.
 
-For each missing destination record with a matching source path, copy the translation and retain
-its checked English SHA-256. Readers see the copy with a source-change notice if the destination's
-English blob differs. A missing source translation uses English fallback. Relative links whose
-targets exist only at the origin are pinned to that upstream revision in the copied Markdown.
-Commit the destination manifest and new Markdown files together. Re-running the command fills
-any newly eligible gaps. An interrupted command can leave an unreferenced copy; only manifest
-entries are published. If a process was killed and left `.transfer.lock`, confirm that it has
-exited before removing that lock and retrying.
+Acquire the configured pins, then run `npm run translations:transfer -- --from next --to stable`.
+Both arguments accept any registered edition ID. The command matches each path in the destination
+publication list against the source manifest, copies the matching translation and retains its
+checked English SHA-256. Relative links to targets that exist only at the origin become links at
+that pinned upstream commit. Readers see a source-change notice when the checked hash differs
+from the destination English file. Pages without a matching record use English fallback, including
+every page when the result is an empty manifest.
+
+Review the additions, changes and removals under the destination directory in the PR. Use the
+`review` and `missing` counts to check source-change notices and fallbacks. Commit the manifest,
+added Markdown and removed files together, then validate the edition. Repeating the transfer with
+the same inputs produces the same destination files.
+
+The command prepares the replacement before changing the destination. If a transfer is interrupted,
+confirm that the process identified by `.generated/translation-transfer.lock` has exited. Inspect
+the destination and the `previous` directory in the corresponding `.generated/transfer-<edition>-*`
+run before retrying. Restore the saved directory if the destination was left absent, or recover
+committed translations from Git. Remove the stale lock after checking the state.
 
 ## Add or correct a translation
 
-Use `translations/ja/<edition>/manifest.json`. When the edition source config selects a
-`translationSet`, use the manifest in that subdirectory instead. This lets operators keep
-separate release snapshots for any edition. On a new release choose a fresh set and transfer
-into it. A newly created set records its configured ref and commit. For a continuously moving
-edition, use the default directory. Store Markdown alongside or beneath the corresponding manifest.
+Use `translations/ja/<edition>/manifest.json`. Store Markdown alongside or beneath that manifest.
+Earlier revisions of the edition's translations are available in Git history.
 
 1. Run `npm run content:stage` after acquiring the configured pins. Open the resulting
    `manifest.json` and locate the document by edition name and `sourcePath`. Use its
@@ -56,3 +63,12 @@ edition, use the default directory. Store Markdown alongside or beneath the corr
    with a Japanese notice. A record pointing to a missing file fails validation.
 
 Stable corrections and additions follow the [stable release policy](editions.md#stable-release-policy).
+
+## Apply a correction across editions
+
+When reviewing a correction to a released translation, check whether the other edition needs it.
+A fix that applies to both can edit both Markdown files in one PR. If the development edition's
+English has diverged, adapt the translation to that original in the same PR or in a linked PR.
+Check each affected edition against its pinned English before changing its recorded hash. An
+edition-specific correction can be applied only where it is needed. Review these file edits in
+the normal PR flow so corrections needed for the next release are carried forward.

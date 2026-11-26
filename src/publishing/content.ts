@@ -4,8 +4,7 @@ import { join } from "node:path";
 
 import { parseSafeMarkdown, prepareMarkdown, routeFor, sourceTree } from "./markdown.ts";
 import { stage } from "./pipeline.ts";
-import { editionManifest } from "./translation-transfer.ts";
-import { loadTranslation } from "./translations.ts";
+import { loadTranslation, readTranslationManifest } from "./translations.ts";
 interface Document {
   sourcePath: string;
   stagedPath: string;
@@ -14,8 +13,6 @@ interface Document {
 }
 interface Edition {
   name: string;
-  translationSet?: string;
-  requestedRef: string;
   path?: string;
   label?: string;
   resolvedCommit: string;
@@ -41,11 +38,7 @@ export function prepareContent(
   const manifest = json<Manifest>(join(staging, "manifest.json"));
   const edition = manifest.editions.find((e) => e.name === editionName);
   if (!edition) throw new Error("Missing edition in staging manifest.");
-  const translationManifest = editionManifest(root, editionName, {
-    ref: edition.requestedRef,
-    commit: edition.resolvedCommit,
-    translationSet: edition.translationSet,
-  });
+  const translations = readTranslationManifest(root, editionName);
   const tree = sourceTree(root, edition.resolvedCommit);
   const routes = new Map(
     edition.documents.map((doc) => [doc.sourcePath, routeFor(doc.sourcePath)]),
@@ -57,13 +50,7 @@ export function prepareContent(
     const content = readFileSync(join(staging, doc.stagedPath));
     if (createHash("sha256").update(content).digest("hex") !== doc.sha256)
       throw new Error(`Staged content changed: ${doc.sourcePath}`);
-    const translation = loadTranslation(
-      root,
-      editionName,
-      doc.sourcePath,
-      doc.sha256,
-      translationManifest,
-    );
+    const translation = loadTranslation(root, doc.sourcePath, doc.sha256, translations);
     return (["en", "ja"] as const).map((locale) => {
       const translated = locale === "ja" && translation.status !== "missing";
       const source = translated ? translation.content : content.toString("utf8");

@@ -26,9 +26,10 @@ by each edition's publication configuration, with their source revisions and has
 Open this repository as a workspace and ensure its integrated terminal can run the supported
 Node.js and npm versions. In **Run and Debug**, select **npm: site:build** for the combined build,
 **npm: Select script** for acquisition, staging, preparation, preview, verification or tests,
-or **npm: translations:transfer** to enter the source and destination edition IDs. Press F5 to
-start. These launches adapt gitlode's integrated-terminal debugger settings to run the existing npm
-scripts directly, with automatic attachment to Node.js child processes.
+or **npm: translations:transfer (replace destination)** to enter the source and destination edition
+IDs for a [complete translation replacement](../operations/translations.md#transfer-between-editions).
+Press F5 to start. These launches adapt gitlode's integrated-terminal debugger settings to run the
+existing npm scripts directly, with automatic attachment to Node.js child processes.
 
 To trace edition paths, set a breakpoint in `prepareSite` in
 [`src/ssg/vitepress/build.ts`](../../src/ssg/vitepress/build.ts). VitePress loads a generated copy of
@@ -158,8 +159,8 @@ covers publication after integration.
 1. Resolve an explicitly chosen tag/branch using `git ls-remote --heads --tags https://github.com/gitlode/gitlode.git`.
 2. For annotated tags, use the peeled `^{}` commit, not the tag object's SHA.
 3. Update the requested ref and full commit in `config/<edition>/source.json` together.
-4. Acquire the pin. For a new stable release, follow the [edition update procedure](../operations/editions.md) to select a fresh translation set before transferring translations.
-   Stage, inspect the diff and manifest, and run checks.
+4. Acquire the pin. For a new stable release, follow the [edition update procedure](../operations/editions.md#review-a-source-update-pr)
+   to select a translation baseline. Stage, inspect the diff and manifest, and run checks.
 
 Use exact file paths in `config/<edition>/publication.json`; adding to the sidebar is a separate edit in
 `config/<edition>/navigation.json`. Never follow all links or publish a whole repository to avoid failures.
@@ -182,8 +183,9 @@ or cross-version index aggregation is configured.
 `npm run check` runs formatting validation, linting, type checking, and Node's test runner. Tests create isolated local Git fixtures
 under `.generated/tests/`; they do not use the network. They verify immutable blob reads despite
 dirty worktrees, provenance hashes, repeatability, excluded paths, missing files, invalid refs,
-symlink blobs, output path containment, Markdown safety, route/link rewriting, and built HTML
-validation failures. Generated test fixtures remain ignored for diagnosis.
+symlink blobs, output path containment, translation replacement and recovery, Markdown safety,
+route/link rewriting, and built HTML validation failures. Generated test fixtures remain ignored
+for diagnosis.
 
 `.github/workflows/docs.yml` performs these checks plus real upstream acquisition/staging on PRs,
 main pushes, and manual runs, followed by both edition builds, English/Japanese output validation,

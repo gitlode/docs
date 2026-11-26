@@ -116,16 +116,9 @@ export function readOwnedFile(root: string, relativePath: string): string {
   return readFileSync(cursor, "utf8");
 }
 
-export function loadTranslation(
-  root: string,
-  edition: string,
-  sourcePath: string,
-  currentSha256: string,
-  manifestPath = `translations/ja/${edition}/manifest.json`,
-): TranslationResult {
+export function readTranslationManifest(root: string, edition: string) {
   validateEdition(edition);
-  validatePublication({ files: [sourcePath] });
-  validateHash(currentSha256);
+  const manifestPath = `translations/ja/${edition}/manifest.json`;
   const raw = readOwnedFile(root, manifestPath);
   let manifest: unknown;
   try {
@@ -133,9 +126,21 @@ export function loadTranslation(
   } catch (error) {
     throw new Error(`Invalid JSON in ${manifestPath}.`, { cause: error });
   }
-  const record = validateTranslationManifest(manifest).find(
-    (entry) => entry.edition === edition && entry.sourcePath === sourcePath,
-  );
+  const records = validateTranslationManifest(manifest);
+  if (records.some((record) => record.edition !== edition))
+    throw new Error(`Unexpected edition in ${manifestPath}.`);
+  return new Map(records.map((record) => [record.sourcePath, record]));
+}
+
+export function loadTranslation(
+  root: string,
+  sourcePath: string,
+  currentSha256: string,
+  translations: ReadonlyMap<string, TranslationRecord>,
+): TranslationResult {
+  validatePublication({ files: [sourcePath] });
+  validateHash(currentSha256);
+  const record = translations.get(sourcePath);
   if (!record) return { status: "missing" };
   // A declared translation disappearing is a configuration failure, not missing-page fallback.
   return {
