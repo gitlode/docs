@@ -8,9 +8,12 @@ const versions = {
   next: { path: "dev", label: "Develop" },
 };
 const render = (edition: "stable" | "next", locale: "en" | "ja") => {
-  const other = edition === "stable" ? "next" : "stable";
-  const target = `/docs/${versions[other].path}/${locale}/`;
-  return `<header><nav data-version-navigation><strong aria-current="page">${versions[edition].label}</strong><a href="${target}" target="_self">${versions[other].label}</a></nav></header>`;
+  const current = versions[edition];
+  const links = Object.values(versions).map((version) => {
+    const sibling = version === current ? "" : `../${version.path}/`;
+    return `<a href="/docs/${current.path}/${sibling}${locale}/" target="_self">${version.label}</a>`;
+  });
+  return `<header><nav><div class="VPNavMenuGroup VPNavBarMenuGroup"><button>${current.label}</button>${links.join("")}</div></nav></header>`;
 };
 test(`VitePress: links to the locale home from every document when changing either edition`, () => {
   for (const edition of ["stable", "next"] as const)
@@ -37,9 +40,10 @@ test(`VitePress: rejects document targets, wrong locale, fragments, body placeme
     html.replace("/ja/", "/en/"),
     html.replace("/ja/", "/ja/#old-heading"),
     html.replaceAll("header", "main"),
-    html.replace('aria-current="page">Develop', 'aria-current="page">stable'),
-    html.replace('aria-current="page"', ""),
-    html.replace("data-version-navigation", ""),
+    html.replace("<button>Develop</button>", "<button>stable</button>"),
+    html.replace("VPNavBarMenuGroup", ""),
+    html.replace(/<a [^>]+>Develop<\/a>/, ""),
+    html.replace("/docs/dev/../latest/ja/", "//output.invalid/docs/latest/ja/"),
     html.replace('target="_self"', ""),
   ])
     assert.throws(
@@ -49,9 +53,7 @@ test(`VitePress: rejects document targets, wrong locale, fragments, body placeme
 });
 test(`VitePress: unrelated body links cannot repair an invalid control`, () => {
   const valid = render("next", "ja");
-  const html =
-    valid.replace("/ja/", "/ja/profiling/") +
-    valid.replace("<nav data-version-navigation>", "<div>").replace("</nav>", "</div>");
+  const html = valid.replace("/ja/", "/ja/profiling/") + valid.replaceAll("header", "main");
   assert.throws(
     () => validateVersionNavigation(html, "next", "ja", "profiling/", versions),
     /invalid version navigation/,

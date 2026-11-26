@@ -1,15 +1,16 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
-import { defineConfigWithTheme } from "vitepress";
+import { defineConfig } from "vitepress";
 
-import type { PreviewSite, PreviewTheme } from "./site.ts";
+import type { PreviewSite } from "./site.ts";
 
 const root = resolve(import.meta.dirname, "..");
 const site = JSON.parse(readFileSync(resolve(root, "site.json"), "utf8")) as PreviewSite;
-export default defineConfigWithTheme<PreviewTheme>({
+const currentVersion = site.versions[site.edition];
+
+export default defineConfig({
   themeConfig: {
-    versionSite: { edition: site.edition, versions: site.versions, combined: site.combined },
     search: { provider: "local" },
   },
   title: "gitlode",
@@ -49,7 +50,6 @@ export default defineConfigWithTheme<PreviewTheme>({
         label: locale === "en" ? "English" : "日本語",
         lang: locale,
         themeConfig: {
-          versionSite: { edition: site.edition, versions: site.versions, combined: site.combined },
           outline: [2, 3],
           sidebar: site.navigation.map((group) => ({
             text: group.label,
@@ -59,8 +59,19 @@ export default defineConfigWithTheme<PreviewTheme>({
             })),
           })),
           nav: site.combined
-            ? []
-            : [{ text: site.versions[site.edition].label, link: `/${locale}/` }],
+            ? [
+                {
+                  text: currentVersion.label,
+                  items: Object.entries(site.versions).map(([edition, version]) => ({
+                    text: version.label,
+                    // VitePress prepends the edition base. The browser resolves its sibling.
+                    link:
+                      edition === site.edition ? `/${locale}/` : `/../${version.path}/${locale}/`,
+                    target: "_self",
+                  })),
+                },
+              ]
+            : [{ text: currentVersion.label, link: `/${locale}/` }],
         },
       },
     ]),

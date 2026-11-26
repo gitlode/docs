@@ -76,10 +76,8 @@ export function prepareSite(
   }
   write(siteRoot, "content/index.md", "# gitlode\n\n[English](/en/) · [日本語](/ja/)\n");
   safeDirectory(siteRoot, ".vitepress");
-  for (const file of ["site.ts", "config.ts", "theme"])
-    cpSync(join(root, "site/vitepress", file), join(siteRoot, ".vitepress", file), {
-      recursive: true,
-    });
+  for (const file of ["site.ts", "config.ts"])
+    cpSync(join(root, "site/vitepress", file), join(siteRoot, ".vitepress", file));
   const report = {
     edition,
     versions: content.versions,

@@ -1,0 +1,74 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "npm: site:build",
+      "type": "node",
+      "request": "launch",
+      "cwd": "${workspaceFolder}",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "site:build"],
+      "console": "integratedTerminal",
+      "autoAttachChildProcesses": true,
+      "skipFiles": ["<node_internals>/**", "${workspaceFolder}/node_modules/**"]
+    },
+    {
+      "name": "npm: Select script",
+      "type": "node",
+      "request": "launch",
+      "cwd": "${workspaceFolder}",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "${input:npmScript}"],
+      "console": "integratedTerminal",
+      "autoAttachChildProcesses": true,
+      "skipFiles": ["<node_internals>/**", "${workspaceFolder}/node_modules/**"]
+    },
+    {
+      "name": "npm: translations:transfer",
+      "type": "node",
+      "request": "launch",
+      "cwd": "${workspaceFolder}",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "run",
+        "translations:transfer",
+        "--",
+        "--from",
+        "${input:sourceEdition}",
+        "--to",
+        "${input:targetEdition}"
+      ],
+      "console": "integratedTerminal",
+      "autoAttachChildProcesses": true,
+      "skipFiles": ["<node_internals>/**", "${workspaceFolder}/node_modules/**"]
+    }
+  ],
+  "inputs": [
+    {
+      "id": "npmScript",
+      "type": "pickString",
+      "description": "npm script to debug",
+      "options": [
+        "source:acquire",
+        "content:stage",
+        "site:prepare",
+        "preview",
+        "site:verify",
+        "search:verify",
+        "test",
+        "check"
+      ],
+      "default": "site:prepare"
+    },
+    {
+      "id": "sourceEdition",
+      "type": "promptString",
+      "description": "Source edition ID for translation transfer"
+    },
+    {
+      "id": "targetEdition",
+      "type": "promptString",
+      "description": "Destination edition ID for translation transfer"
+    }
+  ]
+}
