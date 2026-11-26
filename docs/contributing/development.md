@@ -21,6 +21,22 @@ npm run site:build
 Each successful stage prints a new directory. Its manifest lists the raw Markdown files selected
 by each edition's publication configuration, with their source revisions and hashes.
 
+## Debug npm scripts in VS Code
+
+Open this repository as a workspace and ensure its integrated terminal can run the supported
+Node.js and npm versions. In **Run and Debug**, select **npm: site:build** for the combined build,
+**npm: Select script** for acquisition, staging, preparation, preview, verification or tests,
+or **npm: translations:transfer** to enter the source and destination edition IDs. Press F5 to
+start. These launches adapt gitlode's integrated-terminal debugger settings to run the existing npm
+scripts directly, with automatic attachment to Node.js child processes.
+
+To trace edition paths, set a breakpoint in `prepareSite` in
+[`src/ssg/vitepress/build.ts`](../../src/ssg/vitepress/build.ts). VitePress loads a generated copy of
+the config for each edition. To debug that copy, pause in `buildEdition` before it launches
+VitePress, then use `report.root` to locate `.vitepress/config.ts` in the generated site.
+**preview** serves the latest successful build. Stop any existing preview on port 4173 before
+starting it, and use Ctrl+C in its terminal when finished.
+
 ## Site builds and preview
 
 `npm run site:prepare` creates trusted VitePress inputs for the default edition (currently `next`) without building a site.
