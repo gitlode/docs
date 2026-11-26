@@ -43,11 +43,11 @@ cross-repository triggers if experience with this workflow shows a need.
 1. Start from a clean docs checkout. Record the edition's current ref and commit, the intended
    upstream ref and its resolved commit. For an annotated release tag, use its peeled commit.
    Compare the two upstream trees before editing the pin.
-2. For a normal stable release, use a `next` revision suitable for the release as the starting
+2. Review the target edition's selected paths, sidebar entries and links against its new pin.
+   For a normal stable release, use a `next` revision suitable for the release as the starting
    point for the publication list, sidebar and translations. For a maintenance release, consider
-   the previous stable revision on that release line. Record the chosen basis in the PR and
-   review selected paths, sidebar entries and links against the release tag. When the source
-   edition in the PR checkout supplies the translation baseline, use
+   the previous stable revision on that release line. Record the chosen basis in the PR. When
+   the source edition in the PR checkout supplies the translation baseline, use
    [translation transfer](translations.md#transfer-between-editions) to replace the destination's
    translations. Include the reviewed publication, navigation and translation diff with the pin.
 3. Commit the candidate inputs, then acquire, check, build and verify using the commands above.
