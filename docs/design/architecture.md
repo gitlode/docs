@@ -23,6 +23,7 @@ coordinates the build and fills gaps in VitePress as simple as possible.
 - **Edition-independent processing.** The edition ID selects configuration. The public path, display label and upstream revision are separate fields. Keeping a released edition's navigation fixed is an [operating policy](../operations/editions.md#stable-release-policy). All editions use the same build and translation rules.
 - **Traceable inputs.** The gitlode project owns the English source. This repository owns configuration, translations and renderer code. Transformations apply to generated copies. The staging manifest and per-edition reports identify the inputs used for each page.
 - **Predictable operation.** A maintainer chooses the revision to publish and the source and destination of a translation transfer. The build can detect that English text changed. A reviewer decides whether the translation conveys its meaning.
+- **Familiar maintenance tools.** Use Git history for earlier release inputs and pull requests to review promotion from a development edition or apply a correction across editions.
 
 ## Component responsibilities
 
@@ -83,7 +84,7 @@ The source path determines the route within each locale. For example, `design/RE
 
 ### Translation state and page behavior
 
-Each English page is canonical. For each Japanese page, [translation loading](../../src/publishing/translations.ts) compares the recorded English SHA-256 with the **selected file's** SHA-256.
+Each edition has one Japanese translation manifest at `translations/ja/<edition>/manifest.json`. Git history records earlier contents. For each Japanese page, [translation loading](../../src/publishing/translations.ts) compares the recorded SHA-256 of the canonical English file with the **selected file's** SHA-256.
 
 | Japanese input                  | Generated page                                                                                                                |
 | ------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
@@ -92,7 +93,7 @@ Each English page is canonical. For each Japanese page, [translation loading](..
 | Translation and different hash  | Japanese body with a source-change notice.                                                                                    |
 | Record points to an absent file | Build error.                                                                                                                  |
 
-Translation transfer is a separate operation. It preserves existing destination translations and carries the original checked hash with each copy. See [translation operations](../operations/translations.md#transfer-between-editions).
+[Translation transfer](../../src/publishing/translation-transfer.ts) prepares a complete replacement in `.generated/`, then installs it as the destination edition's translation directory. A shared lock keeps concurrent transfers from reading or changing the same edition during replacement. If installation fails, it attempts to restore the previous directory. Every copy carries the original checked hash. See [translation operations](../operations/translations.md#transfer-between-editions).
 
 Language switching targets the same document in the other locale. Heading IDs can differ across translations. The VitePress default theme's `nav` menu lists the configured editions for the current locale. Edition links use `target="_self"` for a full navigation to the selected edition's home because each edition has its own built client. VitePress adds the current edition base to sibling links, and the browser resolves their parent path segment on the same host. Each edition also has separate locale search indexes. An English fallback body is searchable in the Japanese index at its Japanese URL.
 

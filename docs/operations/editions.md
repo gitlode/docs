@@ -2,6 +2,8 @@
 
 Edit `config/editions.json` for the public path and label. Edit `config/<edition>/source.json` for the ref and pinned commit. The keys `stable` and `next` are edition IDs used in translation records, staging and verification reports.
 The header dropdown uses the configured labels, paths, and edition order in both languages.
+The names `stable` and `next` describe release and development roles in this workflow. Every
+registered edition uses the same build and transfer rules.
 
 | Field              | Effect                                                                                                                                                              |
 | ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -15,9 +17,8 @@ editions are assembled into a fresh artifact. Changing paths creates no redirect
 
 1. Edit only the fields needed. For a source update follow the [pin procedure](../contributing/development.md#updating-inputs)
    and review selected files, changed links and translation hashes.
-2. Run `npm run check`. Acquire the pins with `npm run source:acquire` if needed.
-   For a new stable release, set `translationSet` to its version in the source configuration, run `npm run translations:transfer -- --from next --to stable` and commit the
-   [release translation snapshot](translations.md#transfer-between-editions) with the pin.
+2. Run `npm run check`. Acquire the pins with `npm run source:acquire` if needed. For a new stable
+   release, prepare the publication, navigation and translation changes in the source update PR.
 3. Run `npm run site:build`, `npm run site:verify` and `npm run search:verify`.
    Review the landing page and version switch in both locales before release.
 
@@ -42,9 +43,13 @@ cross-repository triggers if experience with this workflow shows a need.
 1. Start from a clean docs checkout. Record the edition's current ref and commit, the intended
    upstream ref and its resolved commit. For an annotated release tag, use its peeled commit.
    Compare the two upstream trees before editing the pin.
-2. In the target edition, review the selected paths, sidebar and relative links against the
-   new tree. Include any selection or navigation changes in the pin-update PR. For a new
-   release, include the new translation set and the transfer result in the same PR.
+2. Review the target edition's selected paths, sidebar entries and links against its new pin.
+   For a normal stable release, use a `next` revision suitable for the release as the starting
+   point for the publication list, sidebar and translations. For a maintenance release, consider
+   the previous stable revision on that release line. Record the chosen basis in the PR. When
+   the source edition in the PR checkout supplies the translation baseline, use
+   [translation transfer](translations.md#transfer-between-editions) to replace the destination's
+   translations. Include the reviewed publication, navigation and translation diff with the pin.
 3. Commit the candidate inputs, then acquire, check, build and verify using the commands above.
    In the staging manifest, check the docs revision and dirty flag, each requested ref and
    resolved commit, and the canonical file hashes. In the combined build report, inspect the
@@ -77,7 +82,8 @@ The following rules apply while stable points to one particular gitlode release.
   removals and navigation improvements for a future release.
 - Publish stable near the package release even when translations are missing. Translators may
   subsequently add a translation or improve its fidelity to the pinned original. Review each
-  translation against the stable source and store it under stable. A next translation cannot
-  implicitly change a stable translation. A translated page title can change with its translation.
+  translation against the stable source and store it under stable. Check whether the change
+  applies to next during [translation review](translations.md#apply-a-correction-across-editions).
+  A translated page title can change with its translation.
 - Rebuild the complete site on republication. Shared renderer, theme and search implementation
   updates may change the generated site for a released edition.

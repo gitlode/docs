@@ -4,7 +4,6 @@ import { lstatSync, mkdirSync, readFileSync, mkdtempSync, writeFileSync } from "
 import { basename, isAbsolute, join, relative, resolve, sep } from "node:path";
 
 export interface Source {
-  translationSet?: string;
   path: string;
   label: string;
   ref: string;
@@ -38,10 +37,10 @@ export function loadSources(root: string): Sources {
   const editions = Object.fromEntries(
     Object.entries(registry.editions).map(([id, display]) => {
       validateEdition(id);
-      const { ref, commit, translationSet } = JSON.parse(
+      const { ref, commit } = JSON.parse(
         readFileSync(join(root, "config", id, "source.json"), "utf8"),
       ) as Source;
-      return [id, { path: display.path, label: display.label, ref, commit, translationSet }];
+      return [id, { path: display.path, label: display.label, ref, commit }];
     }),
   );
   const sources = {
@@ -112,14 +111,6 @@ export function validateSources(sources: Sources): void {
   const paths = new Set<string>();
   for (const [id, source] of Object.entries(sources.editions)) {
     validateEdition(id);
-    if (source.translationSet !== undefined) {
-      validatePath(source.translationSet);
-      if (
-        !/^[a-zA-Z0-9][a-zA-Z0-9.-]*$/.test(source.translationSet) ||
-        source.translationSet.endsWith(".")
-      )
-        throw new Error("Invalid translation set.");
-    }
     if (typeof source.path !== "string" || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(source.path))
       throw new Error("Edition path must be a lowercase URL segment.");
     validatePath(source.path);
@@ -274,7 +265,6 @@ export function stage(root: string, sources: Sources = loadSources(root)): strin
       name: edition.name,
       path: edition.path,
       label: edition.label,
-      translationSet: edition.translationSet,
       requestedRef: edition.ref,
       resolvedCommit: edition.commit,
       documents: edition.documents.map((document) => {

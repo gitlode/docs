@@ -24,7 +24,7 @@
       "skipFiles": ["<node_internals>/**", "${workspaceFolder}/node_modules/**"]
     },
     {
-      "name": "npm: translations:transfer",
+      "name": "npm: translations:transfer (replace destination)",
       "type": "node",
       "request": "launch",
       "cwd": "${workspaceFolder}",
@@ -68,7 +68,7 @@
     {
       "id": "targetEdition",
       "type": "promptString",
-      "description": "Destination edition ID for translation transfer"
+      "description": "Edition ID whose Japanese translations will be replaced"
     }
   ]
 }

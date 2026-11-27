@@ -8,12 +8,21 @@ try {
   const root = resolve(import.meta.dirname, "../..");
   switch (process.argv[2]) {
     case "transfer": {
+      const usage =
+        "Replace all Japanese translations in the destination edition.\n\n" +
+        "npm run translations:transfer -- --from <edition> --to <edition>";
       const { values } = parseArgs({
         args: process.argv.slice(3),
-        options: { from: { type: "string" }, to: { type: "string" } },
+        options: { from: { type: "string" }, to: { type: "string" }, help: { type: "boolean" } },
       });
-      if (!values.from || !values.to) throw new Error("Specify --from and --to edition IDs.");
-      console.log(transferTranslations(root, values.from, values.to));
+      if (values.help) {
+        console.log(usage);
+        break;
+      }
+      if (!values.from || !values.to) throw new Error(usage);
+      const result = transferTranslations(root, values.from, values.to);
+      console.log(`Replaced all Japanese translations in ${result.to} using ${result.from}.`);
+      console.log(result);
       break;
     }
     case "acquire":

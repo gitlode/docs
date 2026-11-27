@@ -14,7 +14,7 @@ The following homes contain maintained knowledge for development and operation:
 
 - [Architecture](design/architecture.md): component responsibilities, build execution, trust boundaries and failure behavior.
 - [Publication operations](operations/publication.md): select documents and maintain edition-specific sidebars.
-- [Translation operations](operations/translations.md): add a Japanese translation or review it after its English source changes.
+- [Translation operations](operations/translations.md): maintain Japanese translations and replace a destination edition's translations when preparing a release.
 - [Edition operations](operations/editions.md): update edition labels, public paths and pinned inputs.
 - [Deployment and recovery](operations/deployment.md): prepare a Pages candidate, publish an approved revision, verify HTTPS and recover a release.
 - [Development](contributing/development.md): supported workflows, tooling, and maintenance procedures.
